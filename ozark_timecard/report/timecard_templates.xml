@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_timecard">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-set="rpt" t-value="doc._get_report_data()"/>
+                <t t-set="cur" t-value="rpt['currency']"/>
+                <t t-call="web.external_layout">
+                    <div class="page tc-compact">
+                        <style>
+                            .tc-compact { font-size: 8.5pt; }
+                            .tc-compact h2 { font-size: 14pt; margin-bottom: 4px; }
+                            .tc-compact h5 { font-size: 9.5pt; margin: 8px 0 3px 0; font-weight: bold; }
+                            .tc-compact table { width: 100%; margin-bottom: 4px; }
+                            .tc-compact table th, .tc-compact table td {
+                                padding: 1px 4px !important;
+                                line-height: 1.15;
+                                border-top: none;
+                                border-bottom: 0.5px solid #dee2e6;
+                            }
+                            .tc-compact table thead th {
+                                border-bottom: 1px solid #666;
+                                white-space: nowrap;
+                            }
+                            .tc-compact .tc-note { font-size: 7.5pt; margin-top: 4px; }
+                            .tc-compact .tc-head { margin-bottom: 6px; }
+                        </style>
+
+                        <!-- ================= PAYROLL SUMMARY ================= -->
+                        <t t-if="rpt['show_summary']">
+                            <h2>Payroll Summary</h2>
+                            <p>
+                                <strong>Period:</strong>
+                                <span t-out="rpt['date_from']" t-options="{'widget': 'date'}"/> &#8211;
+                                <span t-out="rpt['date_to']" t-options="{'widget': 'date'}"/>
+                            </p>
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th class="text-end">Rate</th>
+                                        <th class="text-end">Reg Hrs</th>
+                                        <th class="text-end">OT Hrs</th>
+                                        <th class="text-end">PTO Hrs</th>
+                                        <th class="text-end">Reg Pay</th>
+                                        <th class="text-end">OT Pay</th>
+                                        <th class="text-end">PTO Pay</th>
+                                        <th class="text-end">Gross</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="rpt['details']" t-as="d">
+                                        <td>
+                                            <span t-out="d['employee'].name"/>
+                                            <span t-if="d['missing_wage']" class="text-danger"> (no wage set)</span>
+                                        </td>
+                                        <td class="text-end"><span t-out="d['rate']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                        <td class="text-end"><span t-out="'%.2f' % d['total_reg']"/></td>
+                                        <td class="text-end"><span t-out="'%.2f' % d['total_ot']"/></td>
+                                        <td class="text-end"><span t-out="'%.2f' % d['paid_leave_hours']"/></td>
+                                        <td class="text-end"><span t-out="d['reg_pay']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                        <td class="text-end"><span t-out="d['ot_pay']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                        <td class="text-end"><span t-out="d['pto_pay']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                        <td class="text-end"><span t-out="d['gross_pay']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Total</strong></td>
+                                        <td/>
+                                        <td class="text-end"><strong t-out="'%.2f' % rpt['totals']['total_reg']"/></td>
+                                        <td class="text-end"><strong t-out="'%.2f' % rpt['totals']['total_ot']"/></td>
+                                        <td class="text-end"><strong t-out="'%.2f' % rpt['totals']['paid_leave_hours']"/></td>
+                                        <td class="text-end"><strong><span t-out="rpt['totals']['reg_pay']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></strong></td>
+                                        <td class="text-end"><strong><span t-out="rpt['totals']['ot_pay']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></strong></td>
+                                        <td class="text-end"><strong><span t-out="rpt['totals']['pto_pay']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></strong></td>
+                                        <td class="text-end"><strong><span t-out="rpt['totals']['gross_pay']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <h5>Weekly Breakdown (Overtime Validation)</h5>
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th>Workweek</th>
+                                        <th class="text-end">Worked</th>
+                                        <th class="text-end">Regular</th>
+                                        <th class="text-end">Overtime</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="rpt['details']" t-as="d">
+                                        <tr t-foreach="d['week_lines']" t-as="wk">
+                                            <td>
+                                                <span t-if="wk_first" t-out="d['employee'].name"/>
+                                            </td>
+                                            <td>
+                                                <span t-out="wk['week_start']" t-options="{'widget': 'date'}"/> &#8211;
+                                                <span t-out="wk['week_end']" t-options="{'widget': 'date'}"/>
+                                            </td>
+                                            <td class="text-end"><span t-out="'%.2f' % wk['worked']"/></td>
+                                            <td class="text-end"><span t-out="'%.2f' % wk['regular']"/></td>
+                                            <td class="text-end">
+                                                <span t-att-class="'fw-bold' if wk['overtime'] else ''"
+                                                      t-out="'%.2f' % wk['overtime']"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <tr>
+                                        <td><strong>Total</strong></td>
+                                        <td/>
+                                        <td class="text-end"><strong t-out="'%.2f' % (rpt['totals']['total_reg'] + rpt['totals']['total_ot'])"/></td>
+                                        <td class="text-end"><strong t-out="'%.2f' % rpt['totals']['total_reg']"/></td>
+                                        <td class="text-end"><strong t-out="'%.2f' % rpt['totals']['total_ot']"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <p class="text-muted tc-note">
+                                Gross pay before taxes and deductions. Overtime is hours over
+                                <t t-out="'%.0f' % rpt['ot_threshold']"/> per workweek at
+                                <t t-out="'%.2f' % rpt['ot_multiplier']"/>x. Paid time off hours do not
+                                count toward the overtime threshold. Partial workweeks at the start or
+                                end of the period only include hours inside the printed date range.
+                            </p>
+                        </t>
+
+                        <!-- ================= DETAILED TIMECARDS ================= -->
+                        <t t-if="rpt['show_detail']">
+                            <t t-foreach="rpt['details']" t-as="data">
+                                <div t-attf-style="{{ 'page-break-before: always;' if rpt['show_summary'] or not data_first else '' }}">
+                                    <h2>Employee Timecard</h2>
+                                    <div class="row mb-3">
+                                        <div class="col-6">
+                                            <strong>Employee:</strong> <span t-out="data['employee'].name"/><br/>
+                                            <strong>Job Title:</strong> <span t-out="data['employee'].job_title or ''"/>
+                                        </div>
+                                        <div class="col-6">
+                                            <strong>Period:</strong>
+                                            <span t-out="rpt['date_from']" t-options="{'widget': 'date'}"/> &#8211;
+                                            <span t-out="rpt['date_to']" t-options="{'widget': 'date'}"/><br/>
+                                            <strong>Regular Rate:</strong>
+                                            <span t-out="data['rate']" t-options="{'widget': 'monetary', 'display_currency': cur}"/>/hr
+                                            &#160;&#160;
+                                            <strong>OT Rate (<t t-out="'%.2f' % rpt['ot_multiplier']"/>x):</strong>
+                                            <span t-out="data['ot_rate']" t-options="{'widget': 'monetary', 'display_currency': cur}"/>/hr
+                                            <span t-if="data['missing_wage']" class="text-danger"><br/>No wage set on employee</span>
+                                        </div>
+                                    </div>
+
+                                    <h5>Daily Attendance</h5>
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Day</th>
+                                                <th>Date</th>
+                                                <t t-foreach="data['pair_headers']" t-as="n">
+                                                    <th class="text-end">In <t t-out="n"/></th>
+                                                    <th class="text-end">Out <t t-out="n"/></th>
+                                                </t>
+                                                <th class="text-end">Hours</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr t-foreach="data['day_lines']" t-as="line">
+                                                <td><span t-out="line['weekday']"/></td>
+                                                <td><span t-out="line['date']" t-options="{'widget': 'date'}"/></td>
+                                                <t t-foreach="line['pairs']" t-as="p">
+                                                    <td class="text-end"><span t-out="p[0]"/></td>
+                                                    <td class="text-end"><span t-out="p[1]"/></td>
+                                                </t>
+                                                <td class="text-end"><span t-out="'%.2f' % line['hours']"/></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <h5>Weekly Summary</h5>
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Week</th>
+                                                <th class="text-end">Worked</th>
+                                                <th class="text-end">Regular</th>
+                                                <th class="text-end">Overtime</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr t-foreach="data['week_lines']" t-as="wk">
+                                                <td>
+                                                    <span t-out="wk['week_start']" t-options="{'widget': 'date'}"/> &#8211;
+                                                    <span t-out="wk['week_end']" t-options="{'widget': 'date'}"/>
+                                                </td>
+                                                <td class="text-end"><span t-out="'%.2f' % wk['worked']"/></td>
+                                                <td class="text-end"><span t-out="'%.2f' % wk['regular']"/></td>
+                                                <td class="text-end"><span t-out="'%.2f' % wk['overtime']"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Total</strong></td>
+                                                <td class="text-end"><strong t-out="'%.2f' % data['total_worked']"/></td>
+                                                <td class="text-end"><strong t-out="'%.2f' % data['total_reg']"/></td>
+                                                <td class="text-end"><strong t-out="'%.2f' % data['total_ot']"/></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <h5>Time Off Taken This Period</h5>
+                                    <table class="table table-sm" t-if="data['leave_lines']">
+                                        <thead>
+                                            <tr>
+                                                <th>Type</th>
+                                                <th>From</th>
+                                                <th>To</th>
+                                                <th class="text-end">Hours</th>
+                                                <th class="text-end">Paid</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr t-foreach="data['leave_lines']" t-as="lv">
+                                                <td><span t-out="lv['type']"/></td>
+                                                <td><span t-out="lv['date_from']" t-options="{'widget': 'date'}"/></td>
+                                                <td><span t-out="lv['date_to']" t-options="{'widget': 'date'}"/></td>
+                                                <td class="text-end"><span t-out="'%.2f' % lv['hours']"/></td>
+                                                <td class="text-end"><span t-out="'Yes' if lv['paid'] else 'No'"/></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <p t-if="not data['leave_lines']"><em>No time off taken in this period.</em></p>
+
+                                    <h5>Time Off Balances</h5>
+                                    <table class="table table-sm" t-if="data['balance_lines']">
+                                        <thead>
+                                            <tr>
+                                                <th>Type</th>
+                                                <th class="text-end">Allocated</th>
+                                                <th class="text-end">Taken</th>
+                                                <th class="text-end">Remaining</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr t-foreach="data['balance_lines']" t-as="bl">
+                                                <td><span t-out="bl['type']"/></td>
+                                                <td class="text-end"><span t-out="'%.2f %s' % (bl['allocated'], bl['unit'])"/></td>
+                                                <td class="text-end"><span t-out="'%.2f %s' % (bl['taken'], bl['unit'])"/></td>
+                                                <td class="text-end"><span t-out="'%.2f %s' % (bl['remaining'], bl['unit'])"/></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <p t-if="not data['balance_lines']"><em>No time off allocations found.</em></p>
+
+                                    <h5>Pay Summary</h5>
+                                    <table class="table table-sm">
+                                        <tbody>
+                                            <tr>
+                                                <td>Regular (<t t-out="'%.2f' % data['total_reg']"/> hrs)</td>
+                                                <td class="text-end"><span t-out="data['reg_pay']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Overtime (<t t-out="'%.2f' % data['total_ot']"/> hrs)</td>
+                                                <td class="text-end"><span t-out="data['ot_pay']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Paid Time Off (<t t-out="'%.2f' % data['paid_leave_hours']"/> hrs)</td>
+                                                <td class="text-end"><span t-out="data['pto_pay']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Gross Pay</strong></td>
+                                                <td class="text-end"><strong><span t-out="data['gross_pay']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></strong></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </t>
+                        </t>
+
+                        <p t-if="not rpt['details']"><em>No employees with attendance or time off in this period.</em></p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

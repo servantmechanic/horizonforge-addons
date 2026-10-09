@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_timecard_wizard_form" model="ir.ui.view">
+        <field name="name">hr.timecard.wizard.form</field>
+        <field name="model">hr.timecard.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Print Timecards">
+                <group>
+                    <group>
+                        <field name="employee_ids" widget="many2many_tags"
+                               placeholder="All employees"/>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                        <field name="report_style"/>
+                    </group>
+                    <group>
+                        <field name="week_start"/>
+                        <field name="ot_threshold"/>
+                        <field name="ot_multiplier"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_print" string="Print" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_timecard_wizard" model="ir.actions.act_window">
+        <field name="name">Print Timecards</field>
+        <field name="res_model">hr.timecard.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="action_timecard_wizard_employee" model="ir.actions.act_window">
+        <field name="name">Print Timecard</field>
+        <field name="res_model">hr.timecard.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="hr.model_hr_employee"/>
+        <field name="binding_view_types">form,list</field>
+    </record>
+
+    <menuitem id="menu_timecard_wizard"
+              name="Timecards"
+              parent="hr_attendance.menu_hr_attendance_root"
+              action="action_timecard_wizard"
+              sequence="60"/>
+</odoo>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_timecard" model="report.paperformat">
+        <field name="name">Timecard Letter Compact</field>
+        <field name="format">Letter</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">28</field>
+        <field name="margin_bottom">15</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">24</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_report_timecard" model="ir.actions.report">
+        <field name="name">Timecard</field>
+        <field name="model">hr.timecard.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">ozark_timecard.report_timecard</field>
+        <field name="report_file">ozark_timecard.report_timecard</field>
+        <field name="paperformat_id" ref="paperformat_timecard"/>
+        <field name="print_report_name">'Timecards - %s to %s' % (object.date_from, object.date_to)</field>
+    </record>
+</odoo>
