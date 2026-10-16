@@ -2,7 +2,9 @@
 <odoo>
     <menuitem id="menu_np_root" name="Nonprofit Accounting" sequence="40"
               web_icon="nonprofit_accounting,static/description/icon.png"
-              groups="group_np_viewer"/>
+              action="np_dashboard_action" groups="group_np_viewer"/>
+
+    <menuitem id="menu_np_dashboard" name="Dashboard" parent="menu_np_root" action="np_dashboard_action" sequence="1"/>
 
     <menuitem id="menu_np_transactions" name="Transactions" parent="menu_np_root" sequence="10"/>
     <menuitem id="menu_np_deposits" parent="menu_np_transactions" action="np_move_action_deposit" sequence="10"/>

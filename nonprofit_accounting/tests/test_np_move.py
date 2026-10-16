@@ -206,3 +206,29 @@ class TestNpMove(TransactionCase):
             move.with_user(viewer).button_draft()
         with self.assertRaises(AccessError):
             self.env["np.move"].with_user(viewer).create({"move_type": "journal"})
+
+
+@tagged("post_install", "-at_install")
+class TestNpDashboard(TestNpMove):
+
+    def test_balance_and_drafts(self):
+        self._deposit().action_post()
+        self._deposit()
+        self.assertEqual(self.checking.balance, 1000.0, "only posted entries count")
+        self.assertEqual(self.checking.draft_count, 1)
+
+    def test_unpaid_bills_summary(self):
+        self.env.company.np_default_payment_account_id = self.checking
+        self._bill(80.0)
+        self._bill(20.0)
+        self.assertTrue(self.checking.show_unpaid_bills)
+        self.assertFalse(self.petty_cash.show_unpaid_bills)
+        self.assertEqual(self.checking.unpaid_bill_count, 2)
+        self.assertEqual(self.checking.unpaid_bill_total, 100.0)
+
+    def test_quick_actions(self):
+        action = self.checking.action_new_bill()
+        self.assertEqual(action["context"]["default_move_type"], "payment")
+        self.assertEqual(action["context"]["default_bank_account_id"], self.checking.id)
+        self.assertEqual(self.checking.action_open_entries()["domain"],
+                         [("account_id", "=", self.checking.id)])

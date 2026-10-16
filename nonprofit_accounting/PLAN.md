@@ -65,7 +65,7 @@ Module skeleton, CLAUDE.md, README, PLAN, git branch.
 - Opening balance entry for each bank account
 - Tests: balancing, posting, reset to draft, lock date
 
-### M1.5: Dashboard
+### M1.5: Dashboard ✅
 - App opens on a dashboard: one card per bank/cash account with current
   balance and quick buttons (New Deposit / New Bill / Transfer), plus an
   unpaid-bills summary

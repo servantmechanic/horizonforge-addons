@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="np_account_view_kanban_dashboard" model="ir.ui.view">
+        <field name="name">np.account.kanban.dashboard</field>
+        <field name="model">np.account</field>
+        <field name="arch" type="xml">
+            <kanban create="0" action="action_open_entries" type="object">
+                <field name="currency_id"/>
+                <field name="draft_count"/>
+                <field name="show_unpaid_bills"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex align-items-baseline">
+                            <field name="name" class="fw-bold fs-4"/>
+                            <field name="code" class="ms-2 text-muted"/>
+                        </div>
+                        <div class="d-flex align-items-baseline mt-2">
+                            <span class="text-muted">Balance</span>
+                            <field name="balance" widget="monetary" class="fs-3 fw-bold ms-auto"/>
+                        </div>
+                        <div t-if="record.draft_count.raw_value" class="mt-2">
+                            <a name="action_open_drafts" type="object">
+                                <field name="draft_count"/> draft entries to post
+                            </a>
+                        </div>
+                        <div t-if="record.show_unpaid_bills.raw_value" class="mt-2">
+                            <a name="action_open_unpaid_bills" type="object">
+                                <field name="unpaid_bill_count"/> unpaid bills ·
+                                <field name="unpaid_bill_total" widget="monetary"/>
+                            </a>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 mt-3" groups="nonprofit_accounting.group_np_bookkeeper">
+                            <button name="action_new_deposit" type="object" class="btn btn-primary btn-sm">
+                                New Deposit
+                            </button>
+                            <button name="action_new_bill" type="object" class="btn btn-secondary btn-sm">
+                                New Bill
+                            </button>
+                            <button name="action_new_transfer" type="object" class="btn btn-secondary btn-sm">
+                                Transfer
+                            </button>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="np_dashboard_action" model="ir.actions.act_window">
+        <field name="name">Accounting Dashboard</field>
+        <field name="res_model">np.account</field>
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="np_account_view_kanban_dashboard"/>
+        <field name="domain">[('account_type', '=', 'bank')]</field>
+        <field name="context">{'create': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No bank or cash accounts yet</p>
+            <p>Add one under Configuration → Chart of Accounts with type Bank/Cash.</p>
+        </field>
+    </record>
+</odoo>
