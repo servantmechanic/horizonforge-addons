@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.nonprofit.accounting</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="85"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Nonprofit Accounting" string="Nonprofit Accounting" name="nonprofit_accounting"
+                     groups="nonprofit_accounting.group_np_bookkeeper">
+                    <block title="Period Lock" name="np_lock_setting_container">
+                        <setting string="Lock Date" company_dependent="1"
+                                 help="Entries dated on or before this date can't be posted, reset to draft or changed.">
+                            <field name="np_lock_date"/>
+                        </setting>
+                    </block>
+                    <block title="Payments" name="np_payment_setting_container">
+                        <setting string="Default Payment Account" company_dependent="1"
+                                 help="Pay From account for bills, unless the vendor was last paid from a different account.">
+                            <field name="np_default_payment_account_id" options="{'no_create': True}"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="np_settings_action" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="context">{'module': 'nonprofit_accounting', 'bin_size': False}</field>
+    </record>
+</odoo>

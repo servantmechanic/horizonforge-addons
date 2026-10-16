@@ -47,9 +47,16 @@ The bank side of each deposit, payment and transfer is generated automatically.
 ### M0: Project setup ✅
 Module skeleton, CLAUDE.md, README, PLAN, git branch.
 
-### M1: Ledger core
+### M1: Ledger core ✅
 - Chart of accounts plus the default starter chart (data file)
 - Deposit, payment, transfer and journal entry forms (`np.move`)
+- Payments: enter the bill first (bill date, bill/invoice #), then **Pay**
+  (paid date defaults to the bill date and can be changed, plus bank account
+  and check #). Unpaid bills stay off the books (cash basis). **Bills** menu
+  (Unpaid filter by default); **Payments** is the paid check register;
+  **Mark Unpaid** voids a payment
+- Pay From default: the account this vendor was last paid from, else the
+  default payment account in Settings, else the only bank account
 - Posted entries must balance (debits = credits)
 - **Posted entries can be reset to draft until their date is locked**
   (see the reset-to-draft note below)
@@ -57,6 +64,13 @@ Module skeleton, CLAUDE.md, README, PLAN, git branch.
 - Menus, list/form/search views, two user groups, access rights
 - Opening balance entry for each bank account
 - Tests: balancing, posting, reset to draft, lock date
+
+### M1.5: Dashboard
+- App opens on a dashboard: one card per bank/cash account with current
+  balance and quick buttons (New Deposit / New Bill / Transfer), plus an
+  unpaid-bills summary
+- Show **Home Action** on the user form so each user can land on the dashboard
+- Later: last reconciled date and uncleared totals per card (after M4)
 
 ### M2: Income tracking
 - Income accounts for each district: 4010 North, 4020 South (in the starter chart)

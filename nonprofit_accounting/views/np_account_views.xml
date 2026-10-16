@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="np_account_view_list" model="ir.ui.view">
+        <field name="name">np.account.list</field>
+        <field name="model">np.account</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="account_type"/>
+                <field name="note" optional="hide"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="np_account_view_form" model="ir.ui.view">
+        <field name="name">np.account.form</field>
+        <field name="model">np.account</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="name"/>
+                            <field name="account_type"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                    <field name="note" placeholder="Notes about how this account is used..."/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="np_account_view_search" model="ir.ui.view">
+        <field name="name">np.account.search</field>
+        <field name="model">np.account</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="code"/>
+                <field name="name"/>
+                <filter string="Bank/Cash" name="bank" domain="[('account_type', '=', 'bank')]"/>
+                <filter string="Income" name="income" domain="[('account_type', '=', 'income')]"/>
+                <filter string="Expense" name="expense" domain="[('account_type', '=', 'expense')]"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter string="Type" name="group_type" context="{'group_by': 'account_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="np_account_action" model="ir.actions.act_window">
+        <field name="name">Chart of Accounts</field>
+        <field name="res_model">np.account</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

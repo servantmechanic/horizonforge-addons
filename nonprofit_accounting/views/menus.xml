@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_np_root" name="Nonprofit Accounting" sequence="40"
+              web_icon="nonprofit_accounting,static/description/icon.png"
+              groups="group_np_viewer"/>
+
+    <menuitem id="menu_np_transactions" name="Transactions" parent="menu_np_root" sequence="10"/>
+    <menuitem id="menu_np_deposits" parent="menu_np_transactions" action="np_move_action_deposit" sequence="10"/>
+    <menuitem id="menu_np_bills" parent="menu_np_transactions" action="np_move_action_bill" sequence="15"/>
+    <menuitem id="menu_np_payments" parent="menu_np_transactions" action="np_move_action_payment" sequence="20"/>
+    <menuitem id="menu_np_transfers" parent="menu_np_transactions" action="np_move_action_transfer" sequence="30"/>
+    <menuitem id="menu_np_journal" parent="menu_np_transactions" action="np_move_action_journal" sequence="40"/>
+    <menuitem id="menu_np_all_entries" parent="menu_np_transactions" action="np_move_action_all" sequence="50"/>
+    <menuitem id="menu_np_journal_items" parent="menu_np_transactions" action="np_move_line_action" sequence="60"/>
+
+    <menuitem id="menu_np_config" name="Configuration" parent="menu_np_root" sequence="90"
+              groups="group_np_bookkeeper"/>
+    <menuitem id="menu_np_accounts" parent="menu_np_config" action="np_account_action" sequence="10"/>
+    <menuitem id="menu_np_settings" parent="menu_np_config" action="np_settings_action" sequence="20"
+              groups="base.group_system"/>
+</odoo>

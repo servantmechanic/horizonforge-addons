@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="np_move_line_view_list" model="ir.ui.view">
+        <field name="name">np.move.line.list</field>
+        <field name="model">np.move.line</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0" delete="0">
+                <field name="date"/>
+                <field name="move_id"/>
+                <field name="account_id"/>
+                <field name="partner_id"/>
+                <field name="name"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="debit" sum="Total Debit"/>
+                <field name="credit" sum="Total Credit"/>
+                <field name="balance" sum="Balance" optional="show"/>
+                <field name="state" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="np_move_line_view_search" model="ir.ui.view">
+        <field name="name">np.move.line.search</field>
+        <field name="model">np.move.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="account_id"/>
+                <field name="partner_id"/>
+                <field name="move_id"/>
+                <field name="name"/>
+                <filter string="Posted" name="posted" domain="[('state', '=', 'posted')]"/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <separator/>
+                <filter string="Income" name="income" domain="[('account_type', '=', 'income')]"/>
+                <filter string="Expense" name="expense" domain="[('account_type', '=', 'expense')]"/>
+                <filter string="Bank/Cash" name="bank" domain="[('account_type', '=', 'bank')]"/>
+                <separator/>
+                <filter string="Date" name="filter_date" date="date"/>
+                <group>
+                    <filter string="Account" name="group_account" context="{'group_by': 'account_id'}"/>
+                    <filter string="Contact" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Month" name="group_month" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="np_move_line_action" model="ir.actions.act_window">
+        <field name="name">Journal Items</field>
+        <field name="res_model">np.move.line</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_posted': 1, 'search_default_group_account': 1}</field>
+    </record>
+</odoo>

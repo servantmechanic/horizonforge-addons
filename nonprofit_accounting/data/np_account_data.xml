@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Starter chart of accounts. noupdate: edits survive module upgrades. -->
+    <data noupdate="1">
+        <record id="np_account_1000" model="np.account">
+            <field name="code">1000</field>
+            <field name="name">Checking</field>
+            <field name="account_type">bank</field>
+        </record>
+        <record id="np_account_1010" model="np.account">
+            <field name="code">1010</field>
+            <field name="name">Savings</field>
+            <field name="account_type">bank</field>
+        </record>
+        <record id="np_account_1050" model="np.account">
+            <field name="code">1050</field>
+            <field name="name">Petty Cash</field>
+            <field name="account_type">bank</field>
+        </record>
+        <record id="np_account_2100" model="np.account">
+            <field name="code">2100</field>
+            <field name="name">Payroll Withholdings</field>
+            <field name="account_type">liability</field>
+        </record>
+        <record id="np_account_3000" model="np.account">
+            <field name="code">3000</field>
+            <field name="name">Net Assets (Opening Balances)</field>
+            <field name="account_type">equity</field>
+        </record>
+        <record id="np_account_4010" model="np.account">
+            <field name="code">4010</field>
+            <field name="name">North District Support</field>
+            <field name="account_type">income</field>
+        </record>
+        <record id="np_account_4020" model="np.account">
+            <field name="code">4020</field>
+            <field name="name">South District Support</field>
+            <field name="account_type">income</field>
+        </record>
+        <record id="np_account_4300" model="np.account">
+            <field name="code">4300</field>
+            <field name="name">Contributions &amp; Fundraising</field>
+            <field name="account_type">income</field>
+        </record>
+        <record id="np_account_4800" model="np.account">
+            <field name="code">4800</field>
+            <field name="name">Interest Income</field>
+            <field name="account_type">income</field>
+        </record>
+        <record id="np_account_4900" model="np.account">
+            <field name="code">4900</field>
+            <field name="name">Other Income</field>
+            <field name="account_type">income</field>
+        </record>
+        <record id="np_account_5000" model="np.account">
+            <field name="code">5000</field>
+            <field name="name">Salaries &amp; Wages</field>
+            <field name="account_type">expense</field>
+        </record>
+        <record id="np_account_5100" model="np.account">
+            <field name="code">5100</field>
+            <field name="name">Payroll Taxes</field>
+            <field name="account_type">expense</field>
+        </record>
+        <record id="np_account_5200" model="np.account">
+            <field name="code">5200</field>
+            <field name="name">Employee Benefits</field>
+            <field name="account_type">expense</field>
+        </record>
+        <record id="np_account_5300" model="np.account">
+            <field name="code">5300</field>
+            <field name="name">Instructional Supplies</field>
+            <field name="account_type">expense</field>
+        </record>
+        <record id="np_account_5400" model="np.account">
+            <field name="code">5400</field>
+            <field name="name">Office Supplies &amp; Postage</field>
+            <field name="account_type">expense</field>
+        </record>
+        <record id="np_account_5500" model="np.account">
+            <field name="code">5500</field>
+            <field name="name">Rent &amp; Facilities</field>
+            <field name="account_type">expense</field>
+        </record>
+        <record id="np_account_5600" model="np.account">
+            <field name="code">5600</field>
+            <field name="name">Utilities</field>
+            <field name="account_type">expense</field>
+        </record>
+        <record id="np_account_5700" model="np.account">
+            <field name="code">5700</field>
+            <field name="name">Insurance</field>
+            <field name="account_type">expense</field>
+        </record>
+        <record id="np_account_5800" model="np.account">
+            <field name="code">5800</field>
+            <field name="name">Professional Fees</field>
+            <field name="account_type">expense</field>
+        </record>
+        <record id="np_account_5900" model="np.account">
+            <field name="code">5900</field>
+            <field name="name">Repairs &amp; Maintenance</field>
+            <field name="account_type">expense</field>
+        </record>
+        <record id="np_account_6000" model="np.account">
+            <field name="code">6000</field>
+            <field name="name">Transportation</field>
+            <field name="account_type">expense</field>
+        </record>
+        <record id="np_account_6100" model="np.account">
+            <field name="code">6100</field>
+            <field name="name">Food Service</field>
+            <field name="account_type">expense</field>
+        </record>
+        <record id="np_account_6900" model="np.account">
+            <field name="code">6900</field>
+            <field name="name">Bank Fees</field>
+            <field name="account_type">expense</field>
+        </record>
+        <record id="np_account_6950" model="np.account">
+            <field name="code">6950</field>
+            <field name="name">Miscellaneous</field>
+            <field name="account_type">expense</field>
+        </record>
+    </data>
+</odoo>

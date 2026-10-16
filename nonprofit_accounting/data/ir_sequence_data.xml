@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_np_move_deposit" model="ir.sequence">
+            <field name="name">Deposit Numbers</field>
+            <field name="code">np.move.deposit</field>
+            <field name="prefix">DEP/%(range_year)s/</field>
+            <field name="padding">4</field>
+            <field name="use_date_range" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_np_move_payment" model="ir.sequence">
+            <field name="name">Payment Numbers</field>
+            <field name="code">np.move.payment</field>
+            <field name="prefix">PAY/%(range_year)s/</field>
+            <field name="padding">4</field>
+            <field name="use_date_range" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_np_move_transfer" model="ir.sequence">
+            <field name="name">Transfer Numbers</field>
+            <field name="code">np.move.transfer</field>
+            <field name="prefix">TRF/%(range_year)s/</field>
+            <field name="padding">4</field>
+            <field name="use_date_range" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_np_move_journal" model="ir.sequence">
+            <field name="name">Journal Entry Numbers</field>
+            <field name="code">np.move.journal</field>
+            <field name="prefix">JE/%(range_year)s/</field>
+            <field name="padding">4</field>
+            <field name="use_date_range" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

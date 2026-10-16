@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_groups_privilege_nonprofit_accounting" model="res.groups.privilege">
+        <field name="name">Nonprofit Accounting</field>
+        <field name="sequence">30</field>
+        <field name="category_id" ref="base.module_category_accounting"/>
+    </record>
+
+    <record id="group_np_viewer" model="res.groups">
+        <field name="name">Viewer</field>
+        <field name="sequence">10</field>
+        <field name="privilege_id" ref="res_groups_privilege_nonprofit_accounting"/>
+        <field name="comment">Read-only access to entries, accounts and reports.</field>
+    </record>
+
+    <record id="group_np_bookkeeper" model="res.groups">
+        <field name="name">Bookkeeper</field>
+        <field name="sequence">20</field>
+        <field name="privilege_id" ref="res_groups_privilege_nonprofit_accounting"/>
+        <field name="implied_ids" eval="[(4, ref('group_np_viewer'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <field name="comment">Create, post and reset entries, and manage the chart of accounts.</field>
+    </record>
+</odoo>

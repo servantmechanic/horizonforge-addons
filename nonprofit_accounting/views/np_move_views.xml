@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="np_move_view_list" model="ir.ui.view">
+        <field name="name">np.move.list</field>
+        <field name="model">np.move</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state == 'draft'">
+                <field name="date"/>
+                <field name="name"/>
+                <field name="move_type" optional="hide"/>
+                <field name="partner_id"/>
+                <field name="ref"/>
+                <field name="memo" optional="show"/>
+                <field name="bank_account_id" optional="show"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="amount_total" sum="Total"/>
+                <field name="state" widget="badge" decoration-success="state == 'posted'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="np_move_view_form" model="ir.ui.view">
+        <field name="name">np.move.form</field>
+        <field name="model">np.move</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_post" string="Post" type="object" class="oe_highlight"
+                            invisible="state != 'draft' or move_type == 'payment'"
+                            groups="nonprofit_accounting.group_np_bookkeeper"/>
+                    <button name="action_open_pay_wizard" string="Pay" type="object" class="oe_highlight"
+                            invisible="state != 'draft' or move_type != 'payment'"
+                            groups="nonprofit_accounting.group_np_bookkeeper"/>
+                    <button name="button_draft" string="Reset to Draft" type="object"
+                            invisible="state != 'posted' or move_type == 'payment'"
+                            groups="nonprofit_accounting.group_np_bookkeeper"/>
+                    <button name="button_draft" string="Mark Unpaid" type="object"
+                            invisible="state != 'posted' or move_type != 'payment'"
+                            confirm="This voids the payment and marks the bill unpaid again."
+                            groups="nonprofit_accounting.group_np_bookkeeper"/>
+                    <field name="state" widget="statusbar" invisible="move_type == 'payment'"/>
+                    <field name="payment_state" widget="statusbar" invisible="move_type != 'payment'"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" invisible="name == '/'"/>
+                            <span invisible="name != '/'">Draft</span>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="move_type"/>
+                            <field name="bill_date" invisible="move_type != 'payment'"
+                                   readonly="state == 'posted'"/>
+                            <label for="date" string="Paid Date"
+                                   invisible="move_type != 'payment' or state == 'draft'"/>
+                            <label for="date" invisible="move_type == 'payment'"/>
+                            <field name="date" nolabel="1" readonly="state == 'posted'"
+                                   invisible="move_type == 'payment' and state == 'draft'"/>
+
+                            <label for="bank_account_id" string="Deposit To" invisible="move_type != 'deposit'"/>
+                            <label for="bank_account_id" string="Pay From" invisible="move_type != 'payment'"/>
+                            <label for="bank_account_id" string="From Account" invisible="move_type != 'transfer'"/>
+                            <field name="bank_account_id" nolabel="1"
+                                   invisible="move_type == 'journal'"
+                                   required="move_type in ('deposit', 'transfer')"
+                                   readonly="state == 'posted'" options="{'no_create': True}"/>
+
+                            <field name="dest_account_id" invisible="move_type != 'transfer'"
+                                   required="move_type == 'transfer'" readonly="state == 'posted'"
+                                   options="{'no_create': True}"/>
+                            <field name="amount" string="Amount" invisible="move_type != 'transfer'"
+                                   readonly="state == 'posted'"/>
+                        </group>
+                        <group>
+                            <label for="partner_id" string="Received From" invisible="move_type != 'deposit'"/>
+                            <label for="partner_id" string="Paid To" invisible="move_type != 'payment'"/>
+                            <label for="partner_id" string="Contact" invisible="move_type != 'journal'"/>
+                            <field name="partner_id" nolabel="1" invisible="move_type == 'transfer'"
+                                   readonly="state == 'posted'"/>
+
+                            <label for="ref" string="Bill / Invoice #" invisible="move_type != 'payment'"/>
+                            <label for="ref" invisible="move_type == 'payment'"/>
+                            <field name="ref" nolabel="1" readonly="state == 'posted'"/>
+                            <field name="check_number" invisible="move_type != 'payment'"
+                                   readonly="state == 'posted'"/>
+                            <field name="memo" readonly="state == 'posted'"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="amount_total" invisible="move_type == 'transfer'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Lines" name="items" invisible="move_type == 'transfer'">
+                            <field name="item_line_ids" readonly="state == 'posted'">
+                                <list editable="bottom">
+                                    <field name="account_id" options="{'no_create': True}"
+                                           domain="[] if parent.move_type == 'journal' else [('account_type', '!=', 'bank')]"/>
+                                    <field name="name"/>
+                                    <field name="partner_id" column_invisible="parent.move_type != 'journal'"/>
+                                    <field name="currency_id" column_invisible="True"/>
+                                    <field name="amount" sum="Total"
+                                           column_invisible="parent.move_type == 'journal'"/>
+                                    <field name="debit" sum="Total Debit"
+                                           column_invisible="parent.move_type != 'journal'"/>
+                                    <field name="credit" sum="Total Credit"
+                                           column_invisible="parent.move_type != 'journal'"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Journal Items" name="journal_items" invisible="move_type == 'journal'">
+                            <field name="line_ids" readonly="1">
+                                <list>
+                                    <field name="account_id"/>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="currency_id" column_invisible="True"/>
+                                    <field name="debit" sum="Total Debit"/>
+                                    <field name="credit" sum="Total Credit"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="np_move_view_search" model="ir.ui.view">
+        <field name="name">np.move.search</field>
+        <field name="model">np.move</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="ref"/>
+                <field name="check_number"/>
+                <field name="memo"/>
+                <field name="bank_account_id"/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Posted" name="posted" domain="[('state', '=', 'posted')]"/>
+                <separator/>
+                <filter string="Unpaid" name="unpaid" domain="[('payment_state', '=', 'unpaid')]"/>
+                <filter string="Paid" name="paid" domain="[('payment_state', '=', 'paid')]"/>
+                <separator/>
+                <filter string="Date" name="filter_date" date="date"/>
+                <group>
+                    <filter string="Type" name="group_type" context="{'group_by': 'move_type'}"/>
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Bank Account" name="group_bank" context="{'group_by': 'bank_account_id'}"/>
+                    <filter string="Month" name="group_month" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="np_move_action_deposit" model="ir.actions.act_window">
+        <field name="name">Deposits</field>
+        <field name="res_model">np.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('move_type', '=', 'deposit')]</field>
+        <field name="context">{'default_move_type': 'deposit'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Record a deposit</p>
+            <p>Money received into a bank or cash account, such as district support.</p>
+        </field>
+    </record>
+
+    <record id="np_move_view_list_bill" model="ir.ui.view">
+        <field name="name">np.move.list.bill</field>
+        <field name="model">np.move</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <list default_order="bill_date, id">
+                <field name="bill_date"/>
+                <field name="name" optional="hide"/>
+                <field name="partner_id" string="Paid To"/>
+                <field name="ref" string="Bill / Invoice #"/>
+                <field name="memo" optional="show"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="amount_total" sum="Total"/>
+                <field name="payment_state" widget="badge"
+                       decoration-success="payment_state == 'paid'"
+                       decoration-warning="payment_state == 'unpaid'"/>
+                <button name="action_open_pay_wizard" string="Pay" type="object" icon="fa-money"
+                        invisible="state != 'draft'"
+                        groups="nonprofit_accounting.group_np_bookkeeper"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="np_move_view_list_payment" model="ir.ui.view">
+        <field name="name">np.move.list.payment</field>
+        <field name="model">np.move</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="date" string="Paid Date"/>
+                <field name="name"/>
+                <field name="bill_date" optional="hide"/>
+                <field name="partner_id" string="Paid To"/>
+                <field name="ref" string="Bill / Invoice #" optional="show"/>
+                <field name="check_number"/>
+                <field name="memo" optional="hide"/>
+                <field name="bank_account_id" optional="show"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="amount_total" sum="Total"/>
+                <field name="payment_state" widget="badge"
+                       decoration-success="payment_state == 'paid'"
+                       decoration-warning="payment_state == 'unpaid'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="np_move_action_bill" model="ir.actions.act_window">
+        <field name="name">Bills</field>
+        <field name="res_model">np.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="np_move_view_list_bill"/>
+        <field name="domain">[('move_type', '=', 'payment')]</field>
+        <field name="context">{'default_move_type': 'payment', 'search_default_unpaid': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No bills waiting to be paid</p>
+            <p>Enter a bill when it arrives. It stays off the books until you pay it.</p>
+        </field>
+    </record>
+
+    <record id="np_move_action_payment" model="ir.actions.act_window">
+        <field name="name">Payments</field>
+        <field name="res_model">np.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="np_move_view_list_payment"/>
+        <field name="domain">[('move_type', '=', 'payment')]</field>
+        <field name="context">{'default_move_type': 'payment', 'search_default_paid': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Record a payment</p>
+            <p>Checks, debit card charges and other money paid out.
+               Enter the bill, then click Pay.</p>
+        </field>
+    </record>
+
+    <record id="np_move_action_transfer" model="ir.actions.act_window">
+        <field name="name">Transfers</field>
+        <field name="res_model">np.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('move_type', '=', 'transfer')]</field>
+        <field name="context">{'default_move_type': 'transfer'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Record a transfer</p>
+            <p>Moving money between your own accounts, e.g. checking to petty cash.</p>
+        </field>
+    </record>
+
+    <record id="np_move_action_journal" model="ir.actions.act_window">
+        <field name="name">Journal Entries</field>
+        <field name="res_model">np.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('move_type', '=', 'journal')]</field>
+        <field name="context">{'default_move_type': 'journal'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Record a journal entry</p>
+            <p>Manual debits and credits for opening balances and adjustments.</p>
+        </field>
+    </record>
+
+    <record id="np_move_action_all" model="ir.actions.act_window">
+        <field name="name">All Entries</field>
+        <field name="res_model">np.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'create': False}</field>
+    </record>
+</odoo>
