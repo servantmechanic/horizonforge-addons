@@ -1,12 +1,12 @@
 # Nonprofit Accounting
 
-A simplified, standalone fund-accounting app for Odoo 19 Community. It does not
-depend on Odoo's `account` module.
+A simplified, standalone, cash-basis ledger for small nonprofits (first user:
+a small school) on Odoo 19 Community. It does not depend on Odoo's `account`
+module.
 
-It tracks money by **fund** and **net asset class** (with or without donor
-restrictions). Expenses are tagged by **function** (program, management &
-general, fundraising). That supports the standard nonprofit financial
-statements.
+Records deposits, payments and transfers, tracks income by source, reconciles
+bank statements, and produces a period report (beginning balance, income,
+expenses, ending balance).
 
 ## Status
 
