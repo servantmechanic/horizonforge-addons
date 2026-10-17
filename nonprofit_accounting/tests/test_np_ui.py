@@ -22,9 +22,11 @@ class TestNpUi(HttpCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.checking = cls.env.ref("nonprofit_accounting.np_account_1000")
+        # Inside the period report's default range (last full month).
+        period_start = cls.env["np.period.report"].new({}).date_from
         deposit = cls.env["np.move"].create({
             "move_type": "deposit",
-            "date": "2026-09-05",
+            "date": period_start,
             "bank_account_id": cls.checking.id,
             "item_line_ids": [Command.create({
                 "account_id": cls.env.ref("nonprofit_accounting.np_account_4010").id,
@@ -34,7 +36,7 @@ class TestNpUi(HttpCase):
         deposit.action_post()
         cls.reconciliation = cls.env["np.reconciliation"].create({
             "bank_account_id": cls.checking.id,
-            "statement_date": "2026-09-30",
+            "statement_date": period_start.replace(day=28),
             "statement_balance": 1000,
         })
 
@@ -76,3 +78,18 @@ class TestNpUi(HttpCase):
         self.test_reconciliation_form()
         self.assertTrue(self.reconciliation.line_ids.rec_cleared, "toggle was saved")
         self.assertEqual(self.reconciliation.difference, 0.0)
+
+    def test_period_report_click_through(self):
+        self._run("/odoo/action-nonprofit_accounting.np_period_report_action", """
+            (await waitFor(".modal button[name='action_view']")).click();
+            const iframe = await waitFor("iframe.o_report_iframe, .o_action iframe");
+            let link;
+            for (let i = 0; i < 100 && !link; i++) {
+                link = iframe.contentDocument && iframe.contentDocument.querySelector(".np-drill[data-np-kind='account']");
+                if (!link) { await new Promise((r) => setTimeout(r, 100)); }
+            }
+            if (!link) { throw new Error("No drill-down link in report"); }
+            link.click();
+            (await waitFor(".o_list_view .o_data_row .o_data_cell")).click();
+            await waitFor(".o_form_view .o_field_widget[name='item_line_ids']");
+        """)

@@ -3,7 +3,8 @@
     <template id="report_period_amount_row">
         <tr>
             <td class="np-indent"><span t-out="label"/></td>
-            <td class="np-amt"><span t-out="amount" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+            <td class="np-amt"><span class="np-drill" data-np-kind="account" t-att-data-np-account="account_id"
+                t-out="amount" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
         </tr>
     </template>
 
@@ -12,6 +13,7 @@
             <t t-call="nonprofit_accounting.report_period_amount_row">
                 <t t-set="label" t-value="row['account'].display_name"/>
                 <t t-set="amount" t-value="row['amount']"/>
+                <t t-set="account_id" t-value="row['account'].id"/>
             </t>
         </t>
     </template>
@@ -23,7 +25,7 @@
                 <t t-set="cur" t-value="rpt['currency']"/>
                 <t t-set="company" t-value="doc.company_id"/>
                 <t t-call="web.basic_layout">
-                    <div class="page np-period">
+                    <div class="page np-period" t-att-data-np-report-id="doc.id">
                         <style>
                             .np-period { font-family: 'Lato', 'Helvetica Neue', Arial, sans-serif; font-size: 9.5pt; color: #222; }
                             /* wkhtmltopdf draws hairlines for Bootstrap's zero-width row borders
@@ -57,6 +59,8 @@
                             .np-period .np-accounts th { text-align: right; font-weight: bold; }
                             .np-period .np-accounts th:first-child { text-align: left; }
                             .np-period .np-footer { margin-top: 18px; }
+                            .o_in_iframe .np-period .np-drill { cursor: pointer; }
+                            .o_in_iframe .np-period .np-drill:hover { text-decoration: underline; color: #714B67; }
                         </style>
 
                         <table class="np-header">
@@ -86,7 +90,7 @@
                         <table class="np-main">
                             <tr class="np-grand">
                                 <td>Beginning Balance</td>
-                                <td class="np-amt"><span t-out="rpt['beginning']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                <td class="np-amt"><span class="np-drill" data-np-kind="beginning" t-out="rpt['beginning']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
                             </tr>
 
                             <tr class="np-section"><td colspan="2">Income</td></tr>
@@ -96,7 +100,7 @@
                             <tr t-if="not rpt['income_rows']"><td class="np-indent np-muted" colspan="2">None</td></tr>
                             <tr class="np-total">
                                 <td>Total Income</td>
-                                <td class="np-amt"><span t-out="rpt['total_income']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                <td class="np-amt"><span class="np-drill" data-np-kind="section" data-np-section="income" t-out="rpt['total_income']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
                             </tr>
 
                             <tr class="np-section"><td colspan="2">Expenses</td></tr>
@@ -106,7 +110,7 @@
                             <tr t-if="not rpt['expense_rows']"><td class="np-indent np-muted" colspan="2">None</td></tr>
                             <tr class="np-total">
                                 <td>Total Expenses</td>
-                                <td class="np-amt"><span t-out="rpt['total_expense']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                <td class="np-amt"><span class="np-drill" data-np-kind="section" data-np-section="expense" t-out="rpt['total_expense']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
                             </tr>
 
                             <tr class="np-section np-total">
@@ -130,7 +134,7 @@
 
                             <tr class="np-grand np-ending">
                                 <td>Ending Balance</td>
-                                <td class="np-amt"><span t-out="rpt['ending']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                <td class="np-amt"><span class="np-drill" data-np-kind="ending" t-out="rpt['ending']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
                             </tr>
                         </table>
 
@@ -151,9 +155,9 @@
                                 </tr>
                                 <tr t-foreach="rpt['bank_rows']" t-as="row">
                                     <td><span t-out="row['account'].display_name"/></td>
-                                    <td class="np-amt"><span t-out="row['beginning']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
-                                    <td class="np-amt"><span t-out="row['ending'] - row['beginning']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
-                                    <td class="np-amt"><span t-out="row['ending']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                    <td class="np-amt"><span class="np-drill" data-np-kind="beginning" t-att-data-np-account="row['account'].id" t-out="row['beginning']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                    <td class="np-amt"><span class="np-drill" data-np-kind="bank_period" t-att-data-np-account="row['account'].id" t-out="row['ending'] - row['beginning']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                    <td class="np-amt"><span class="np-drill" data-np-kind="ending" t-att-data-np-account="row['account'].id" t-out="row['ending']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
                                 </tr>
                             </table>
                         </t>

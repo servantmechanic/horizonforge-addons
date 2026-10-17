@@ -5,6 +5,12 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_np_open_entries" type="object" class="oe_stat_button" icon="fa-book"
+                        invisible="not np_entry_count" groups="nonprofit_accounting.group_np_viewer">
+                    <field name="np_entry_count" widget="statinfo" string="Transactions"/>
+                </button>
+            </xpath>
             <xpath expr="//notebook" position="inside">
                 <page string="Accounting" name="np_accounting" groups="nonprofit_accounting.group_np_viewer">
                     <group>

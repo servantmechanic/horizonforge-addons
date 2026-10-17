@@ -20,6 +20,14 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_entries" type="object" class="oe_stat_button"
+                                icon="fa-list" invisible="not id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Transactions</span>
+                            </div>
+                        </button>
+                    </div>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <group>
                         <group>

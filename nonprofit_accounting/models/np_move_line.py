@@ -155,6 +155,16 @@ class NpMoveLine(models.Model):
     def _unlink_draft_only(self):
         self.move_id._check_draft()
 
+    def action_open_move(self):
+        """Open the entry (deposit, bill, ...) this line belongs to."""
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "res_model": "np.move",
+            "res_id": self.move_id.id,
+            "views": [(False, "form")],
+        }
+
     def _sync_moves(self, moves=None):
         """Regenerate bank lines after items are edited directly (the entry
         form goes through np.move.write, which already does this)."""

@@ -107,6 +107,42 @@ class TestNpPeriodReport(TransactionCase):
         self.assertIn("4010 North District Support", html)
         self.assertNotIn("Does not tie out", html)
 
+    def _drill(self, wizard, kind, **kwargs):
+        action = wizard.action_drilldown(kind, **kwargs)
+        return self.env["np.move.line"].search(action["domain"])
+
+    def test_drilldown(self):
+        wizard, data = self._report()
+        north = self._drill(wizard, "account", account_id=self.acc["4010"].id)
+        self.assertEqual(sum(north.mapped("report_amount")), 10000)
+        income = self._drill(wizard, "section", section="income")
+        self.assertEqual(sum(income.mapped("report_amount")), data["total_income"])
+        expenses = self._drill(wizard, "section", section="expense")
+        self.assertEqual(sum(expenses.mapped("report_amount")), data["total_expense"])
+        beginning = self._drill(wizard, "beginning")
+        self.assertEqual(sum(beginning.mapped("balance")), data["beginning"])
+        ending = self._drill(wizard, "ending")
+        self.assertEqual(sum(ending.mapped("balance")), data["ending"])
+        checking_activity = self._drill(wizard, "bank_period", account_id=self.checking.id)
+        row = next(r for r in data["bank_rows"] if r["account"] == self.checking)
+        self.assertEqual(sum(checking_activity.mapped("balance")), row["ending"] - row["beginning"])
+
+    def test_drilldown_links_render(self):
+        wizard, _data = self._report()
+        html = self.env["ir.actions.report"]._render_qweb_html(
+            "nonprofit_accounting.report_period", wizard.ids
+        )[0].decode()
+        self.assertIn(f'data-np-report-id="{wizard.id}"', html)
+        self.assertIn(f'data-np-account="{self.acc["4010"].id}"', html)
+
+    def test_open_entry_and_partner_button(self):
+        line = self.env["np.move.line"].search([("account_id", "=", self.acc["4010"].id)], limit=1)
+        self.assertEqual(line.action_open_move()["res_id"], line.move_id.id)
+        partner = self.env["res.partner"].create({"name": "Supply Co"})
+        self.env["np.move"].create({"move_type": "payment", "partner_id": partner.id})
+        self.assertEqual(partner.np_entry_count, 1)
+        self.assertEqual(partner.action_np_open_entries()["domain"], [("partner_id", "=", partner.id)])
+
     def test_date_order(self):
         with self.assertRaises(ValidationError):
             self.env["np.period.report"].create({"date_from": "2026-09-30", "date_to": "2026-09-01"})

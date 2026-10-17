@@ -118,6 +118,12 @@ Statement-match method:
    completed one can be reopened (keeps the beginning-balance chain intact)
 10. Dashboard cards show "Reconciled through <date>" and a Reconcile button
 
+### Click-through ✅
+- Period report (on screen): every amount opens the journal items behind it
+  (accounts, section totals, beginning/ending balances, By Account columns)
+- Journal item lists (ledger, analysis lists, drill-downs): clicking a row opens the entry
+- Reconciliation rows: open-entry icon; accounts and contacts: Transactions smart button
+
 ### M5: Later / nice-to-have
 - CSV import of bank transactions (create draft deposits/payments)
 - CSV import of the chart of accounts

@@ -79,6 +79,8 @@
                                     <field name="debit" string="Deposit" readonly="1" sum="Total Deposits"/>
                                     <field name="credit" string="Payment" readonly="1" sum="Total Payments"/>
                                     <field name="rec_cleared" widget="boolean_toggle"/>
+                                    <button name="action_open_move" type="object" icon="fa-external-link"
+                                            title="Open entry"/>
                                 </list>
                             </field>
                         </page>
