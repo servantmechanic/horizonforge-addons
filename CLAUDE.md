@@ -25,6 +25,10 @@ venv/bin/python odoo/odoo-bin -c odoo.conf -d test_<module> -i <module> \
     --test-tags /<module> --stop-after-init
 ```
 
+- If the dev server is already running on 8069, add `--http-port 8079` to test runs.
+- Browser (HttpCase) tests need Chrome and the `websocket-client` package in the venv
+  (`uv pip install --python venv/bin/python websocket-client`); without it they are skipped.
+
 ## Modules
 
 | Module | Status | Notes |

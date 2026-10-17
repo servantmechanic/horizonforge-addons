@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="np_reconciliation_view_list" model="ir.ui.view">
+        <field name="name">np.reconciliation.list</field>
+        <field name="model">np.reconciliation</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state == 'draft'">
+                <field name="statement_date"/>
+                <field name="bank_account_id"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="statement_balance"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'"
+                       decoration-warning="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="np_reconciliation_view_form" model="ir.ui.view">
+        <field name="name">np.reconciliation.form</field>
+        <field name="model">np.reconciliation</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_finish" string="Finish" type="object" class="oe_highlight"
+                            invisible="state != 'draft' or not id"
+                            groups="nonprofit_accounting.group_np_bookkeeper"/>
+                    <button name="action_refresh" string="Refresh" type="object"
+                            invisible="state != 'draft' or not id"
+                            groups="nonprofit_accounting.group_np_bookkeeper"
+                            help="Load transactions posted since you started."/>
+                    <button name="action_clear_all" string="Clear All" type="object"
+                            invisible="state != 'draft' or not id"
+                            groups="nonprofit_accounting.group_np_bookkeeper"/>
+                    <button name="action_reopen" string="Reopen" type="object"
+                            invisible="state != 'done'"
+                            confirm="Reopen this reconciliation? Its cleared transactions become editable again."
+                            groups="nonprofit_accounting.group_np_bookkeeper"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="display_name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="bank_account_id" readonly="state == 'done'" options="{'no_create': True}"/>
+                            <field name="statement_date" readonly="state == 'done'"/>
+                            <field name="statement_balance" readonly="state == 'done'"/>
+                            <field name="statement_file" filename="statement_filename"/>
+                            <field name="statement_filename" invisible="1"/>
+                            <field name="previous_id" invisible="not previous_id"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group string="Summary">
+                            <field name="beginning_balance"/>
+                            <field name="cleared_deposits" string="+ Cleared Deposits"/>
+                            <field name="cleared_payments" string="− Cleared Payments"/>
+                            <field name="cleared_balance" string="= Cleared Balance"/>
+                            <field name="statement_balance" string="Statement Ending Balance" readonly="1"/>
+                            <field name="difference" decoration-danger="difference != 0"
+                                   decoration-success="difference == 0" class="fw-bold"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="status" invisible="id">
+                        Enter the bank account, statement date and ending balance, then save
+                        to load the transactions to check off.
+                    </div>
+                    <notebook>
+                        <page string="Transactions" name="transactions">
+                            <field name="line_ids" readonly="state == 'done'" nolabel="1">
+                                <list editable="bottom" create="0" delete="0"
+                                      default_order="date, move_id" decoration-muted="not rec_cleared">
+                                    <field name="date" readonly="1"/>
+                                    <field name="move_id" readonly="1"/>
+                                    <field name="partner_id" readonly="1"/>
+                                    <field name="check_number" readonly="1" optional="show"/>
+                                    <field name="name" readonly="1" optional="show"/>
+                                    <field name="currency_id" column_invisible="True"/>
+                                    <field name="debit" string="Deposit" readonly="1" sum="Total Deposits"/>
+                                    <field name="credit" string="Payment" readonly="1" sum="Total Payments"/>
+                                    <field name="rec_cleared" widget="boolean_toggle"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="note" placeholder="Outstanding checks, bank errors, follow-ups..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="np_reconciliation_view_search" model="ir.ui.view">
+        <field name="name">np.reconciliation.search</field>
+        <field name="model">np.reconciliation</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="bank_account_id"/>
+                <filter string="In Progress" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Reconciled" name="done" domain="[('state', '=', 'done')]"/>
+                <group>
+                    <filter string="Bank Account" name="group_bank" context="{'group_by': 'bank_account_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="np_reconciliation_action" model="ir.actions.act_window">
+        <field name="name">Bank Reconciliations</field>
+        <field name="res_model">np.reconciliation</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Reconcile a bank statement</p>
+            <p>Enter the statement date and ending balance, then check off the transactions that cleared.</p>
+        </field>
+    </record>
+</odoo>

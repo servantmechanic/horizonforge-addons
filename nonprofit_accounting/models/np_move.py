@@ -396,5 +396,17 @@ class NpMove(models.Model):
             raise AccessError(_("Only bookkeepers can reset entries to draft."))
         posted = self.filtered(lambda m: m.state == "posted")
         posted._check_lock_date()
+        reconciled = posted.line_ids.filtered("reconciled")
+        if reconciled:
+            raise UserError(_(
+                "%(entry)s is cleared on bank reconciliation %(reconciliation)s. "
+                "Reopen that reconciliation first.",
+                entry=reconciled[0].move_id.display_name,
+                reconciliation=reconciled[0].reconciliation_id.display_name,
+            ))
+        posted.line_ids.filtered("reconciliation_id").write({
+            "reconciliation_id": False,
+            "rec_cleared": False,
+        })
         posted.write({"state": "draft"})
         return True

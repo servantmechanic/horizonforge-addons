@@ -101,7 +101,7 @@ Beginning balance (bank/cash accounts as of start date)
 - Entries that never touch a bank/cash account (non-cash) are excluded
 - PDF needs wkhtmltopdf installed on the server
 
-### M4: Bank reconciliation
+### M4: Bank reconciliation ✅
 Statement-match method:
 1. Pick bank account, statement date and statement ending balance
 2. Beginning balance comes from the last completed reconciliation
@@ -113,6 +113,10 @@ Statement-match method:
 6. Reconciled lines can't be edited or reset to draft unless the
    reconciliation is reopened
 7. Attach the statement PDF (binary field plus chatter attachments)
+8. Refresh pulls in newly posted transactions; Clear All checks everything
+9. Only one reconciliation in progress per account; only the most recent
+   completed one can be reopened (keeps the beginning-balance chain intact)
+10. Dashboard cards show "Reconciled through <date>" and a Reconcile button
 
 ### M5: Later / nice-to-have
 - CSV import of bank transactions (create draft deposits/payments)

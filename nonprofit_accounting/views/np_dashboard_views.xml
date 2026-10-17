@@ -8,6 +8,7 @@
                 <field name="currency_id"/>
                 <field name="draft_count"/>
                 <field name="show_unpaid_bills"/>
+                <field name="last_reconciled_date"/>
                 <templates>
                     <t t-name="card">
                         <div class="d-flex align-items-baseline">
@@ -17,6 +18,12 @@
                         <div class="d-flex align-items-baseline mt-2">
                             <span class="text-muted">Balance</span>
                             <field name="balance" widget="monetary" class="fs-3 fw-bold ms-auto"/>
+                        </div>
+                        <div class="text-muted small">
+                            <t t-if="record.last_reconciled_date.raw_value">
+                                Reconciled through <field name="last_reconciled_date"/>
+                            </t>
+                            <t t-else="">Not reconciled yet</t>
                         </div>
                         <div t-if="record.draft_count.raw_value" class="mt-2">
                             <a name="action_open_drafts" type="object">
@@ -38,6 +45,9 @@
                             </button>
                             <button name="action_new_transfer" type="object" class="btn btn-secondary btn-sm">
                                 Transfer
+                            </button>
+                            <button name="action_reconcile" type="object" class="btn btn-secondary btn-sm">
+                                Reconcile
                             </button>
                         </div>
                     </t>

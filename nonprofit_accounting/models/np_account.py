@@ -38,6 +38,7 @@ class NpAccount(models.Model):
         help="Balance of posted entries.",
     )
     draft_count = fields.Integer(compute="_compute_draft_count")
+    last_reconciled_date = fields.Date(compute="_compute_last_reconciled_date")
     show_unpaid_bills = fields.Boolean(compute="_compute_unpaid_bills")
     unpaid_bill_count = fields.Integer(compute="_compute_unpaid_bills")
     unpaid_bill_total = fields.Monetary(
@@ -61,6 +62,15 @@ class NpAccount(models.Model):
         ))
         for account in self:
             account.balance = balances.get(account, 0.0)
+
+    def _compute_last_reconciled_date(self):
+        dates = dict(self.env["np.reconciliation"]._read_group(
+            [("bank_account_id", "in", self.ids), ("state", "=", "done")],
+            ["bank_account_id"],
+            ["statement_date:max"],
+        ))
+        for account in self:
+            account.last_reconciled_date = dates.get(account)
 
     def _draft_domain(self):
         return [
@@ -115,6 +125,22 @@ class NpAccount(models.Model):
 
     def action_new_transfer(self):
         return self._new_move_action(_("New Transfer"), "transfer", bank_account_id=self.id)
+
+    def action_reconcile(self):
+        """Open the reconciliation in progress for this account, or start one."""
+        self.ensure_one()
+        in_progress = self.env["np.reconciliation"].search([
+            ("bank_account_id", "=", self.id),
+            ("state", "=", "draft"),
+        ], limit=1)
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Reconcile %s", self.name),
+            "res_model": "np.reconciliation",
+            "views": [(False, "form")],
+            "res_id": in_progress.id,
+            "context": {"default_bank_account_id": self.id},
+        }
 
     def action_open_entries(self):
         self.ensure_one()

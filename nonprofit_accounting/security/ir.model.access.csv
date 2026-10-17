@@ -7,3 +7,5 @@ access_np_move_line_viewer,np.move.line viewer,model_np_move_line,group_np_viewe
 access_np_move_line_bookkeeper,np.move.line bookkeeper,model_np_move_line,group_np_bookkeeper,1,1,1,1
 access_np_move_pay_bookkeeper,np.move.pay bookkeeper,model_np_move_pay,group_np_bookkeeper,1,1,1,1
 access_np_period_report_viewer,np.period.report viewer,model_np_period_report,group_np_viewer,1,1,1,1
+access_np_reconciliation_viewer,np.reconciliation viewer,model_np_reconciliation,group_np_viewer,1,0,0,0
+access_np_reconciliation_bookkeeper,np.reconciliation bookkeeper,model_np_reconciliation,group_np_bookkeeper,1,1,1,1

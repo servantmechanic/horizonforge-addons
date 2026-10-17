@@ -1,7 +1,11 @@
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 # Line fields that feed the entry's generated bank lines.
 SYNC_FIELDS = {"account_id", "amount"}
+
+# Bank reconciliation fields: writable on posted lines.
+RECONCILE_FIELDS = {"reconciliation_id", "rec_cleared"}
 
 
 class NpMoveLine(models.Model):
@@ -74,6 +78,24 @@ class NpMoveLine(models.Model):
         help="Positive on the account's normal side: credits for income, "
         "liability and equity accounts; debits for bank and expense accounts.",
     )
+    check_number = fields.Char(related="move_id.check_number", string="Check #")
+    reconciliation_id = fields.Many2one(
+        "np.reconciliation",
+        string="Reconciliation",
+        index=True,
+        copy=False,
+        ondelete="set null",
+    )
+    rec_cleared = fields.Boolean(
+        string="Cleared",
+        copy=False,
+        help="Checked off against a bank statement.",
+    )
+    reconciled = fields.Boolean(
+        compute="_compute_reconciled",
+        store=True,
+        help="Cleared on a completed bank reconciliation.",
+    )
     is_generated = fields.Boolean(
         string="Generated",
         readonly=True,
@@ -90,6 +112,11 @@ class NpMoveLine(models.Model):
         for line in self:
             if line.move_id.move_type != "journal":
                 line.partner_id = line.move_id.partner_id
+
+    @api.depends("rec_cleared", "reconciliation_id.state")
+    def _compute_reconciled(self):
+        for line in self:
+            line.reconciled = line.rec_cleared and line.reconciliation_id.state == "done"
 
     @api.depends("debit", "credit", "account_type")
     def _compute_balance(self):
@@ -108,6 +135,10 @@ class NpMoveLine(models.Model):
         return lines
 
     def write(self, vals):
+        if vals.keys() <= RECONCILE_FIELDS:
+            if "rec_cleared" in vals and any(line.reconciled for line in self):
+                raise UserError(_("Reopen the reconciliation before changing cleared items."))
+            return super().write(vals)
         self.move_id._check_draft()
         res = super().write(vals)
         if SYNC_FIELDS & vals.keys():
