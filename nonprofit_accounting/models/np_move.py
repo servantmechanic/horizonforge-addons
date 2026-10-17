@@ -121,6 +121,12 @@ class NpMove(models.Model):
         copy=False,
     )
     memo = fields.Char()
+    partner_default_account_id = fields.Many2one(
+        "np.account",
+        compute="_compute_partner_default_account_id",
+        help="Pre-filled on new lines: the contact's default income account "
+        "(deposits) or expense account (payments).",
+    )
     line_ids = fields.One2many(
         "np.move.line",
         "move_id",
@@ -151,6 +157,16 @@ class NpMove(models.Model):
                 move.display_name = move.name
             else:
                 move.display_name = _("Draft %s", type_labels.get(move.move_type, ""))
+
+    @api.depends("move_type", "partner_id")
+    def _compute_partner_default_account_id(self):
+        for move in self:
+            if move.move_type == "deposit":
+                move.partner_default_account_id = move.partner_id.np_income_account_id
+            elif move.move_type == "payment":
+                move.partner_default_account_id = move.partner_id.np_expense_account_id
+            else:
+                move.partner_default_account_id = False
 
     @api.depends("move_type", "state")
     def _compute_payment_state(self):

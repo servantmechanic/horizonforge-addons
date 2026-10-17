@@ -15,6 +15,10 @@
     <menuitem id="menu_np_all_entries" parent="menu_np_transactions" action="np_move_action_all" sequence="50"/>
     <menuitem id="menu_np_journal_items" parent="menu_np_transactions" action="np_move_line_action" sequence="60"/>
 
+    <menuitem id="menu_np_reports" name="Reports" parent="menu_np_root" sequence="50"/>
+    <menuitem id="menu_np_income_report" parent="menu_np_reports" action="np_income_report_action" sequence="10"/>
+    <menuitem id="menu_np_expense_report" parent="menu_np_reports" action="np_expense_report_action" sequence="20"/>
+
     <menuitem id="menu_np_config" name="Configuration" parent="menu_np_root" sequence="90"
               groups="group_np_bookkeeper"/>
     <menuitem id="menu_np_accounts" parent="menu_np_config" action="np_account_action" sequence="10"/>

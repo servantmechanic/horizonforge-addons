@@ -72,11 +72,13 @@ Module skeleton, CLAUDE.md, README, PLAN, git branch.
 - Show **Home Action** on the user form so each user can land on the dashboard
 - Later: last reconciled date and uncleared totals per card (after M4)
 
-### M2: Income tracking
+### M2: Income tracking ✅
 - Income accounts for each district: 4010 North, 4020 South (in the starter chart)
-- Optional starter contacts for the two districts, used as "received from"
-- "Received from" partner on deposits; filter and group income by source
-- Income summary by account and source for any date range (list/pivot view)
+- Starter contacts "North District" and "South District", linked to their income accounts
+- Contacts get an **Accounting** tab with Default Income / Expense Account,
+  which pre-fills new deposit and bill lines
+- Reports → **Income Analysis** (by account and source, by month) and
+  **Expense Analysis**: pivot, graph and list, any date range, positive amounts
 
 ### M3: Period report (PDF + on-screen)
 For a chosen date range, optionally limited to one bank account:

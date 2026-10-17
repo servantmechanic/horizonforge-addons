@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_inherit_np" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.nonprofit.accounting</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Accounting" name="np_accounting" groups="nonprofit_accounting.group_np_viewer">
+                    <group>
+                        <group>
+                            <field name="np_income_account_id" options="{'no_create': True}"/>
+                            <field name="np_expense_account_id" options="{'no_create': True}"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

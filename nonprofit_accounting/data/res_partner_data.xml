@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Starter contacts for the supporting districts. Rename freely. -->
+    <data noupdate="1">
+        <record id="np_partner_north" model="res.partner">
+            <field name="name">North District</field>
+            <field name="is_company" eval="True"/>
+            <field name="np_income_account_id" ref="np_account_4010"/>
+        </record>
+        <record id="np_partner_south" model="res.partner">
+            <field name="name">South District</field>
+            <field name="is_company" eval="True"/>
+            <field name="np_income_account_id" ref="np_account_4020"/>
+        </record>
+    </data>
+</odoo>

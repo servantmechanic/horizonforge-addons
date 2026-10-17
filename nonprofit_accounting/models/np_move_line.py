@@ -66,6 +66,14 @@ class NpMoveLine(models.Model):
         store=True,
         help="Debit minus credit.",
     )
+    report_amount = fields.Monetary(
+        string="Net Amount",
+        currency_field="currency_id",
+        compute="_compute_balance",
+        store=True,
+        help="Positive on the account's normal side: credits for income, "
+        "liability and equity accounts; debits for bank and expense accounts.",
+    )
     is_generated = fields.Boolean(
         string="Generated",
         readonly=True,
@@ -83,10 +91,14 @@ class NpMoveLine(models.Model):
             if line.move_id.move_type != "journal":
                 line.partner_id = line.move_id.partner_id
 
-    @api.depends("debit", "credit")
+    @api.depends("debit", "credit", "account_type")
     def _compute_balance(self):
         for line in self:
             line.balance = line.debit - line.credit
+            if line.account_type in ("income", "liability", "equity"):
+                line.report_amount = -line.balance
+            else:
+                line.report_amount = line.balance
 
     @api.model_create_multi
     def create(self, vals_list):
