@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_period_amount_row">
+        <tr>
+            <td class="np-indent"><span t-out="label"/></td>
+            <td class="np-amt"><span t-out="amount" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+        </tr>
+    </template>
+
+    <template id="report_period_rows">
+        <t t-foreach="rows" t-as="row">
+            <t t-call="nonprofit_accounting.report_period_amount_row">
+                <t t-set="label" t-value="row['account'].display_name"/>
+                <t t-set="amount" t-value="row['amount']"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_period">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-set="rpt" t-value="doc._get_report_data()"/>
+                <t t-set="cur" t-value="rpt['currency']"/>
+                <t t-set="company" t-value="doc.company_id"/>
+                <t t-call="web.basic_layout">
+                    <div class="page np-period">
+                        <style>
+                            .np-period { font-family: 'Lato', 'Helvetica Neue', Arial, sans-serif; font-size: 9.5pt; color: #222; }
+                            /* wkhtmltopdf draws hairlines for Bootstrap's zero-width row borders
+                               when borders collapse: keep them separate and turn them off. */
+                            .np-period table { border-collapse: separate !important; border-spacing: 0; margin: 0; }
+                            .np-period table, .np-period thead, .np-period tbody, .np-period tr { border: none !important; }
+                            .np-period table td, .np-period table th {
+                                padding: 1px 4px !important; border: 0 !important; background: none !important;
+                                vertical-align: bottom;
+                            }
+                            .np-period table.np-header { width: 100%; margin-bottom: 14px; }
+                            .np-period table.np-header td { padding: 0 !important; vertical-align: top; }
+                            .np-period .np-company { font-size: 13pt; font-weight: bold; }
+                            .np-period .np-title { font-size: 15pt; font-weight: 300; }
+                            .np-period .np-muted { color: #666; font-size: 8.5pt; }
+                            .np-period table.np-main { width: 62%; }
+                            .np-period table.np-accounts { width: 80%; }
+                            .np-period .np-amt { text-align: right; white-space: nowrap; width: 30%; }
+                            .np-period table.np-accounts .np-amt { width: 20%; }
+                            .np-period table td.np-indent { padding-left: 20px !important; }
+                            .np-period .np-section td { font-weight: bold; padding-top: 8px !important; }
+                            .np-period .np-total td { font-weight: bold; }
+                            .np-period table .np-total td.np-amt { border-top: 1px solid #444 !important; }
+                            .np-period .np-grand td { font-weight: bold; font-size: 10.5pt; }
+                            .np-period table .np-ending td { padding-top: 10px !important; }
+                            .np-period table .np-ending td.np-amt {
+                                border-top: 1px solid #444 !important; border-bottom: 3px double #444 !important;
+                            }
+                            .np-period .np-warn { color: #b00020; font-weight: bold; margin-top: 8px; }
+                            .np-period h5 { font-size: 10pt; font-weight: bold; margin: 18px 0 4px 0; }
+                            .np-period .np-accounts th { text-align: right; font-weight: bold; }
+                            .np-period .np-accounts th:first-child { text-align: left; }
+                            .np-period .np-footer { margin-top: 18px; }
+                        </style>
+
+                        <table class="np-header">
+                            <tr>
+                                <td>
+                                    <img t-if="not company.uses_default_logo" t-att-src="image_data_uri(company.logo)"
+                                         style="max-height: 40px; margin-bottom: 4px;" alt="Logo"/>
+                                    <div class="np-company" t-out="company.name"/>
+                                    <div class="np-muted">
+                                        <t t-out="', '.join(part for part in [company.city, company.state_id.code] if part)"/>
+                                    </div>
+                                </td>
+                                <td style="text-align: right;">
+                                    <div class="np-title">Period Report</div>
+                                    <div>
+                                        <span t-out="rpt['date_from']" t-options="{'widget': 'date'}"/> &#8211;
+                                        <span t-out="rpt['date_to']" t-options="{'widget': 'date'}"/>
+                                    </div>
+                                    <div class="np-muted">
+                                        <t t-if="rpt['all_accounts']">All bank and cash accounts</t>
+                                        <t t-else="" t-out="', '.join(row['account'].display_name for row in rpt['bank_rows'])"/>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <table class="np-main">
+                            <tr class="np-grand">
+                                <td>Beginning Balance</td>
+                                <td class="np-amt"><span t-out="rpt['beginning']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                            </tr>
+
+                            <tr class="np-section"><td colspan="2">Income</td></tr>
+                            <t t-call="nonprofit_accounting.report_period_rows">
+                                <t t-set="rows" t-value="rpt['income_rows']"/>
+                            </t>
+                            <tr t-if="not rpt['income_rows']"><td class="np-indent np-muted" colspan="2">None</td></tr>
+                            <tr class="np-total">
+                                <td>Total Income</td>
+                                <td class="np-amt"><span t-out="rpt['total_income']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                            </tr>
+
+                            <tr class="np-section"><td colspan="2">Expenses</td></tr>
+                            <t t-call="nonprofit_accounting.report_period_rows">
+                                <t t-set="rows" t-value="rpt['expense_rows']"/>
+                            </t>
+                            <tr t-if="not rpt['expense_rows']"><td class="np-indent np-muted" colspan="2">None</td></tr>
+                            <tr class="np-total">
+                                <td>Total Expenses</td>
+                                <td class="np-amt"><span t-out="rpt['total_expense']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                            </tr>
+
+                            <tr class="np-section np-total">
+                                <td>Net Income (Income − Expenses)</td>
+                                <td class="np-amt"><span t-out="rpt['net_change']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                            </tr>
+
+                            <t t-if="rpt['transfer_rows']">
+                                <tr class="np-section"><td colspan="2">Transfers In / (Out)</td></tr>
+                                <t t-call="nonprofit_accounting.report_period_rows">
+                                    <t t-set="rows" t-value="rpt['transfer_rows']"/>
+                                </t>
+                            </t>
+
+                            <t t-if="rpt['other_rows']">
+                                <tr class="np-section"><td colspan="2">Other Increases / (Decreases)</td></tr>
+                                <t t-call="nonprofit_accounting.report_period_rows">
+                                    <t t-set="rows" t-value="rpt['other_rows']"/>
+                                </t>
+                            </t>
+
+                            <tr class="np-grand np-ending">
+                                <td>Ending Balance</td>
+                                <td class="np-amt"><span t-out="rpt['ending']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                            </tr>
+                        </table>
+
+                        <div t-if="not rpt['balanced']" class="np-warn">
+                            Does not tie out: the ending balance differs from beginning + income − expenses
+                            (± transfers and other) by
+                            <span t-out="rpt['difference']" t-options="{'widget': 'monetary', 'display_currency': cur}"/>.
+                        </div>
+
+                        <t t-if="len(rpt['bank_rows']) &gt; 1">
+                            <h5>By Account</h5>
+                            <table class="np-accounts">
+                                <tr>
+                                    <th>Account</th>
+                                    <th>Beginning</th>
+                                    <th>Change</th>
+                                    <th>Ending</th>
+                                </tr>
+                                <tr t-foreach="rpt['bank_rows']" t-as="row">
+                                    <td><span t-out="row['account'].display_name"/></td>
+                                    <td class="np-amt"><span t-out="row['beginning']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                    <td class="np-amt"><span t-out="row['ending'] - row['beginning']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                    <td class="np-amt"><span t-out="row['ending']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                </tr>
+                            </table>
+                        </t>
+
+                        <div class="np-footer np-muted">
+                            Cash basis · posted entries only · printed
+                            <span t-out="datetime.datetime.now()" t-options="{'widget': 'datetime'}"/>
+                            by <span t-out="user.name"/>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

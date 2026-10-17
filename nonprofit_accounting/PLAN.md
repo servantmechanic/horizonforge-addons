@@ -80,7 +80,7 @@ Module skeleton, CLAUDE.md, README, PLAN, git branch.
 - Reports → **Income Analysis** (by account and source, by month) and
   **Expense Analysis**: pivot, graph and list, any date range, positive amounts
 
-### M3: Period report (PDF + on-screen)
+### M3: Period report (PDF + on-screen) ✅
 For a chosen date range, optionally limited to one bank account:
 
 ```
@@ -94,7 +94,12 @@ Beginning balance (bank/cash accounts as of start date)
   them out of income/expense
 - Check: beginning + income − expenses must equal the ending balance; flag it
   on the report if not
-- Wizard: date from / date to / bank account → PDF (QWeb) or on-screen
+- Wizard: date from / date to / bank accounts (default: last full month,
+  all accounts) → **View** (in browser) or **Print PDF**
+- Liabilities/equity touching the bank (e.g. payroll withholdings, opening
+  balances) show as "Other Increases / (Decreases)" so the report ties out
+- Entries that never touch a bank/cash account (non-cash) are excluded
+- PDF needs wkhtmltopdf installed on the server
 
 ### M4: Bank reconciliation
 Statement-match method:
