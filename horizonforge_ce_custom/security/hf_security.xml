@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_groups_privilege_hf_custom" model="res.groups.privilege">
+        <field name="name">Data Entry</field>
+        <field name="sequence">90</field>
+        <field name="category_id" ref="base.module_category_administration"/>
+    </record>
+
+    <record id="group_quick_create" model="res.groups">
+        <field name="name">Quick-create Contacts and Products</field>
+        <field name="privilege_id" ref="res_groups_privilege_hf_custom"/>
+        <field name="comment">May create a contact or product by typing a new name in a field and pressing Tab, without the full form.</field>
+    </record>
+
+    <!-- Administrators can always quick-create. -->
+    <record id="base.group_system" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('group_quick_create'))]"/>
+    </record>
+</odoo>

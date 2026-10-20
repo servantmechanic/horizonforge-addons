@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Quick-create blocking is on by default; toggle it in Settings. -->
+    <record id="param_block_quick_create_partner" model="ir.config_parameter">
+        <field name="key">horizonforge_ce_custom.block_quick_create_partner</field>
+        <field name="value">True</field>
+    </record>
+    <record id="param_block_quick_create_product" model="ir.config_parameter">
+        <field name="key">horizonforge_ce_custom.block_quick_create_product</field>
+        <field name="value">True</field>
+    </record>
+</odoo>

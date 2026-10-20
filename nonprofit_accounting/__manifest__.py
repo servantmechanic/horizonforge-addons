@@ -1,11 +1,11 @@
 {
     "name": "Nonprofit Accounting",
-    "version": "19.0.0.7.0",
+    "version": "19.0.0.7.1",
     "category": "Accounting",
     "summary": "Simple cash-basis ledger for nonprofits: deposits, payments, bank reconciliation, period report",
     "author": "Ozark AG LLC",
     "license": "AGPL-3",
-    "depends": ["base", "mail"],
+    "depends": ["base", "mail", "horizonforge_ce_custom"],
     "data": [
         "security/np_security.xml",
         "security/ir.model.access.csv",
@@ -22,7 +22,6 @@
         "report/np_period_report_templates.xml",
         "views/np_reconciliation_views.xml",
         "views/np_dashboard_views.xml",
-        "views/res_users_views.xml",
         "views/res_partner_views.xml",
         "views/np_report_views.xml",
         "views/menus.xml",

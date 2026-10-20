@@ -35,6 +35,7 @@ venv/bin/python odoo/odoo-bin -c odoo.conf -d test_<module> -i <module> \
 |---|---|---|
 | `ozark_timecard` | In production (v2.1) | Don't change it unless asked |
 | `nonprofit_accounting` | In development | Standalone cash-basis ledger (small school). See its `PLAN.md` |
+| `horizonforge_ce_custom` | In development | Generic CE tweaks (home action, no quick-create, debranding). Install on every database |
 | `hello_test` | Scratch/learning | Not for production |
 
 ## Odoo 19 conventions
