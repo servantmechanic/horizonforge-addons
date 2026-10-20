@@ -6,6 +6,9 @@ Custom Odoo 19 **Community** addons. This folder is on Odoo's `addons_path`.
 
 - Odoo source: `~/odoo-dev/odoo` (Odoo 19, Python 3.11 venv at `~/odoo-dev/venv`)
 - Config: `~/odoo-dev/odoo.conf`, dev database `dev19`, http://localhost:8069
+- OCA addons: `~/odoo-dev/oca/web` (OCA/web, branch 19.0, on `addons_path`).
+  `web_responsive` is installed in `dev19` for the app launcher. Update with
+  `git -C ~/odoo-dev/oca/web pull`, then `-u web_responsive`.
 - Odoo Enterprise is **not** available. Never depend on Enterprise modules
   (`account_accountant`, `account_reports`, etc.).
 
@@ -36,7 +39,6 @@ venv/bin/python odoo/odoo-bin -c odoo.conf -d test_<module> -i <module> \
 | `ozark_timecard` | In production (v2.1) | Don't change it unless asked |
 | `nonprofit_accounting` | In development | Standalone cash-basis ledger (small school). See its `PLAN.md` |
 | `horizonforge_ce_custom` | In development | Generic CE tweaks (home action, no quick-create, debranding). Install on every database |
-| `hello_test` | Scratch/learning | Not for production |
 
 ## Odoo 19 conventions
 
