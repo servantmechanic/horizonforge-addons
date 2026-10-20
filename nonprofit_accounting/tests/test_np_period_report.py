@@ -104,7 +104,7 @@ class TestNpPeriodReport(TransactionCase):
         html = html.decode()
         self.assertIn("Beginning Balance", html)
         self.assertIn(self.env.company.name, html, "company name comes from the company record")
-        self.assertIn("4010 North District Support", html)
+        self.assertIn("4010 Tuition Income", html)
         self.assertNotIn("Does not tie out", html)
 
     def _drill(self, wizard, kind, **kwargs):
@@ -113,8 +113,8 @@ class TestNpPeriodReport(TransactionCase):
 
     def test_drilldown(self):
         wizard, data = self._report()
-        north = self._drill(wizard, "account", account_id=self.acc["4010"].id)
-        self.assertEqual(sum(north.mapped("report_amount")), 10000)
+        tuition = self._drill(wizard, "account", account_id=self.acc["4010"].id)
+        self.assertEqual(sum(tuition.mapped("report_amount")), 10000)
         income = self._drill(wizard, "section", section="income")
         self.assertEqual(sum(income.mapped("report_amount")), data["total_income"])
         expenses = self._drill(wizard, "section", section="expense")

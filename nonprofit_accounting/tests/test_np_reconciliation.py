@@ -13,7 +13,7 @@ class TestNpReconciliation(TransactionCase):
         cls.checking = ref("nonprofit_accounting.np_account_1000")
         cls.petty_cash = ref("nonprofit_accounting.np_account_1050")
         cls.net_assets = ref("nonprofit_accounting.np_account_3000")
-        cls.north = ref("nonprofit_accounting.np_account_4010")
+        cls.tuition = ref("nonprofit_accounting.np_account_4010")
         cls.supplies = ref("nonprofit_accounting.np_account_5300")
         cls.env.company.np_lock_date = False
 
@@ -25,11 +25,11 @@ class TestNpReconciliation(TransactionCase):
                 Command.create({"account_id": cls.net_assets.id, "credit": 5000}),
             ],
         }))
-        cls.deposit = cls._post(cls._simple("deposit", "2026-09-05", cls.north, 10000))
+        cls.deposit = cls._post(cls._simple("deposit", "2026-09-05", cls.tuition, 10000))
         cls.check_1001 = cls._post(cls._simple("payment", "2026-09-10", cls.supplies, 800))
         cls.check_1002 = cls._post(cls._simple("payment", "2026-09-28", cls.supplies, 300))
-        cls.october = cls._post(cls._simple("deposit", "2026-10-02", cls.north, 2000))
-        cls.draft = cls._simple("deposit", "2026-09-20", cls.north, 999)
+        cls.october = cls._post(cls._simple("deposit", "2026-10-02", cls.tuition, 2000))
+        cls.draft = cls._simple("deposit", "2026-09-20", cls.tuition, 999)
 
     @classmethod
     def _simple(cls, move_type, date, account, amount):
