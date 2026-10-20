@@ -176,7 +176,3 @@ added or archived. 4-digit codes.
 
 Petty cash is its own cash account. Moving money into it is a **Transfer**
 (checking → petty cash), and spending from it is a **Payment** from petty cash.
-
-## Open questions
-
-None for now. Ready for M1.

@@ -10,7 +10,8 @@ expenses, ending balance).
 
 ## Status
 
-Early development. See [PLAN.md](PLAN.md) for scope and milestones.
+Testing. Milestones M0–M4 and report click-through are built. See
+[PLAN.md](PLAN.md) for scope and milestones.
 
 ## Install
 
