@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_hf" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.horizonforge.ce.custom</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='general_settings']" position="inside">
+                <block title="Data Entry" name="hf_data_entry_setting_container">
+                    <setting id="hf_block_quick_create_partner" help="Typing a new name in a contact field opens the full Create form">
+                        <field name="hf_block_quick_create_partner"/>
+                    </setting>
+                    <setting id="hf_block_quick_create_product" help="Typing a new name in a product field opens the full Create form">
+                        <field name="hf_block_quick_create_product"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>
