@@ -29,12 +29,12 @@
         </record>
         <record id="np_account_4010" model="np.account">
             <field name="code">4010</field>
-            <field name="name">North District Support</field>
+            <field name="name">Tuition Income</field>
             <field name="account_type">income</field>
         </record>
         <record id="np_account_4020" model="np.account">
             <field name="code">4020</field>
-            <field name="name">South District Support</field>
+            <field name="name">District Income</field>
             <field name="account_type">income</field>
         </record>
         <record id="np_account_4300" model="np.account">

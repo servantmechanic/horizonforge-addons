@@ -73,8 +73,8 @@ Module skeleton, CLAUDE.md, README, PLAN, git branch.
 - Later: last reconciled date and uncleared totals per card (after M4)
 
 ### M2: Income tracking ✅
-- Income accounts for each district: 4010 North, 4020 South (in the starter chart)
-- Starter contacts "North District" and "South District", linked to their income accounts
+- Starter income accounts: 4010 Tuition Income, 4020 District Income
+- Starter contacts "Example Family" and "Example School District", linked to their income accounts
 - Contacts get an **Accounting** tab with Default Income / Expense Account,
   which pre-fills new deposit and bill lines
 - Reports → **Income Analysis** (by account and source, by month) and
@@ -154,8 +154,8 @@ added or archived. 4-digit codes.
 | 1050 | Petty Cash | Bank/Cash |
 | 2100 | Payroll Withholdings | Liability |
 | 3000 | Net Assets (Opening Balances) | Equity |
-| 4010 | North District Support | Income |
-| 4020 | South District Support | Income |
+| 4010 | Tuition Income | Income |
+| 4020 | District Income | Income |
 | 4300 | Contributions & Fundraising | Income |
 | 4800 | Interest Income | Income |
 | 4900 | Other Income | Income |

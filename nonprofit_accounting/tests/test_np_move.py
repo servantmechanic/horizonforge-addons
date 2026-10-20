@@ -13,10 +13,10 @@ class TestNpMove(TransactionCase):
         cls.checking = ref("nonprofit_accounting.np_account_1000")
         cls.petty_cash = ref("nonprofit_accounting.np_account_1050")
         cls.net_assets = ref("nonprofit_accounting.np_account_3000")
-        cls.north = ref("nonprofit_accounting.np_account_4010")
+        cls.tuition = ref("nonprofit_accounting.np_account_4010")
         cls.supplies = ref("nonprofit_accounting.np_account_5300")
         cls.bank_fees = ref("nonprofit_accounting.np_account_6900")
-        cls.district = cls.env["res.partner"].create({"name": "North District"})
+        cls.district = cls.env["res.partner"].create({"name": "Example School District"})
         cls.env.company.np_lock_date = False
 
     def _deposit(self, *items, date="2026-09-15"):
@@ -27,7 +27,7 @@ class TestNpMove(TransactionCase):
             "partner_id": self.district.id,
             "item_line_ids": [
                 Command.create({"account_id": account.id, "amount": amount})
-                for account, amount in (items or [(self.north, 1000.0)])
+                for account, amount in (items or [(self.tuition, 1000.0)])
             ],
         })
 
@@ -37,7 +37,7 @@ class TestNpMove(TransactionCase):
     def test_deposit_generates_bank_line(self):
         move = self._deposit()
         bank_line = self._line(move, self.checking)
-        income_line = self._line(move, self.north)
+        income_line = self._line(move, self.tuition)
         self.assertTrue(bank_line.is_generated)
         self.assertEqual((bank_line.debit, bank_line.credit), (1000.0, 0.0))
         self.assertEqual((income_line.debit, income_line.credit), (0.0, 1000.0))
@@ -49,7 +49,7 @@ class TestNpMove(TransactionCase):
         self.assertTrue(move.name.startswith("DEP/2026/"))
 
     def test_deposit_with_fee_deducted(self):
-        move = self._deposit((self.north, 1000.0), (self.bank_fees, -25.0))
+        move = self._deposit((self.tuition, 1000.0), (self.bank_fees, -25.0))
         self.assertEqual(self._line(move, self.checking).debit, 975.0)
         self.assertEqual(self._line(move, self.bank_fees).debit, 25.0)
         move.action_post()
