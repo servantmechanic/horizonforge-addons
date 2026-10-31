@@ -59,6 +59,25 @@
         <field name="type_ids" eval="[(6, 0, [ref('stage_estimate'), ref('stage_scheduled'), ref('stage_in_progress'), ref('stage_punch_list'), ref('stage_done')])]"/>
     </record>
 
+    <!-- One starter task per job. Core links a job's tasks to the sales order
+         line, so internal work such as office time does not belong here: on a
+         time and materials job it would be billed to the customer. -->
+    <record id="task_template_bid" model="project.task">
+        <field name="name">General Labor</field>
+        <field name="project_id" ref="template_bid"/>
+        <field name="stage_id" ref="stage_estimate"/>
+    </record>
+    <record id="task_template_progress" model="project.task">
+        <field name="name">General Labor</field>
+        <field name="project_id" ref="template_progress"/>
+        <field name="stage_id" ref="stage_estimate"/>
+    </record>
+    <record id="task_template_tm" model="project.task">
+        <field name="name">General Labor</field>
+        <field name="project_id" ref="template_tm"/>
+        <field name="stage_id" ref="stage_estimate"/>
+    </record>
+
     <!-- One service product per job type; confirming an order creates the job -->
     <record id="product_bid" model="product.product">
         <field name="name">Bid Job</field>

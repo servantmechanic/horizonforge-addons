@@ -127,9 +127,13 @@ with `sudo()` because `wage` is limited to `hr.group_hr_manager`.
 
 ### Job setup
 
-`data/project_defaults.xml` ships five stages, three project templates, three service products
-and the job sequence, all `noupdate`. Edits made in the UI survive upgrades. The Done stage sets
+`data/project_defaults.xml` ships five stages, three project templates with a General Labor
+starter task each, three service products and the job sequence, all `noupdate`. Edits made in the UI survive upgrades. The Done stage sets
 `hf_closes_task`, because core stages have no closed state: moving a task there sets it to `1_done`.
+
+Core links a job's tasks to the sales order line, including tasks added later, so hours on any
+task of a T&M job bill to the customer. Log internal work such as office time in a separate
+project. Hide from Customers controls following, not billing.
 
 | Product | Service policy | Template |
 |---|---|---|

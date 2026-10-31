@@ -127,3 +127,40 @@ class TestJobSetup(TransactionCase):
             "name": "Work", "project_id": project.id, "employee_id": employee.id, "unit_amount": 2.0,
         })
         self.assertEqual(timesheet.sudo().amount, -50.0)
+
+    def test_new_job_starts_with_one_task(self):
+        for xmlid in ("product_bid", "product_progress", "product_tm"):
+            order = self._confirm_order(xmlid)
+            task = order.order_line.project_id.tasks
+            self.assertEqual(task.mapped("name"), ["General Labor"], xmlid)
+            self.assertEqual(task.stage_id.name, "Estimate", xmlid)
+            self.assertEqual(task.stage_id, order.order_line.project_id.type_ids[0], xmlid)
+            self.assertEqual(task.partner_id, self.customer, xmlid)
+            self.assertEqual(task.sale_line_id, order.order_line, xmlid)
+            self.assertFalse(task.is_template, xmlid)
+
+    def test_time_on_starter_task_bills_at_the_line_price(self):
+        order = self._confirm_order("product_tm", price=40.0)
+        task = order.order_line.project_id.tasks
+        self.env["account.analytic.line"].create({
+            "name": "Work", "task_id": task.id, "project_id": task.project_id.id,
+            "employee_id": self.employee.id, "unit_amount": 5.0,
+        })
+        self.assertEqual(order.order_line.qty_delivered, 5.0)
+        self.assertEqual(order._create_invoices().amount_untaxed, 200.0)
+
+    def test_customer_auto_follows_starter_task(self):
+        project = self._confirm_order("product_bid").order_line.project_id
+        project.message_subscribe([self.customer.id])
+        task = project.tasks
+        self.assertIn(self.customer, task.message_partner_ids)
+        follower = task.message_follower_ids.filtered(lambda f: f.partner_id == self.customer)
+        self.assertTrue(follower.hf_auto_followed)
+
+    def test_each_job_gets_its_own_starter_task(self):
+        first = self._confirm_order("product_tm").order_line.project_id.tasks
+        second = self._confirm_order("product_tm").order_line.project_id.tasks
+        self.assertNotEqual(first, second)
+        template = self.env.ref("horizonforge_project_custom.task_template_tm")
+        self.assertEqual(template.project_id, self.env.ref("horizonforge_project_custom.template_tm"))
+        self.assertNotIn(template, first | second)

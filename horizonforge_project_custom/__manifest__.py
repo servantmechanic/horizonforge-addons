@@ -1,9 +1,11 @@
 {
     "name": "HorizonForge Project Customizations",
-    "version": "19.0.1.1.1",
+    "version": "19.0.1.2.0",
     "category": "Services/Project",
     "summary": "Job tracking for small contractors: portal privacy toggles, "
                "auto-follow of tasks, timesheet payroll report, job setup defaults",
+    # Set, or Odoo parses README.md as reStructuredText and logs errors.
+    "description": "Job tracking for small contractors. See README.md.",
     "author": "Ozark AG LLC",
     "license": "LGPL-3",
     "depends": ["project", "hr_timesheet", "sale_project", "sale_timesheet", "portal", "account"],
