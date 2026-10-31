@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Job numbers; the prefix and padding can be changed under Technical > Sequences -->
+    <record id="sequence_job_code" model="ir.sequence">
+        <field name="name">Job Code</field>
+        <field name="code">horizonforge_project_custom.job_code</field>
+        <field name="prefix">J-</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Standard stages for new jobs -->
+    <record id="stage_estimate" model="project.task.type">
+        <field name="name">Estimate</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="stage_scheduled" model="project.task.type">
+        <field name="name">Scheduled</field>
+        <field name="sequence">20</field>
+    </record>
+    <record id="stage_in_progress" model="project.task.type">
+        <field name="name">In Progress</field>
+        <field name="sequence">30</field>
+    </record>
+    <record id="stage_punch_list" model="project.task.type">
+        <field name="name">Punch List</field>
+        <field name="sequence">40</field>
+    </record>
+    <record id="stage_done" model="project.task.type">
+        <field name="name">Done</field>
+        <field name="sequence">50</field>
+        <field name="fold" eval="True"/>
+        <field name="hf_closes_task" eval="True"/>
+    </record>
+
+    <!-- One project template per job type -->
+    <record id="template_bid" model="project.project">
+        <field name="name">Bid Job</field>
+        <field name="is_template" eval="True"/>
+        <field name="privacy_visibility">portal</field>
+        <field name="allow_timesheets" eval="True"/>
+        <field name="allow_billable" eval="True"/>
+        <field name="type_ids" eval="[(6, 0, [ref('stage_estimate'), ref('stage_scheduled'), ref('stage_in_progress'), ref('stage_punch_list'), ref('stage_done')])]"/>
+    </record>
+    <record id="template_progress" model="project.project">
+        <field name="name">Progress Billing Job</field>
+        <field name="is_template" eval="True"/>
+        <field name="privacy_visibility">portal</field>
+        <field name="allow_timesheets" eval="True"/>
+        <field name="allow_billable" eval="True"/>
+        <field name="type_ids" eval="[(6, 0, [ref('stage_estimate'), ref('stage_scheduled'), ref('stage_in_progress'), ref('stage_punch_list'), ref('stage_done')])]"/>
+    </record>
+    <record id="template_tm" model="project.project">
+        <field name="name">Time and Materials Job</field>
+        <field name="is_template" eval="True"/>
+        <field name="privacy_visibility">portal</field>
+        <field name="allow_timesheets" eval="True"/>
+        <field name="allow_billable" eval="True"/>
+        <field name="type_ids" eval="[(6, 0, [ref('stage_estimate'), ref('stage_scheduled'), ref('stage_in_progress'), ref('stage_punch_list'), ref('stage_done')])]"/>
+    </record>
+
+    <!-- One service product per job type; confirming an order creates the job -->
+    <record id="product_bid" model="product.product">
+        <field name="name">Bid Job</field>
+        <field name="type">service</field>
+        <field name="service_tracking">project_only</field>
+        <field name="service_policy">ordered_prepaid</field>
+        <field name="project_template_id" ref="template_bid"/>
+        <field name="list_price">0.0</field>
+    </record>
+    <record id="product_progress" model="product.product">
+        <field name="name">Progress Billing Job</field>
+        <field name="type">service</field>
+        <field name="service_tracking">project_only</field>
+        <field name="service_policy">delivered_manual</field>
+        <field name="project_template_id" ref="template_progress"/>
+        <field name="list_price">0.0</field>
+    </record>
+    <record id="product_tm" model="product.product">
+        <field name="name">Time and Materials Job</field>
+        <field name="type">service</field>
+        <field name="service_tracking">project_only</field>
+        <field name="service_policy">delivered_timesheet</field>
+        <field name="project_template_id" ref="template_tm"/>
+        <field name="uom_id" ref="uom.product_uom_hour"/>
+        <field name="list_price">0.0</field>
+    </record>
+</odoo>

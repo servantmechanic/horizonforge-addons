@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_task_form2_hf" model="ir.ui.view">
+        <field name="name">project.task.form.inherit.horizonforge.project.custom</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <field name="hf_hide_from_customers"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_task_search_form_hf" model="ir.ui.view">
+        <field name="name">project.task.search.inherit.horizonforge.project.custom</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_search_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <field name="hf_job_code"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr_timesheet_line_search_hf" model="ir.ui.view">
+        <field name="name">account.analytic.line.search.inherit.horizonforge.project.custom</field>
+        <field name="model">account.analytic.line</field>
+        <field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <field name="hf_job_code"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="task_type_edit_hf" model="ir.ui.view">
+        <field name="name">project.task.type.form.inherit.horizonforge.project.custom</field>
+        <field name="model">project.task.type</field>
+        <field name="inherit_id" ref="project.task_type_edit"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='fold']" position="after">
+                <field name="hf_closes_task"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

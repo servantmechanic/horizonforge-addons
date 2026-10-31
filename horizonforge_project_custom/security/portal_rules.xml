@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Global rules: they restrict portal users while the toggle is on. Links
+         with an access token read the order as superuser, so they keep working. -->
+    <record id="rule_portal_hide_sale_order" model="ir.rule">
+        <field name="name">Sales Order: hidden from the portal by toggle</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="domain_force">[('id', '=', 0)] if user._hf_portal_orders_hidden() else [(1, '=', 1)]</field>
+    </record>
+    <record id="rule_portal_hide_sale_order_line" model="ir.rule">
+        <field name="name">Sales Order Line: hidden from the portal by toggle</field>
+        <field name="model_id" ref="sale.model_sale_order_line"/>
+        <field name="domain_force">[('id', '=', 0)] if user._hf_portal_orders_hidden() else [(1, '=', 1)]</field>
+    </record>
+</odoo>

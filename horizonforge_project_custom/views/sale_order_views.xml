@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_order_form_hf" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.horizonforge.project.custom</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_shipping_id']" position="after">
+                <field name="hf_job_code" invisible="not hf_job_code"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_sales_order_filter_hf" model="ir.ui.view">
+        <field name="name">sale.order.search.inherit.horizonforge.project.custom</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <field name="hf_job_code"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
