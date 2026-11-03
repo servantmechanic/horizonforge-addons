@@ -1,30 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="action_profit_loss" model="ir.actions.server">
+    <!-- The MIS widget finds its instance from active_id in the context: on
+         Odoo 19 it gets no field value (upstream bug), and MIS's own Preview
+         button only works because a button click sets active_id. -->
+    <record id="action_report_profit_loss" model="ir.actions.act_window">
         <field name="name">Profit and Loss</field>
-        <field name="model_id" ref="mis_builder.model_mis_report_instance"/>
-        <field name="state">code</field>
-        <field name="code">action = env.ref("horizonforge_accounting.mis_instance_pl").preview()</field>
+        <field name="res_model">mis.report.instance</field>
+        <field name="res_id" ref="mis_instance_pl"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="mis_builder.mis_report_instance_result_view_form"/>
+        <field name="target">current</field>
+        <field name="context" eval="{'active_model': 'mis.report.instance', 'active_id': ref('mis_instance_pl')}"/>
     </record>
-    <menuitem id="menu_profit_loss" name="Profit and Loss" action="action_profit_loss"
+    <menuitem id="menu_profit_loss" name="Profit and Loss" action="action_report_profit_loss"
               parent="account.account_reports_legal_statements_menu" sequence="10"
               groups="account.group_account_readonly"/>
-    <record id="action_profit_loss_monthly" model="ir.actions.server">
+    <!-- The MIS widget finds its instance from active_id in the context: on
+         Odoo 19 it gets no field value (upstream bug), and MIS's own Preview
+         button only works because a button click sets active_id. -->
+    <record id="action_report_profit_loss_monthly" model="ir.actions.act_window">
         <field name="name">Profit and Loss by Month</field>
-        <field name="model_id" ref="mis_builder.model_mis_report_instance"/>
-        <field name="state">code</field>
-        <field name="code">action = env.ref("horizonforge_accounting.mis_instance_pl_monthly").preview()</field>
+        <field name="res_model">mis.report.instance</field>
+        <field name="res_id" ref="mis_instance_pl_monthly"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="mis_builder.mis_report_instance_result_view_form"/>
+        <field name="target">current</field>
+        <field name="context" eval="{'active_model': 'mis.report.instance', 'active_id': ref('mis_instance_pl_monthly')}"/>
     </record>
-    <menuitem id="menu_profit_loss_monthly" name="Profit and Loss by Month" action="action_profit_loss_monthly"
+    <menuitem id="menu_profit_loss_monthly" name="Profit and Loss by Month" action="action_report_profit_loss_monthly"
               parent="account.account_reports_legal_statements_menu" sequence="11"
               groups="account.group_account_readonly"/>
-    <record id="action_balance_sheet" model="ir.actions.server">
+    <!-- The MIS widget finds its instance from active_id in the context: on
+         Odoo 19 it gets no field value (upstream bug), and MIS's own Preview
+         button only works because a button click sets active_id. -->
+    <record id="action_report_balance_sheet" model="ir.actions.act_window">
         <field name="name">Balance Sheet</field>
-        <field name="model_id" ref="mis_builder.model_mis_report_instance"/>
-        <field name="state">code</field>
-        <field name="code">action = env.ref("horizonforge_accounting.mis_instance_bs").preview()</field>
+        <field name="res_model">mis.report.instance</field>
+        <field name="res_id" ref="mis_instance_bs"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="mis_builder.mis_report_instance_result_view_form"/>
+        <field name="target">current</field>
+        <field name="context" eval="{'active_model': 'mis.report.instance', 'active_id': ref('mis_instance_bs')}"/>
     </record>
-    <menuitem id="menu_balance_sheet" name="Balance Sheet" action="action_balance_sheet"
+    <menuitem id="menu_balance_sheet" name="Balance Sheet" action="action_report_balance_sheet"
               parent="account.account_reports_legal_statements_menu" sequence="20"
               groups="account.group_account_readonly"/>
 </odoo>
