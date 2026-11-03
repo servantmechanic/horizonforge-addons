@@ -1,4 +1,5 @@
 from . import models
+from . import wizard
 
 
 def _hf_accounting_post_init(env):

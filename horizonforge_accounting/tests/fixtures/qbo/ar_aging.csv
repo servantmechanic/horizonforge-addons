@@ -1,0 +1,13 @@
+Example Contracting LLC
+A/R Aging Detail
+As of December 31, 2025
+
+Date,Transaction Type,Num,Customer,Due Date,Past Due,Amount,Open Balance
+Current
+12/15/2025,Invoice,1001,Smith Construction,01/14/2026,0,"2,000.00","2,000.00"
+Total for Current,,,,,,"$2,000.00","$2,000.00"
+1 - 30 days past due
+11/20/2025,Invoice,998,Jones Remodel,12/20/2025,11,"1,500.00","1,500.00"
+12/01/2025,Credit Memo,CM12,Jones Remodel,12/01/2025,30,-500.00,-500.00
+Total for 1 - 30 days past due,,,,,,"$1,000.00","$1,000.00"
+TOTAL,,,,,,"$3,000.00","$3,000.00"

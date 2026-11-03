@@ -1,0 +1,19 @@
+Example Contracting LLC
+Account List
+
+Account,Type,Detail Type,Description,Balance
+Checking,Bank,Checking,,"12,500.00"
+Accounts Receivable (A/R),Accounts receivable (A/R),Accounts Receivable (A/R),,"3,000.00"
+Undeposited Funds,Other Current Assets,Undeposited Funds,,0.00
+Truck,Fixed Assets,Vehicles,,"30,000.00"
+Accounts Payable (A/P),Accounts payable (A/P),Accounts Payable (A/P),,"1,200.00"
+Visa,Credit Card,Credit Card,,800.00
+Truck Loan,Long Term Liabilities,Notes Payable,,"20,000.00"
+Opening Balance Equity,Equity,Opening Balance Equity,,0.00
+Retained Earnings,Equity,Retained Earnings,,
+Owner's Investment,Equity,Owner's Equity,,"10,000.00"
+Sales,Income,Service/Fee Income,,
+Job Materials,Cost of Goods Sold,Supplies & Materials - COGS,,
+Utilities,Expenses,Utilities,,
+Utilities:Gas and Electric,Expenses,Utilities,,
+Depreciation,Other Expense,Depreciation,,

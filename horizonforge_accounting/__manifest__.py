@@ -1,6 +1,6 @@
 {
     "name": "HorizonForge Accounting",
-    "version": "19.0.0.4.0",
+    "version": "19.0.0.5.0",
     "category": "Accounting",
     "summary": "Small-business books on Community: OCA reports, reconciliation and "
                "bank feeds, contractor starter accounts and journals",
@@ -33,6 +33,7 @@
         "account_statement_import_online_plaid",
     ],
     "data": [
+        "security/ir.model.access.csv",
         "data/statement_import_maps.xml",
         "views/account_journal_dashboard_views.xml",
         "data/mis_report_styles.xml",
@@ -40,12 +41,14 @@
         "data/mis_report_instances.xml",
         "data/mis_report_menus.xml",
         "report/mis_report_templates.xml",
+        "wizard/qb_import_views.xml",
     ],
     "assets": {
         "web.report_assets_common": [
             "horizonforge_accounting/static/src/scss/mis_report_compact.scss",
         ],
     },
+    "external_dependencies": {"python": ["openpyxl"]},
     "post_init_hook": "_hf_accounting_post_init",
     "installable": True,
 }
