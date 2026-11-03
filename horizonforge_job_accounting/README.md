@@ -45,7 +45,7 @@ venv/bin/python odoo/odoo-bin -c odoo.conf -d test_hf_job -i horizonforge_job_ac
 dropdb test_hf_job
 ```
 
-`tests/test_job_profit.py` runs a T&M job end to end: 10 hours at a $20 wage billed at $40,
+`tests/test_ui.py` opens both screens in a browser. `tests/test_job_profit.py` runs a T&M job end to end: 10 hours at a $20 wage billed at $40,
 a $120 lumber bill, and the invoice. It checks categories, job totals, uninvoiced time,
 burden, refunds, opening the source and access.
 

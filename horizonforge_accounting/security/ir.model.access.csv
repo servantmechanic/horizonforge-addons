@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_hf_qb_import_manager,hf.qb.import manager,model_hf_qb_import,account.group_account_manager,1,1,1,1
 access_hf_qb_import_account_manager,hf.qb.import.account manager,model_hf_qb_import_account,account.group_account_manager,1,1,1,1
+access_hf_check_handwritten_user,hf.check.handwritten user,model_hf_check_handwritten,account.group_account_user,1,1,1,1
+access_hf_check_handwritten_line_user,hf.check.handwritten.line user,model_hf_check_handwritten_line,account.group_account_user,1,1,1,1

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Payments list: Print Checks is the button for the selection. Core's
+         Confirm only posts drafts, which Actions > Post Payments also does. -->
+    <record id="view_account_payment_tree" model="ir.ui.view">
+        <field name="name">account.payment.list.horizonforge</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_company_currency_signed']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+            </xpath>
+            <xpath expr="//field[@name='amount_company_currency_signed']" position="after">
+                <field name="company_currency_id" column_invisible="True"/>
+                <!-- Checks to Print: one positive amount, as on the check. -->
+                <field name="amount" string="Check Amount" widget="monetary" sum="Total"
+                       column_invisible="not context.get('hf_checks_to_print')"/>
+                <field name="hf_amount_out" widget="monetary" sum="Total"
+                       column_invisible="context.get('hf_checks_to_print')"/>
+                <field name="hf_amount_in" widget="monetary" sum="Total"
+                       column_invisible="context.get('hf_checks_to_print')"/>
+            </xpath>
+            <xpath expr="//field[@name='payment_method_line_id']" position="after">
+                <field name="check_number" string="Check No." optional="show"/>
+            </xpath>
+            <xpath expr="//field[@name='state']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+            </xpath>
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="hf_status" widget="badge"
+                       decoration-muted="hf_status in ('draft', 'canceled', 'rejected')"
+                       decoration-warning="hf_status == 'to_print'"
+                       decoration-info="hf_status == 'in_payment'"
+                       decoration-success="hf_status == 'paid'"/>
+            </xpath>
+            <xpath expr="//header/button[@name='action_post']" position="replace">
+                <button name="print_checks" type="object" string="Print Checks" class="btn-primary"
+                        invisible="context.get('default_payment_type') == 'inbound'"
+                        groups="account.group_account_user"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Move Payment Receipt from Print to Actions, so Print Checks is the one
+         print button. Core's own record, so re-applied on each update of this
+         module; an update of account alone puts it back under Print. -->
+    <record id="account.action_report_payment_receipt" model="ir.actions.report">
+        <field name="binding_type">action</field>
+    </record>
+</odoo>

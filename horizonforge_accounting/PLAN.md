@@ -39,6 +39,7 @@ compact spreadsheet-style reports), reimplemented on `account.move`.
 | GL, trial balance, aging | `account_financial_report` | account-financial-reporting |
 | Customer statements | `partner_statement` | account-financial-reporting |
 | Reconciliation | `account_reconcile_oca` | account-reconcile |
+| In Payment until cleared | `account_in_payment` | account-reconcile |
 | Feed framework | `account_statement_import_online` | bank-statement-import |
 | CSV/XLSX statements | `account_statement_import_sheet_file_xlsx`, `account_statement_import_file_reconcile_oca` | bank-statement-import |
 
@@ -112,9 +113,29 @@ Plaid adds `plaid-python`.
   aging reports agree with the trial balance), optional monthly P&L history, contacts and
   bank journals
 
+### M7: Check printing ✅
+- QuickBooks Voucher Check (Top) layout for pre-printed voucher stock: check fields placed
+  for QuickBooks checks and a double-window envelope, two stubs with the bills paid, VOID
+  continuation pages. Built on core `account_check_printing` (numbering, Print Checks,
+  Void); its margin settings fine-tune alignment
+- Set as the company's check layout on install when none is chosen
+- Paying by check: **Pay and Print**, or **Pay, Print Later** to queue the check. The bank
+  card on the dashboard shows the queue count and prints the whole queue in one batch.
+  Bank drafts use the Manual method, outside the queue
+- Bills paid by check (or any payment) show In Payment until the bank clears them, then
+  Paid: OCA `account_in_payment`, with bank and card payments kept on the outstanding
+  accounts
+- Vendor credits: paying by check groups by vendor (one net check per vendor), and the
+  stub lists bills at what they settle plus the credits used
+- Actions > Record Handwritten Check: enter the numbers of checks written by hand, which
+  leaves them out of the print queue
+- To do: a test print on real stock to confirm the positions
+
 ### Later
 - OFX/QFX importer (missing in OCA 19.0)
 - Statement of cash flows (indirect method) as an MIS template
+- Report the MIS widget bug upstream (OCA/mis-builder 19.0: the widget reads `props.value`, gone since Odoo 17)
 - 1099-NEC vendor flag and report
 - WIP report for progress-billing jobs (over/under billing)
 - Sales tax review per client
+- Other check layouts (voucher middle or bottom, three per page); blank stock with MICR

@@ -133,6 +133,11 @@ and every amount drills down to its journal items. The Balance Sheet includes an
 - The report instances have no company, so they report on the company the user is working
   in. Change dates and columns on a copy (Accounting > Reporting > MIS Reporting > MIS
   Reports).
+- The menus are window actions on MIS's report view with `active_model` / `active_id` in
+  their context. On Odoo 19 the MIS widget gets no field value (`props.value` no longer
+  exists for field widgets) and falls back to `active_id`, which MIS's own Preview button
+  sets by being a button. Without it the page fails with "Invalid ids list". This is an
+  upstream MIS Builder bug, worth reporting to OCA/mis-builder.
 - **Budget vs. actual:** the P&L lines are budgetable. Create an MIS budget for the Profit
   and Loss template, then add a column with the budget as its source.
 - OCA's **Cash Flow** (`mis_builder_cash_flow`) is a forward-looking forecast of bank
@@ -142,6 +147,100 @@ and every amount drills down to its journal items. The Balance Sheet includes an
   so `mis.report.style` gets a **Rule Above** property (`hf_rule`). It's added by overriding
   `merge()` and `to_css_style()`, not MIS's module-level `PROPS` list, which every database
   on the server shares.
+
+## Payment states
+
+Odoo Community normally marks an invoice or bill Paid as soon as a payment is registered,
+because it assumes nothing reconciles bank statements. Here OCA's `account_in_payment` is
+installed, so they stay **In Payment** until the payment is matched with the bank: paid in
+the books, not yet cleared. That's what the reconcile screen and the outstanding balance on
+the dashboard's bank cards show.
+
+With that module, core stops forcing payments through an outstanding account, and a payment
+method without one would post no journal entry. `account.payment._compute_outstanding_account_id()`
+therefore falls back to the chart's Outstanding Payments / Outstanding Receipts for bank and
+card journals. Upgrading to 19.0.0.7.0 recomputes stored Paid states once (migration).
+
+## Payment lists
+
+Core's payments list has one signed Amount column, money out negative, so its total is
+net cash. Here it is replaced by **Paid Out** and **Received**, both positive with their
+own totals, like a check register (`hf_amount_out` / `hf_amount_in`, stored, so they also
+total when grouped). The Checks to Print list opened from the dashboard shows one positive
+**Check Amount** instead (context `hf_checks_to_print`). Journal entries and accounting
+reports keep their usual signs.
+
+The list also has **Check No.** and a **Status** column (`hf_status`, stored) that splits
+core's In Process: **To Print** for a check not printed yet, **In Payment** once printed
+(or for any other payment waiting to clear), then **Paid** when matched with the bank. It
+mirrors the bill's status. It is display only: the payment's real state stays core's,
+because reconciliation depends on it, and the form's status bar still shows it.
+
+## Printing checks
+
+The **QuickBooks Voucher Check (Top)** layout prints on pre-printed QuickBooks-compatible
+voucher checks: an 8.5 x 11 in sheet with the check at the top and two stubs. The bank
+details, check number and MICR line are already on the stock, so only the date, payee,
+amount, amount in words, payee address (placed for a double-window envelope) and memo are
+printed. Both stubs show the payee, date, check number and the bills paid.
+
+Setup sets it as the company's check layout when none is chosen. To print:
+
+1. On the bank journal (Configuration > Journals, Outgoing Payments tab), make sure
+   **Checks** is an outgoing payment method, and set the next check number.
+2. Pay a bill (or several). From a bank journal the payment window defaults to the Checks
+   method, unless the bill or vendor has a preferred method; credit card journals default
+   to Manual Payment. With Checks there are two buttons instead of Create Payment:
+   - **Pay and Print** records the payment and prints at once. With pre-numbered checks
+     Odoo first asks for the number of the first check in the printer; with Manual
+     Numbering on the journal the PDF opens straight away.
+   - **Pay, Print Later** records the payment and puts the check in the print queue.
+3. The bank journal's card on the Accounting dashboard shows **N checks to print** (opening
+   the list) and a **Print Checks** button that prints the whole queue in one PDF, oldest
+   first. In the Payments list, select checks and click **Print Checks** for just those
+   (filter Checks to Print shows the queue). That button replaces core's Confirm, which
+   only posts drafts; Actions > Post Payments still does that. Payment Receipt is under
+   Actions too, so Print Checks is the one print button.
+
+**Vendor credits:** select a vendor's bills together with their credit notes and click Pay.
+Paying by check turns on **Group Payments**, so each vendor gets one check for the net
+amount, with the credits used against the bills. (Core pays each bill separately and books
+each credit note as money received, which would mean mailing several checks.) The stub
+lists each bill at what it settles, then the credits as negative lines, adding up to the
+check. When a vendor's credits exceed the bills, the vendor owes you: Odoo proposes an
+incoming payment on Manual Payment, not a check. Bills with installment payment terms pay
+the installment that's due, as core does.
+
+**Handwritten checks:** select queued checks in the Payments list (or open one) and use
+Actions > **Record Handwritten Check**. It suggests the next check numbers in date order,
+each editable, then marks the checks sent and takes them out of the queue. Numbers must be
+unique per bank journal. With Manual Numbering on the journal, its next number moves past
+the highest one used, so the printer doesn't reuse a number from the same book. Core's
+Post Payments is unchanged: it only posts drafts.
+
+Either way the payment is posted to Outstanding Payments and the bill shows **In Payment**;
+printing gives the payment its check number and marks it sent. The bill turns **Paid** when
+the check clears: the bank feed line is reconciled with the payment. For a bank draft or anything else paid
+without a check, use the Manual payment method, which never enters the queue.
+4. Lines that don't fit on one stub continue on extra pages marked VOID, when
+   **Multi-Pages Check Stub** is on in Settings; otherwise the stub is cut short with "...".
+
+**Lining up the printer:** print a payment on plain paper, hold it over a blank check
+against the light, and adjust **Check Top Margin** and **Check Left Margin** in Settings >
+Accounting. They move everything on the page; at their default, 0.25 in, the layout prints
+where it was designed. Raise a value to move the print down or right. Turn off
+**Print Date Label** if the stock already says DATE. Print at 100% ("Actual size"), never
+"Fit to page".
+
+Core opens the new payment after paying instead; `account.payment.register.action_create_payments()`
+is overridden for the Checks method only, and keeps core's behavior when no check layout is
+set, so paying never fails on a missing setting. The queue is
+`account.journal._hf_checks_to_print_domain()`: core's Checks to Print filter, plus checks
+already Paid, which a payment posted straight to the bank account becomes.
+
+The layout is `report/check_qb_voucher.xml`. Field positions are absolute, in inches from
+the sheet's top left corner, on a zero-margin Letter paper format, so they can be tuned for
+other stock in one place. Blank check stock with a printed MICR line is not supported.
 
 ## QuickBooks migration
 
@@ -193,6 +292,8 @@ dropdb test_horizonforge_accounting
 | `tests/test_statement_import.py` | Every statement map against a sample file, and the owner reconcile models |
 | `tests/test_feed_dashboard.py` | Feed status on the dashboard, Sync, failed and recovered scheduled pulls |
 | `tests/test_financial_reports.py` | P&L and Balance Sheet amounts, balance check, rules at totals, compact PDF |
+| `tests/test_check_printing.py` | Default layout, check and stub contents, VOID pages, margins, Pay and Print, Pay Print Later, the queue and batch printing, In Payment until cleared, handwritten checks |
+| `tests/test_ui.py` | In a browser: each statement renders, and the OCA report wizards and MIS list open |
 | `tests/test_qb_import.py` | Parsing QBO exports, mapping, tie-out, open items, bank journals, history, mismatches |
 
 The Plaid connector has its own tests (all Plaid calls mocked):

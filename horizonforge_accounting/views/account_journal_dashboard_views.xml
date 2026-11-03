@@ -6,6 +6,9 @@
         <field name="inherit_id" ref="account.account_journal_dashboard_kanban_view"/>
         <field name="arch" type="xml">
             <xpath expr="//div[@id='dashboard_bank_cash_left']/div[@name='bank_cash_buttons']" position="inside">
+                <button t-if="dashboard.hf_checks_to_print" name="action_hf_print_checks" type="object"
+                        class="btn btn-secondary" groups="account.group_account_user"
+                        title="Print every check waiting in this account's queue">Print Checks</button>
                 <button t-if="dashboard.hf_feed" name="action_hf_sync_feed" type="object"
                         class="btn btn-secondary" groups="account.group_account_user"
                         title="Pull new transactions from the bank now">Sync</button>

@@ -27,8 +27,17 @@ STARTER_ACCOUNTS = [
 ]
 
 
+QB_VOUCHER_LAYOUT = "horizonforge_accounting.action_print_check_qb_voucher"
+
+
 class ResCompany(models.Model):
     _inherit = "res.company"
+
+    # Core keeps check layouts as report XML ids in this selection.
+    account_check_printing_layout = fields.Selection(
+        selection_add=[(QB_VOUCHER_LAYOUT, "QuickBooks Voucher Check (Top)")],
+        ondelete={QB_VOUCHER_LAYOUT: "set default"},
+    )
 
     def _hf_setup_accounting(self):
         """Add the starter accounts, journals, reconcile models and fiscal year.
@@ -42,6 +51,7 @@ class ResCompany(models.Model):
             company._hf_setup_journals()
             company._hf_setup_reconcile_models()
             company._hf_setup_fiscal_year()
+            company._hf_setup_check_layout()
 
     def _hf_xmlid(self, key):
         return f"horizonforge_accounting.{self.id}_{key}"
@@ -129,6 +139,10 @@ class ResCompany(models.Model):
                 "record": model,
                 "noupdate": True,
             }])
+
+    def _hf_setup_check_layout(self):
+        if self.account_check_printing_layout in (False, "disabled"):
+            self.account_check_printing_layout = QB_VOUCHER_LAYOUT
 
     def _hf_setup_fiscal_year(self):
         FiscalYear = self.env["account.fiscal.year"]
