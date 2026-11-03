@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- CSV download formats of common US banks and card issuers, for
+     Import Statement. Banks change their formats now and then: check a map
+     against a real download, and copy and adjust it when it differs. -->
+<odoo noupdate="1">
+    <record id="map_generic" model="account.statement.import.sheet.mapping">
+        <field name="name">Generic CSV (Date, Description, Amount)</field>
+        <field name="float_thousands_sep">comma</field>
+        <field name="float_decimal_sep">dot</field>
+        <field name="delimiter">comma</field>
+        <field name="header_lines_skip_count">1</field>
+        <field name="timestamp_format">%m/%d/%Y</field>
+        <field name="timestamp_column">Date</field>
+        <field name="amount_column">Amount</field>
+        <field name="description_column">Description</field>
+    </record>
+
+    <record id="map_chase_card" model="account.statement.import.sheet.mapping">
+        <field name="name">Chase Credit Card</field>
+        <field name="float_thousands_sep">comma</field>
+        <field name="float_decimal_sep">dot</field>
+        <field name="delimiter">comma</field>
+        <field name="header_lines_skip_count">1</field>
+        <field name="timestamp_format">%m/%d/%Y</field>
+        <field name="timestamp_column">Transaction Date</field>
+        <field name="amount_column">Amount</field>
+        <field name="description_column">Description</field>
+        <field name="notes_column">Memo</field>
+    </record>
+
+    <record id="map_chase_checking" model="account.statement.import.sheet.mapping">
+        <field name="name">Chase Checking or Savings</field>
+        <field name="float_thousands_sep">comma</field>
+        <field name="float_decimal_sep">dot</field>
+        <field name="delimiter">comma</field>
+        <field name="header_lines_skip_count">1</field>
+        <field name="timestamp_format">%m/%d/%Y</field>
+        <field name="timestamp_column">Posting Date</field>
+        <field name="amount_column">Amount</field>
+        <field name="description_column">Description</field>
+        <field name="reference_column">Check or Slip #</field>
+    </record>
+
+    <!-- Charges are positive and payments negative, so the sign is inverted. -->
+    <record id="map_amex" model="account.statement.import.sheet.mapping">
+        <field name="name">American Express</field>
+        <field name="float_thousands_sep">comma</field>
+        <field name="float_decimal_sep">dot</field>
+        <field name="delimiter">comma</field>
+        <field name="header_lines_skip_count">1</field>
+        <field name="timestamp_format">%m/%d/%Y</field>
+        <field name="timestamp_column">Date</field>
+        <field name="amount_column">Amount</field>
+        <field name="amount_inverse_sign" eval="True"/>
+        <field name="description_column">Description</field>
+    </record>
+
+    <record id="map_discover" model="account.statement.import.sheet.mapping">
+        <field name="name">Discover Card</field>
+        <field name="float_thousands_sep">comma</field>
+        <field name="float_decimal_sep">dot</field>
+        <field name="delimiter">comma</field>
+        <field name="header_lines_skip_count">1</field>
+        <field name="timestamp_format">%m/%d/%Y</field>
+        <field name="timestamp_column">Trans. Date</field>
+        <field name="amount_column">Amount</field>
+        <field name="amount_inverse_sign" eval="True"/>
+        <field name="description_column">Description</field>
+    </record>
+
+    <!-- Purchases are in Debit and payments in Credit. The import reads
+         debit minus credit, so the sign is inverted. -->
+    <record id="map_capital_one" model="account.statement.import.sheet.mapping">
+        <field name="name">Capital One Card</field>
+        <field name="float_thousands_sep">comma</field>
+        <field name="float_decimal_sep">dot</field>
+        <field name="delimiter">comma</field>
+        <field name="header_lines_skip_count">1</field>
+        <field name="timestamp_format">%Y-%m-%d</field>
+        <field name="timestamp_column">Transaction Date</field>
+        <field name="amount_type">distinct_credit_debit</field>
+        <field name="amount_debit_column">Debit</field>
+        <field name="amount_credit_column">Credit</field>
+        <field name="amount_inverse_sign" eval="True"/>
+        <field name="description_column">Description</field>
+    </record>
+
+    <record id="map_citi" model="account.statement.import.sheet.mapping">
+        <field name="name">Citi Card</field>
+        <field name="float_thousands_sep">comma</field>
+        <field name="float_decimal_sep">dot</field>
+        <field name="delimiter">comma</field>
+        <field name="header_lines_skip_count">1</field>
+        <field name="timestamp_format">%m/%d/%Y</field>
+        <field name="timestamp_column">Date</field>
+        <field name="amount_type">distinct_credit_debit</field>
+        <field name="amount_debit_column">Debit</field>
+        <field name="amount_credit_column">Credit</field>
+        <field name="amount_inverse_sign" eval="True"/>
+        <field name="description_column">Description</field>
+    </record>
+
+    <!-- No header row: date, amount, two unused columns, description. -->
+    <record id="map_wells_fargo" model="account.statement.import.sheet.mapping">
+        <field name="name">Wells Fargo</field>
+        <field name="float_thousands_sep">comma</field>
+        <field name="float_decimal_sep">dot</field>
+        <field name="delimiter">comma</field>
+        <field name="no_header" eval="True"/>
+        <field name="header_lines_skip_count">0</field>
+        <field name="timestamp_format">%m/%d/%Y</field>
+        <field name="timestamp_column">0</field>
+        <field name="amount_column">1</field>
+        <field name="description_column">4</field>
+    </record>
+</odoo>

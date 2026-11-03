@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="account_journal_dashboard_kanban_view" model="ir.ui.view">
+        <field name="name">account.journal.dashboard.kanban.horizonforge</field>
+        <field name="model">account.journal</field>
+        <field name="inherit_id" ref="account.account_journal_dashboard_kanban_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@id='dashboard_bank_cash_left']/div[@name='bank_cash_buttons']" position="inside">
+                <button t-if="dashboard.hf_feed" name="action_hf_sync_feed" type="object"
+                        class="btn btn-secondary" groups="account.group_account_user"
+                        title="Pull new transactions from the bank now">Sync</button>
+            </xpath>
+            <xpath expr="//div[@id='dashboard_bank_cash_right']" position="inside">
+                <div t-if="dashboard.hf_feed" class="row" name="hf_feed_status">
+                    <div t-if="dashboard.hf_feed.error" class="col text-danger text-start"
+                         t-att-title="dashboard.hf_feed.error">
+                        <i class="fa fa-exclamation-triangle me-1"/>
+                        <a type="object" name="action_open_online_bank_statement_provider"
+                           class="text-danger">Last sync failed</a>
+                    </div>
+                    <div t-elif="dashboard.hf_feed.last_sync" class="col text-muted text-start">
+                        Synced <t t-out="dashboard.hf_feed.last_sync"/>
+                    </div>
+                    <div t-else="" class="col text-muted text-start">Not synced yet</div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="online_bank_statement_provider_form" model="ir.ui.view">
+        <field name="name">online.bank.statement.provider.form.horizonforge</field>
+        <field name="model">online.bank.statement.provider</field>
+        <field name="inherit_id" ref="account_statement_import_online.online_bank_statement_provider_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_hf_sync_now" type="object" string="Sync Now"
+                        class="btn btn-secondary" invisible="not active"/>
+            </xpath>
+            <xpath expr="//sheet/group[@name='main']" position="before">
+                <div class="alert alert-danger" role="alert" invisible="not hf_last_error">
+                    <strong>Last sync failed:</strong> <field name="hf_last_error" nolabel="1"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
