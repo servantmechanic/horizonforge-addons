@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Statements built from account types, so they work on any chart.
+     Account detail lines expand under each line. Edit them in
+     Accounting > Configuration > MIS Reporting > MIS Report Templates. -->
+<odoo noupdate="1">
+    <record id="mis_report_pl" model="mis.report">
+        <field name="name">Profit and Loss</field>
+        <field name="style_id" ref="mis_style_report"/>
+    </record>
+    <record id="mis_report_pl_kpi_h_income" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_pl"/>
+        <field name="name">h_income</field>
+        <field name="description">Income</field>
+        <field name="expression">AccountingNone</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_heading"/>
+        <field name="auto_expand_accounts" eval="False"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">10</field>
+    </record>
+    <record id="mis_report_pl_kpi_revenue" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_pl"/>
+        <field name="name">revenue</field>
+        <field name="description">Sales and Services</field>
+        <field name="expression">-balp[][('account_type', '=', 'income')]</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_line"/>
+        <field name="auto_expand_accounts" eval="True"/>
+        <field name="auto_expand_accounts_style_id" ref="mis_style_detail"/>
+        <field name="budgetable" eval="True"/>
+        <field name="sequence">20</field>
+    </record>
+    <record id="mis_report_pl_kpi_cogs" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_pl"/>
+        <field name="name">cogs</field>
+        <field name="description">Cost of Goods Sold</field>
+        <field name="expression">balp[][('account_type', '=', 'expense_direct_cost')]</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_line"/>
+        <field name="auto_expand_accounts" eval="True"/>
+        <field name="auto_expand_accounts_style_id" ref="mis_style_detail"/>
+        <field name="budgetable" eval="True"/>
+        <field name="sequence">30</field>
+    </record>
+    <record id="mis_report_pl_kpi_gross_profit" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_pl"/>
+        <field name="name">gross_profit</field>
+        <field name="description">Gross Profit</field>
+        <field name="expression">revenue - cogs</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_total"/>
+        <field name="auto_expand_accounts" eval="False"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">40</field>
+    </record>
+    <record id="mis_report_pl_kpi_gross_margin" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_pl"/>
+        <field name="name">gross_margin</field>
+        <field name="description">Gross Margin</field>
+        <field name="expression">gross_profit / revenue if revenue else AccountingNone</field>
+        <field name="type">pct</field>
+        <field name="style_id" ref="mis_style_pct"/>
+        <field name="auto_expand_accounts" eval="False"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">50</field>
+    </record>
+    <record id="mis_report_pl_kpi_h_expenses" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_pl"/>
+        <field name="name">h_expenses</field>
+        <field name="description">Expenses</field>
+        <field name="expression">AccountingNone</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_heading"/>
+        <field name="auto_expand_accounts" eval="False"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">60</field>
+    </record>
+    <record id="mis_report_pl_kpi_expenses" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_pl"/>
+        <field name="name">expenses</field>
+        <field name="description">Operating Expenses</field>
+        <field name="expression">balp[][('account_type', 'in', ('expense', 'expense_depreciation'))]</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_line"/>
+        <field name="auto_expand_accounts" eval="True"/>
+        <field name="auto_expand_accounts_style_id" ref="mis_style_detail"/>
+        <field name="budgetable" eval="True"/>
+        <field name="sequence">70</field>
+    </record>
+    <record id="mis_report_pl_kpi_total_expenses" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_pl"/>
+        <field name="name">total_expenses</field>
+        <field name="description">Total Expenses</field>
+        <field name="expression">expenses</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_subtotal"/>
+        <field name="auto_expand_accounts" eval="False"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">80</field>
+    </record>
+    <record id="mis_report_pl_kpi_operating_income" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_pl"/>
+        <field name="name">operating_income</field>
+        <field name="description">Operating Income</field>
+        <field name="expression">gross_profit - total_expenses</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_total"/>
+        <field name="auto_expand_accounts" eval="False"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">90</field>
+    </record>
+    <record id="mis_report_pl_kpi_other_income" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_pl"/>
+        <field name="name">other_income</field>
+        <field name="description">Other Income</field>
+        <field name="expression">-balp[][('account_type', '=', 'income_other')]</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_line"/>
+        <field name="auto_expand_accounts" eval="True"/>
+        <field name="auto_expand_accounts_style_id" ref="mis_style_detail"/>
+        <field name="budgetable" eval="True"/>
+        <field name="sequence">100</field>
+    </record>
+    <record id="mis_report_pl_kpi_net_income" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_pl"/>
+        <field name="name">net_income</field>
+        <field name="description">Net Income</field>
+        <field name="expression">operating_income + other_income</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_total"/>
+        <field name="auto_expand_accounts" eval="False"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">110</field>
+    </record>
+
+    <record id="mis_report_bs" model="mis.report">
+        <field name="name">Balance Sheet</field>
+        <field name="style_id" ref="mis_style_report"/>
+    </record>
+    <record id="mis_report_bs_kpi_h_assets" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_bs"/>
+        <field name="name">h_assets</field>
+        <field name="description">Assets</field>
+        <field name="expression">AccountingNone</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_heading"/>
+        <field name="auto_expand_accounts" eval="False"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">10</field>
+    </record>
+    <record id="mis_report_bs_kpi_cash" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_bs"/>
+        <field name="name">cash</field>
+        <field name="description">Bank and Cash</field>
+        <field name="expression">bale[][('account_type', '=', 'asset_cash')]</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_line"/>
+        <field name="auto_expand_accounts" eval="True"/>
+        <field name="auto_expand_accounts_style_id" ref="mis_style_detail"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">20</field>
+    </record>
+    <record id="mis_report_bs_kpi_receivable" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_bs"/>
+        <field name="name">receivable</field>
+        <field name="description">Accounts Receivable</field>
+        <field name="expression">bale[][('account_type', '=', 'asset_receivable')]</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_line"/>
+        <field name="auto_expand_accounts" eval="True"/>
+        <field name="auto_expand_accounts_style_id" ref="mis_style_detail"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">30</field>
+    </record>
+    <record id="mis_report_bs_kpi_current_assets" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_bs"/>
+        <field name="name">current_assets</field>
+        <field name="description">Other Current Assets</field>
+        <field name="expression">bale[][('account_type', 'in', ('asset_current', 'asset_prepayments'))]</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_line"/>
+        <field name="auto_expand_accounts" eval="True"/>
+        <field name="auto_expand_accounts_style_id" ref="mis_style_detail"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">40</field>
+    </record>
+    <record id="mis_report_bs_kpi_fixed_assets" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_bs"/>
+        <field name="name">fixed_assets</field>
+        <field name="description">Fixed and Other Assets</field>
+        <field name="expression">bale[][('account_type', 'in', ('asset_fixed', 'asset_non_current'))]</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_line"/>
+        <field name="auto_expand_accounts" eval="True"/>
+        <field name="auto_expand_accounts_style_id" ref="mis_style_detail"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">50</field>
+    </record>
+    <record id="mis_report_bs_kpi_total_assets" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_bs"/>
+        <field name="name">total_assets</field>
+        <field name="description">Total Assets</field>
+        <field name="expression">cash + receivable + current_assets + fixed_assets</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_total"/>
+        <field name="auto_expand_accounts" eval="False"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">60</field>
+    </record>
+    <record id="mis_report_bs_kpi_h_liabilities" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_bs"/>
+        <field name="name">h_liabilities</field>
+        <field name="description">Liabilities</field>
+        <field name="expression">AccountingNone</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_heading"/>
+        <field name="auto_expand_accounts" eval="False"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">70</field>
+    </record>
+    <record id="mis_report_bs_kpi_payable" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_bs"/>
+        <field name="name">payable</field>
+        <field name="description">Accounts Payable</field>
+        <field name="expression">-bale[][('account_type', '=', 'liability_payable')]</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_line"/>
+        <field name="auto_expand_accounts" eval="True"/>
+        <field name="auto_expand_accounts_style_id" ref="mis_style_detail"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">80</field>
+    </record>
+    <record id="mis_report_bs_kpi_credit_cards" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_bs"/>
+        <field name="name">credit_cards</field>
+        <field name="description">Credit Cards</field>
+        <field name="expression">-bale[][('account_type', '=', 'liability_credit_card')]</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_line"/>
+        <field name="auto_expand_accounts" eval="True"/>
+        <field name="auto_expand_accounts_style_id" ref="mis_style_detail"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">90</field>
+    </record>
+    <record id="mis_report_bs_kpi_current_liabilities" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_bs"/>
+        <field name="name">current_liabilities</field>
+        <field name="description">Other Current Liabilities</field>
+        <field name="expression">-bale[][('account_type', '=', 'liability_current')]</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_line"/>
+        <field name="auto_expand_accounts" eval="True"/>
+        <field name="auto_expand_accounts_style_id" ref="mis_style_detail"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">100</field>
+    </record>
+    <record id="mis_report_bs_kpi_long_term" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_bs"/>
+        <field name="name">long_term</field>
+        <field name="description">Long-Term Liabilities</field>
+        <field name="expression">-bale[][('account_type', '=', 'liability_non_current')]</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_line"/>
+        <field name="auto_expand_accounts" eval="True"/>
+        <field name="auto_expand_accounts_style_id" ref="mis_style_detail"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">110</field>
+    </record>
+    <record id="mis_report_bs_kpi_total_liabilities" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_bs"/>
+        <field name="name">total_liabilities</field>
+        <field name="description">Total Liabilities</field>
+        <field name="expression">payable + credit_cards + current_liabilities + long_term</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_subtotal"/>
+        <field name="auto_expand_accounts" eval="False"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">120</field>
+    </record>
+    <record id="mis_report_bs_kpi_h_equity" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_bs"/>
+        <field name="name">h_equity</field>
+        <field name="description">Equity</field>
+        <field name="expression">AccountingNone</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_heading"/>
+        <field name="auto_expand_accounts" eval="False"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">130</field>
+    </record>
+    <record id="mis_report_bs_kpi_equity" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_bs"/>
+        <field name="name">equity</field>
+        <field name="description">Owner's Equity</field>
+        <field name="expression">-bale[][('account_type', '=', 'equity')]</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_line"/>
+        <field name="auto_expand_accounts" eval="True"/>
+        <field name="auto_expand_accounts_style_id" ref="mis_style_detail"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">140</field>
+    </record>
+    <record id="mis_report_bs_kpi_retained" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_bs"/>
+        <field name="name">retained</field>
+        <field name="description">Retained Earnings</field>
+        <field name="expression">-bale[][('account_type', '=', 'equity_unaffected')] - balu[][('account_id.include_initial_balance', '=', False)]</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_line"/>
+        <field name="auto_expand_accounts" eval="False"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">150</field>
+    </record>
+    <record id="mis_report_bs_kpi_current_earnings" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_bs"/>
+        <field name="name">current_earnings</field>
+        <field name="description">Net Income This Year</field>
+        <field name="expression">-bale[][('account_id.include_initial_balance', '=', False)]</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_line"/>
+        <field name="auto_expand_accounts" eval="False"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">160</field>
+    </record>
+    <record id="mis_report_bs_kpi_total_equity" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_bs"/>
+        <field name="name">total_equity</field>
+        <field name="description">Total Equity</field>
+        <field name="expression">equity + retained + current_earnings</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_subtotal"/>
+        <field name="auto_expand_accounts" eval="False"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">170</field>
+    </record>
+    <record id="mis_report_bs_kpi_total_le" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_bs"/>
+        <field name="name">total_le</field>
+        <field name="description">Total Liabilities and Equity</field>
+        <field name="expression">total_liabilities + total_equity</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_total"/>
+        <field name="auto_expand_accounts" eval="False"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">180</field>
+    </record>
+    <record id="mis_report_bs_kpi_out_of_balance" model="mis.report.kpi">
+        <field name="report_id" ref="mis_report_bs"/>
+        <field name="name">out_of_balance</field>
+        <field name="description">Out of Balance</field>
+        <field name="expression">total_assets - total_le</field>
+        <field name="type">num</field>
+        <field name="style_id" ref="mis_style_warning"/>
+        <field name="auto_expand_accounts" eval="False"/>
+        <field name="budgetable" eval="False"/>
+        <field name="sequence">190</field>
+    </record>
+</odoo>

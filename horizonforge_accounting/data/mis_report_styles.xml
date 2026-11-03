@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="mis_style_report" model="mis.report.style">
+        <field name="name">HorizonForge: report</field>
+        <field name="dp_inherit" eval="False"/>
+        <field name="dp">2</field>
+        <field name="hide_empty_inherit" eval="False"/>
+        <field name="hide_empty" eval="True"/>
+    </record>
+    <record id="mis_style_detail" model="mis.report.style">
+        <field name="name">HorizonForge: account detail</field>
+        <field name="indent_level_inherit" eval="False"/>
+        <field name="indent_level">2</field>
+    </record>
+    <record id="mis_style_line" model="mis.report.style">
+        <field name="name">HorizonForge: line</field>
+        <field name="indent_level_inherit" eval="False"/>
+        <field name="indent_level">1</field>
+    </record>
+    <record id="mis_style_heading" model="mis.report.style">
+        <field name="name">HorizonForge: heading</field>
+        <field name="font_weight_inherit" eval="False"/>
+        <field name="font_weight">bold</field>
+        <field name="hide_empty_inherit" eval="False"/>
+        <field name="hide_empty" eval="False"/>
+    </record>
+    <record id="mis_style_subtotal" model="mis.report.style">
+        <field name="name">HorizonForge: subtotal</field>
+        <field name="indent_level_inherit" eval="False"/>
+        <field name="indent_level">1</field>
+        <field name="hf_rule_inherit" eval="False"/>
+        <field name="hf_rule" eval="True"/>
+    </record>
+    <record id="mis_style_total" model="mis.report.style">
+        <field name="name">HorizonForge: total</field>
+        <field name="font_weight_inherit" eval="False"/>
+        <field name="font_weight">bold</field>
+        <field name="hf_rule_inherit" eval="False"/>
+        <field name="hf_rule" eval="True"/>
+    </record>
+    <record id="mis_style_pct" model="mis.report.style">
+        <field name="name">HorizonForge: percent</field>
+        <field name="font_style_inherit" eval="False"/>
+        <field name="font_style">italic</field>
+        <field name="indent_level_inherit" eval="False"/>
+        <field name="indent_level">1</field>
+        <field name="dp_inherit" eval="False"/>
+        <field name="dp">1</field>
+    </record>
+    <record id="mis_style_warning" model="mis.report.style">
+        <field name="name">HorizonForge: warning</field>
+        <field name="color_inherit" eval="False"/>
+        <field name="color">#C00000</field>
+        <field name="font_weight_inherit" eval="False"/>
+        <field name="font_weight">bold</field>
+    </record>
+</odoo>
