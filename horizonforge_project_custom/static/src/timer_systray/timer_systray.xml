@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="horizonforge_project_custom.TimerSystray">
+    <t t-if="state.enabled">
+        <Dropdown position="'bottom-end'" beforeOpen.bind="load" menuClass="'p-3 o_hf_timer_menu'" state="dropdown">
+            <button class="o_hf_timer_systray" t-att-title="state.timer ? 'Timer running' : 'No timer running'">
+                <i class="fa fa-clock-o" t-att-class="state.timer ? 'text-success' : 'opacity-50'" role="img" aria-label="Timer"/>
+                <span t-if="state.timer" class="o_hf_timer_elapsed ms-1 small fw-bold" t-esc="elapsed"/>
+            </button>
+            <t t-set-slot="content">
+                <div class="d-flex flex-column gap-2" style="min-width: 260px; max-width: 340px;">
+                    <t t-if="state.timer">
+                        <small class="text-muted">Clocked in since <t t-esc="startLabel"/></small>
+                        <div class="fs-2" t-esc="elapsed"/>
+                        <div class="fw-bold text-break">
+                            <span t-if="state.timer.job_code" class="me-1">[<t t-esc="state.timer.job_code"/>]</span>
+                            <t t-esc="state.timer.project"/>
+                        </div>
+                        <div t-if="state.timer.task" class="text-break" t-esc="state.timer.task"/>
+                        <div t-if="state.timer.name" class="small text-muted text-break" t-esc="state.timer.name"/>
+                        <div t-if="state.timer.count > 1" class="small text-warning">
+                            <t t-esc="state.timer.count"/> timers are running. This one is the latest.
+                        </div>
+                        <button class="btn btn-warning o_hf_timer_stop" t-on-click="stop">
+                            Stop timer <i class="fa fa-stop ms-1"/>
+                        </button>
+                        <button t-if="state.timer.task_id" class="btn btn-secondary" t-on-click="openTask">
+                            Open task
+                        </button>
+                    </t>
+                    <t t-else="">
+                        <div class="text-muted">No timer running</div>
+                        <button class="btn btn-success o_hf_timer_start" t-on-click="startWork">
+                            Start work <i class="fa fa-play ms-1"/>
+                        </button>
+                    </t>
+                </div>
+            </t>
+        </Dropdown>
+    </t>
+</t>
+
+</templates>

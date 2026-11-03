@@ -1,6 +1,6 @@
 {
     "name": "HorizonForge Project Customizations",
-    "version": "19.0.1.2.0",
+    "version": "19.0.1.3.0",
     "category": "Services/Project",
     "summary": "Job tracking for small contractors: portal privacy toggles, "
                "auto-follow of tasks, timesheet payroll report, job setup defaults",
@@ -24,6 +24,11 @@
         "report/timesheet_payroll_templates.xml",
         "wizard/timesheet_payroll_wizard_views.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "horizonforge_project_custom/static/src/timer_systray/*",
+        ],
+    },
     "post_init_hook": "_hf_project_post_init",
     "installable": True,
 }

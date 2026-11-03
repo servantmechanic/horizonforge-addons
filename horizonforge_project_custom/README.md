@@ -12,6 +12,7 @@ models and views only and does not need Enterprise or any OCA module.
 | Payroll report | Weekly hours, regular and overtime pay, from project timesheets, as PDF, XLSX or an on-screen job cost list |
 | Job costing | Job codes, labor cost from the employee's wage, and a Job field on vendor bills |
 | Job setup | Three service products, each linked to a project template with standard stages |
+| Timer in the header | A clock icon shows a running timer's elapsed time, with Stop and Start work, when the OCA timer module is installed |
 
 Office staff should use the user guide, which covers daily use. This README is for whoever
 installs and maintains the module.
@@ -23,7 +24,7 @@ installs and maintains the module.
 - Odoo modules: `project`, `hr_timesheet`, `sale_project`, `sale_timesheet`, `portal`, `account`.
   Installing this module installs them, which adds Sales, Project, Timesheets and Invoicing to the database.
 
-Developed and tested on Python 3.11. The Debian 13 target runs Python 3.13, so run the tests there first.
+Tested on Python 3.11 and, on the Debian 13 server, Python 3.13 with the OCA modules installed there.
 
 ## Install and upgrade
 
@@ -148,6 +149,20 @@ project. Hide from Customers controls following, not billing.
 - **Analytic accounting is enabled by a `<function>`, not a record.** `base.group_user` is
   `noupdate`, so an XML record applies on install but not on update.
 
+### Timer in the header
+
+`static/src/timer_systray/` adds a systray dropdown, next to the attendance icon. It calls
+`account.analytic.line.hf_get_running_timer()`, which returns `{"enabled": False}` unless the
+OCA module `hr_timesheet_time_control` is installed and the user can log time and has an
+employee. It is a soft integration: nothing here depends on that module.
+
+- A running timer is the OCA definition: a line with `date_time` set and no hours yet, from `_running_domain()`.
+- Stop calls the OCA `button_end_work()`. Start work opens the OCA `hr.timesheet.switch` wizard,
+  which stops any running timer itself.
+- The icon refreshes after each screen change (`ACTION_MANAGER:UI-UPDATED`), so timers started
+  from task buttons show up, and its elapsed time ticks every 30 seconds without a server call.
+- After Stop or Start work it runs `soft_reload`, so the screen's own Start and Stop buttons match.
+
 ## Tests
 
 Never run tests against a real database. With a server on 8069, use another port:
@@ -165,6 +180,17 @@ dropdb test_hf_project
 | `tests/test_payroll.py` | Overtime, weeks, grouping, job cost, exports, access |
 | `tests/test_job_costing.py` | Job codes, search, vendor bills, analytic accounting |
 | `tests/test_job_setup.py` | The three job types, invoicing, wage cost versus billing |
+| `tests/test_timer_systray.py` | The header timer, including Stop and Start work in a browser |
+
+The timer tests skip unless `hr_timesheet_time_control` is installed. To run them too, add
+OCA/timesheet (branch 19.0) to the addons path for the test run:
+
+```bash
+venv/bin/python odoo/odoo-bin -c odoo.conf --addons-path=odoo/addons,custom-addons,oca/web,oca/timesheet \
+    -d test_hf_timer -i horizonforge_project_custom,hr_timesheet_time_control \
+    --test-tags /horizonforge_project_custom --stop-after-init --http-port 8079
+dropdb test_hf_timer
+```
 
 Browser tests need Chrome and `websocket-client` in the venv; without them they are skipped.
 
@@ -176,5 +202,6 @@ Browser tests need Chrome and `websocket-client` in the venv; without them they 
 - Timesheet analytic cost uses base wage. Only the Payroll report includes the overtime premium.
 - Selling materials posts no cost. Material cost reaches a job through vendor bills.
 - The tokenized order page keeps its Sales Orders breadcrumb, which redirects to `/my` when hidden.
-- Not tested with the OCA timer module `hr_timesheet_time_control`, or on Python 3.13.
+- With several timers running, the header shows the latest; the OCA Start work wizard then asks
+  for them to be stopped by hand.
 - Service products link their template per company, so a second company must set it again.
