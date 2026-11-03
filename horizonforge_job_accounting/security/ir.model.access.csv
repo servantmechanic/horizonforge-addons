@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hf_job_profit_line_accountant,hf.job.profit.line accountant,model_hf_job_profit_line,account.group_account_readonly,1,0,0,0
+access_hf_job_profit_line_project_manager,hf.job.profit.line project manager,model_hf_job_profit_line,project.group_project_manager,1,0,0,0
