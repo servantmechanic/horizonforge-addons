@@ -9,6 +9,15 @@ Custom Odoo 19 **Community** addons. This folder is on Odoo's `addons_path`.
 - OCA addons: `~/odoo-dev/oca/web` (OCA/web, branch 19.0, on `addons_path`).
   `web_responsive` is installed in `dev19` for the app launcher. Update with
   `git -C ~/odoo-dev/oca/web pull`, then `-u web_responsive`.
+- OCA accounting repos (branch 19.0, all on `addons_path`) under `~/odoo-dev/oca/`:
+  `server-ux`, `reporting-engine`, `account-financial-tools`,
+  `account-financial-reporting`, `mis-builder`, `account-reconcile`,
+  `bank-statement-import`. Used by `horizonforge_accounting`. `account_usability`
+  needs `openupgradelib` in the venv. `oca/timesheet` is cloned but only added
+  to `addons_path` for timer test runs.
+- `oca/bank-statement-import` is checked out on branch
+  `19.0-mig-account_statement_import_online_plaid`: our 19.0 port of the Plaid
+  connector (needs `plaid-python`), to be offered upstream. Don't reset it to 19.0.
 - Odoo Enterprise is **not** available. Never depend on Enterprise modules
   (`account_accountant`, `account_reports`, etc.).
 
@@ -37,9 +46,11 @@ venv/bin/python odoo/odoo-bin -c odoo.conf -d test_<module> -i <module> \
 | Module | Status | Notes |
 |---|---|---|
 | `ozark_timecard` | In production (v2.1) | Don't change it unless asked |
-| `nonprofit_accounting` | In development | Standalone cash-basis ledger (small school). See its `PLAN.md` |
+| `nonprofit_accounting` | In production | Standalone cash-basis ledger (small school). See its `PLAN.md`. Not part of the `horizonforge_accounting` build |
 | `horizonforge_ce_custom` | In development | Generic CE tweaks (home action, no quick-create, debranding). Install on every database |
 | `horizonforge_project_custom` | In development | Small-contractor jobs: portal privacy toggles, auto-follow, timesheet payroll, job templates |
+| `horizonforge_accounting` | In development | Small-business books on CE Accounting + OCA (MIS Builder, reconcile, bank feeds). See its `PLAN.md` |
+| `horizonforge_job_accounting` | In development | Bridge (auto-installs): job profitability for `horizonforge_project_custom` |
 
 ## Odoo 19 conventions
 

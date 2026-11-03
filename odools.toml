@@ -1,6 +1,6 @@
 [[config]]
 name = "default"
 odoo_path = "/home/andrew/odoo-dev/odoo"
-addons_paths = ["/home/andrew/odoo-dev/custom-addons", "$autoDetectAddons"]
+addons_paths = ["/home/andrew/odoo-dev/custom-addons", "/home/andrew/odoo-dev/oca/web", "/home/andrew/odoo-dev/oca/server-ux", "/home/andrew/odoo-dev/oca/reporting-engine", "/home/andrew/odoo-dev/oca/account-financial-tools", "/home/andrew/odoo-dev/oca/account-financial-reporting", "/home/andrew/odoo-dev/oca/mis-builder", "/home/andrew/odoo-dev/oca/account-reconcile", "/home/andrew/odoo-dev/oca/bank-statement-import", "$autoDetectAddons"]
 python_path = "/home/andrew/odoo-dev/venv/bin/python"
 diag_missing_imports = "only_odoo"
