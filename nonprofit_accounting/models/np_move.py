@@ -345,7 +345,17 @@ class NpMove(models.Model):
         for move in self.filtered(lambda m: m.state == "draft"):
             move._check_lock_date()
             move._sync_lines()
-            move._check_can_post()
+            try:
+                move._check_can_post()
+            except ValidationError as error:
+                if len(self) == 1:
+                    raise
+                # When posting several at once, say which entry is the problem.
+                raise ValidationError(_(
+                    "%(entry)s: %(error)s",
+                    entry=move.display_name,
+                    error=error.args[0],
+                )) from error
             vals = {"state": "posted"}
             if move.name == "/":
                 vals["name"] = self.env["ir.sequence"].next_by_code(
