@@ -171,6 +171,27 @@ class TestNpMove(TransactionCase):
         move.action_post()
         self.assertEqual(move.name, number)
 
+    def test_post_several(self):
+        first = self._deposit()
+        second = self._deposit(date="2026-09-20")
+        (first | second).action_post()
+        self.assertEqual((first | second).mapped("state"), ["posted", "posted"])
+
+    def test_post_several_names_the_bad_entry(self):
+        good = self._deposit()
+        bad = self._deposit(date="2026-09-20")
+        bad.bank_account_id = False
+        with self.assertRaises(ValidationError) as caught:
+            (good | bad).action_post()
+        self.assertIn(bad.display_name, str(caught.exception))
+        self.assertIn("Choose a bank account", str(caught.exception))
+
+    def test_post_server_action(self):
+        moves = self._deposit() | self._deposit(date="2026-09-20")
+        action = self.env.ref("nonprofit_accounting.np_move_action_server_post")
+        action.with_context(active_model="np.move", active_ids=moves.ids).run()
+        self.assertEqual(moves.mapped("state"), ["posted", "posted"])
+
     def test_lock_date(self):
         move = self._deposit(date="2026-08-15")
         move.action_post()

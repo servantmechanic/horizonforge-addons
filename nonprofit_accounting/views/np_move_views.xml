@@ -157,6 +157,16 @@
         </field>
     </record>
 
+    <record id="np_move_action_server_post" model="ir.actions.server">
+        <field name="name">Post</field>
+        <field name="model_id" ref="model_np_move"/>
+        <field name="binding_model_id" ref="model_np_move"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="group_ids" eval="[(4, ref('nonprofit_accounting.group_np_bookkeeper'))]"/>
+        <field name="state">code</field>
+        <field name="code">records.action_post()</field>
+    </record>
+
     <record id="np_move_action_deposit" model="ir.actions.act_window">
         <field name="name">Deposits</field>
         <field name="res_model">np.move</field>
