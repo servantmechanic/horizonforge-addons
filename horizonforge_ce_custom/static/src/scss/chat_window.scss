@@ -1,0 +1,7 @@
+// OCA web_responsive draws its full-screen app launcher at z-index 1024,
+// above the chat window (1020, $zindex-sticky). A chat opened from the
+// messaging systray while the launcher is open ended up mostly hidden.
+// Keep the chat window just above the launcher, below modals (1050+).
+.o-mail-ChatWindow:not(.o-mobile) {
+    z-index: $zindex-sticky + 5;
+}
