@@ -1,6 +1,6 @@
 {
     "name": "HorizonForge CE Customizations",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.0.1",
     "category": "Hidden/Tools",
     "summary": "Small, safe usability tweaks for Odoo Community: home action, "
                "no quick-create of contacts/products, duplicate contact warning, "
@@ -17,6 +17,7 @@
     "assets": {
         "web.assets_backend": [
             "horizonforge_ce_custom/static/src/js/user_menu.js",
+            "horizonforge_ce_custom/static/src/scss/chat_window.scss",
         ],
     },
     "post_init_hook": "_hf_post_init",
