@@ -133,11 +133,15 @@ class TestPeriodMarks(GradebookCase):
         self.env["school.calendar.day"].create({
             "year_id": self.year.id, "name": "Storm", "date_start": "2030-09-02", "date_end": "2030-09-03",
         })
-        self.assertFalse(self.section_5._generate_assignments(self.semester_1))
+        # Monday's unscored lesson leaves the day off for the next school
+        # day; Tuesday's, already scored, stays where it is.
+        moved = self.section_5._generate_assignments(self.semester_1)
+        self.assertEqual(moved.mapped("date"), [date(2030, 9, 4)])
         dates = self.section_5.assignment_ids.mapped("date")
         self.assertNotIn(date(2030, 9, 2), dates)
         self.assertIn(date(2030, 9, 3), dates)
-        self.assertEqual(len(dates), 5)
+        self.assertEqual(len(dates), 6)
+        self.assertFalse(self.section_5._generate_assignments(self.semester_1))
 
     def test_setup_guide_steps(self):
         guide = self.env["school.setup.guide"].create({})

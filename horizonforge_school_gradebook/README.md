@@ -66,11 +66,22 @@ A schedule doesn't have to run every week: **Every (Weeks)** set to 3 with
 so on. Weeks without any school day aren't counted.
 
 **Generate from schedule** in the grid (one class), or Gradebook, Generate
-Assignments (many classes), creates the whole grading period at once. It skips
-weekends and the school calendar's days off, numbers the assignments through the
-year (Lesson 1, Lesson 2, ...), and leaves existing assignments alone, so it is
-safe to run again. After a day becomes a day off, running it again removes that
-day's scheduled assignments unless they already have scores. Schedules belong to the course, so next year's classes use
+Assignments (many classes), creates the whole grading period at once and
+numbers the assignments through the year (Lesson 1, Lesson 2, ...). It leaves
+existing assignments alone, so it is safe to run again.
+
+When an assignment's day is a day off, it moves to the next school day (or the
+one before, at the end of a grading period), unless that day already has the
+same schedule's assignment: a Friday test moves to Monday, while a daily
+lesson is simply dropped. Clear **Move If Day Off** on a schedule to skip it
+instead. After the calendar changes, generating again moves the scheduled
+assignments that have no scores yet.
+
+**Tests placed by hand:** leave every weekday off. The schedule then generates
+nothing; choose it under **From Schedule** when adding an assignment in the
+grid, and the name (Test 4), category, points and entry mode are filled in.
+
+Schedules belong to the course, so next year's classes use
 them without any copying.
 
 ## Access

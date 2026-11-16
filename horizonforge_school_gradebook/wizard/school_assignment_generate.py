@@ -19,7 +19,7 @@ class SchoolAssignmentGenerate(models.TransientModel):
         compute="_compute_section_ids",
         store=True,
         readonly=False,
-        domain="[('year_id', '=', year_id), ('course_id.assignment_template_ids', '!=', False)]",
+        domain="[('year_id', '=', year_id), ('course_id.assignment_template_ids.is_scheduled', '=', True)]",
         help="Only classes whose course has an assignment schedule.",
     )
     year_id = fields.Many2one(related="period_id.year_id")
@@ -40,7 +40,7 @@ class SchoolAssignmentGenerate(models.TransientModel):
         for wizard in self:
             sections = self.env["school.section"]._gradebook_sections().filtered(
                 lambda s: s.year_id == wizard.period_id.year_id
-                and s.course_id.assignment_template_ids
+                and s.course_id.assignment_template_ids.filtered("is_scheduled")
             )
             user = self.env.user
             own = sections.filtered(lambda s: user in (s.teacher_id | s.co_teacher_ids))

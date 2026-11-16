@@ -56,9 +56,12 @@ class SchoolSection(models.Model):
     # Assignment schedules
 
     def _generate_assignments(self, period):
-        """Create the assignments of the course's schedules for every school
-        day of ``period``. Days that already have theirs are skipped, so it
-        can run again after a schedule or the days off change."""
+        """Create the assignments of the course's schedules for ``period``.
+        One that falls on a day off moves to the next school day, unless
+        that day already has its own or the schedule says to skip it. Days
+        that already have theirs are left alone, so it can run again after
+        a schedule or the calendar changes. Schedules without weekdays are
+        placed by hand and generate nothing."""
         Assignment = self.env["school.assignment"]
         vals_list = []
         for section in self:
@@ -79,17 +82,38 @@ class SchoolSection(models.Model):
             week_numbers = {}
             for day in section.year_id._get_school_days():
                 week_numbers.setdefault(day - timedelta(days=day.weekday()), len(week_numbers) + 1)
+            school_days = set(days)
+            weekdays_of_period = []
+            day = period.date_start
+            while day <= period.date_end:
+                if day.weekday() < 5:
+                    weekdays_of_period.append(day)
+                day += timedelta(days=1)
             for template in section.course_id.assignment_template_ids:
                 weekdays = template._weekdays()
+                if not weekdays:
+                    continue  # placed by hand
                 existing = Assignment.search([
                     ("section_id", "=", section.id),
                     ("template_id", "=", template.id),
                 ])
                 taken = sorted(existing.mapped("date"))
-                for day in days:
-                    if day.weekday() not in weekdays or day in taken:
+                for planned in weekdays_of_period:
+                    if planned.weekday() not in weekdays:
                         continue
-                    if not template._in_week(week_numbers[day - timedelta(days=day.weekday())]):
+                    week = week_numbers.get(planned - timedelta(days=planned.weekday()))
+                    if not week or not template._in_week(week):
+                        continue  # a week without school isn't counted
+                    day = planned
+                    if day not in school_days:
+                        if not template.move_on_day_off:
+                            continue
+                        # A day off: the next school day of the period, or
+                        # the one before when the period ends first.
+                        day = next((d for d in days if d > planned), None) or next(
+                            (d for d in reversed(days) if d < planned), None
+                        )
+                    if not day or day in taken:
                         continue
                     name = template.name
                     if template.numbered:
@@ -176,7 +200,7 @@ class SchoolSection(models.Model):
             "entry_mode": section._get_entry_mode(),
             "can_edit": bool(period) and section._gradebook_can_edit(period),
             "locked": period.locked,
-            "has_schedule": bool(section.course_id.assignment_template_ids),
+            "has_schedule": bool(section.course_id.assignment_template_ids.filtered("is_scheduled")),
             "categories": [
                 {"id": c.id, "name": c.name, "code": c.code, "color": c.color}
                 for c in self.env["school.score.category"].with_context(active_test=False).search([])
@@ -257,7 +281,7 @@ class SchoolSection(models.Model):
         """Generate the scheduled assignments from the grid's button."""
         self.ensure_one()
         period = self.env["school.period"].browse(period_id)
-        if not self.course_id.assignment_template_ids:
+        if not self.course_id.assignment_template_ids.filtered("is_scheduled"):
             raise UserError(_(
                 "%(course)s has no assignment schedule yet. Add one under "
                 "Gradebook, Assignment Schedules.",

@@ -27,6 +27,9 @@
                     <group>
                         <group>
                             <field name="year_id" invisible="1"/>
+                            <field name="course_id" invisible="1"/>
+                            <field name="template_id" string="From Schedule" placeholder="None: type the details"
+                                   options="{'no_create': True, 'no_open': True}"/>
                             <field name="name" placeholder="e.g. Lesson 12" default_focus="1"/>
                             <field name="category_id" options="{'no_create': True, 'no_open': True}"/>
                             <field name="date"/>

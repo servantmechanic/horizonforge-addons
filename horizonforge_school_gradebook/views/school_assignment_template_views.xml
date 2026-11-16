@@ -14,8 +14,10 @@
                 <field name="wednesday" widget="boolean_toggle"/>
                 <field name="thursday" widget="boolean_toggle"/>
                 <field name="friday" widget="boolean_toggle"/>
-                <field name="week_interval"/>
-                <field name="first_week" invisible="week_interval == 1" optional="show"/>
+                <field name="is_scheduled" column_invisible="1"/>
+                <field name="week_interval" invisible="not is_scheduled"/>
+                <field name="first_week" invisible="week_interval == 1 or not is_scheduled" optional="show"/>
+                <field name="move_on_day_off" invisible="not is_scheduled" optional="show"/>
                 <field name="numbered" optional="show"/>
                 <field name="max_points" optional="show"/>
                 <field name="entry_mode" optional="show" placeholder="Class default"/>
@@ -31,6 +33,7 @@
                 <field name="course_id"/>
                 <field name="name"/>
                 <field name="category_id"/>
+                <filter name="by_hand" string="Placed by Hand" domain="[('is_scheduled', '=', False)]"/>
                 <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
                 <group>
                     <filter name="group_course" string="Course" context="{'group_by': 'course_id'}"/>
@@ -48,7 +51,9 @@
             <p class="o_view_nocontent_smiling_face">Add an assignment schedule</p>
             <p>Say which assignments a course has each week, for example a Math Lesson every day
                and a Spelling Test on Friday. Generate Assignments then creates a whole grading
-               period of gradebook columns at once, skipping days off.</p>
+               period of gradebook columns at once; one that falls on a day off moves to the next school day.
+               Leave every weekday off for assignments you place by hand, such as tests:
+               pick the schedule when adding the assignment.</p>
         </field>
     </record>
 </odoo>

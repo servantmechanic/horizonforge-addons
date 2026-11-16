@@ -1,5 +1,4 @@
-from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo import api, fields, models
 
 from .school_assignment import ENTRY_MODES
 
@@ -49,6 +48,21 @@ class SchoolAssignmentTemplate(models.Model):
         help="The school week of the first one, counted from the start of "
         "the year. A test every 3 weeks that closes each unit starts in week 3.",
     )
+    is_scheduled = fields.Boolean(
+        string="Scheduled",
+        compute="_compute_is_scheduled",
+        store=True,
+        help="Without any weekday, the assignments are placed by hand: "
+        "pick the schedule when adding an assignment to fill in its name, "
+        "category and points.",
+    )
+    move_on_day_off = fields.Boolean(
+        string="Move If Day Off",
+        default=True,
+        help="When its day is a day off, give the assignment on the next "
+        "school day instead (unless that day already has its own). Clear "
+        "to skip it.",
+    )
     numbered = fields.Boolean(
         default=True,
         help="Number the assignments through the year: Lesson 1, Lesson 2 and so on.",
@@ -76,13 +90,26 @@ class SchoolAssignmentTemplate(models.Model):
             and (week_number - self.first_week) % self.week_interval == 0
         )
 
-    @api.constrains("course_id", *WEEKDAY_FIELDS)
-    def _check_weekdays(self):
+    @api.depends(*WEEKDAY_FIELDS)
+    def _compute_is_scheduled(self):
         for template in self:
-            if not template._weekdays():
-                raise ValidationError(_(
-                    "Pick at least one weekday for %(name)s.", name=template.name
-                ))
+            template.is_scheduled = bool(template._weekdays())
+
+    @api.depends("name", "course_id.name")
+    def _compute_display_name(self):
+        for template in self:
+            template.display_name = template.name or ""
+
+    def _next_name(self, section, date):
+        """The name of a new assignment of this schedule on ``date``:
+        numbered after the ones before it in the class."""
+        self.ensure_one()
+        if not self.numbered:
+            return self.name
+        count = self.env["school.assignment"].search_count([
+            ("section_id", "=", section.id), ("template_id", "=", self.id), ("date", "<", date),
+        ])
+        return f"{self.name} {count + 1}"
 
     def _weekdays(self):
         """Weekday numbers (Monday is 0) the assignment falls on."""

@@ -39,6 +39,7 @@ class SchoolAssignment(models.Model):
         help="Set from the date.",
     )
     year_id = fields.Many2one(related="section_id.year_id")
+    course_id = fields.Many2one(related="section_id.course_id")
     category_id = fields.Many2one(
         "school.score.category",
         string="Category",
@@ -67,6 +68,9 @@ class SchoolAssignment(models.Model):
         ondelete="set null",
         index=True,
         copy=False,
+        domain="[('course_id', '=', course_id)]",
+        help="Pick one to fill in the name, category, points and entry mode, "
+        "for example a test that is placed by hand.",
     )
     score_ids = fields.One2many(
         "school.score",
@@ -78,6 +82,18 @@ class SchoolAssignment(models.Model):
         "CHECK(max_points > 0)",
         "Max points must be more than 0.",
     )
+
+    @api.onchange("template_id", "date")
+    def _onchange_template_id(self):
+        template = self.template_id
+        if not template or not self.section_id or not self.date:
+            return
+        if self._origin.template_id != template:
+            self.category_id = template.category_id
+            self.max_points = template.max_points
+            self.entry_mode = template.entry_mode or self.section_id._get_entry_mode()
+        if not self._origin.id:
+            self.name = template._next_name(self.section_id, self.date)
 
     @api.depends("date", "section_id")
     def _compute_period_id(self):

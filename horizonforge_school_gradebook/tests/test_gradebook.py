@@ -4,7 +4,7 @@ from psycopg2 import IntegrityError
 
 from odoo import Command
 from odoo.exceptions import UserError, ValidationError
-from odoo.tests import tagged
+from odoo.tests import Form, tagged
 from odoo.tools import mute_logger
 
 from .common import GradebookCase
@@ -187,9 +187,59 @@ class TestGradebook(GradebookCase):
             **vals,
         })
 
-    def test_schedule_needs_a_weekday(self):
-        with self.assertRaises(ValidationError):
-            self._schedule()
+    def test_schedule_placed_by_hand(self):
+        """No weekday: nothing is generated; the schedule fills in an
+        assignment added by hand."""
+        self.semester_1.date_end = "2030-09-13"
+        by_hand = self._schedule(name="Unit Test", category_id=self.test.id,
+                                 entry_mode="points", max_points=40)
+        self.assertFalse(by_hand.is_scheduled)
+        self.assertFalse(self.section_5._generate_assignments(self.semester_1))
+        self.assertFalse(self.env["school.section"].with_user(self.teacher).gradebook_open()["has_schedule"])
+        with self.assertRaises(UserError):
+            self.section_5.gradebook_generate(self.semester_1.id)
+
+        def add(date):
+            form = Form(self.env["school.assignment"].with_context(default_section_id=self.section_5.id))
+            form.date = date
+            form.template_id = by_hand
+            return form.save()
+
+        first = add("2030-09-05")
+        self.assertEqual(
+            (first.name, first.category_id, first.entry_mode, first.max_points),
+            ("Unit Test 1", self.test, "points", 40),
+        )
+        self.assertEqual(add("2030-09-12").name, "Unit Test 2")
+        # With a weekday it is scheduled again.
+        by_hand.friday = True
+        self.assertTrue(by_hand.is_scheduled)
+
+    def test_day_off_moves_to_next_school_day(self):
+        self.semester_1.date_end = "2030-09-13"   # weeks of Aug 26, Sep 2, Sep 9
+        self.env["school.calendar.day"].create([
+            {"year_id": self.year.id, "name": "Fair day", "date_start": "2030-08-30"},   # a Friday
+            {"year_id": self.year.id, "name": "Labor Day", "date_start": "2030-09-02"},  # a Monday
+            {"year_id": self.year.id, "name": "Last day off", "date_start": "2030-09-13"},  # the period's last Friday
+        ])
+        test = self._schedule(name="Test", category_id=self.test.id, friday=True)
+        daily = self._schedule(name="Lesson", monday=True, tuesday=True, wednesday=True,
+                               thursday=True, friday=True, sequence=5)
+        skipped = self._schedule(name="Quiz", friday=True, move_on_day_off=False, sequence=30)
+        created = self.section_5._generate_assignments(self.semester_1)
+
+        def dates(template):
+            return created.filtered(lambda a: a.template_id == template).mapped("date")
+
+        # Friday Aug 30 off: the test moves to Tuesday Sep 3 (Monday is off too).
+        # Friday Sep 13 off at the end of the period: the day before.
+        self.assertEqual(dates(test), [date(2030, 9, 3), date(2030, 9, 6), date(2030, 9, 12)])
+        # A daily lesson isn't doubled up: the day off's lesson is dropped.
+        self.assertEqual(len(dates(daily)), 12)
+        self.assertEqual(len(set(dates(daily))), 12)
+        self.assertEqual(dates(skipped), [date(2030, 9, 6)])
+        # Nothing new on a second run.
+        self.assertFalse(self.section_5._generate_assignments(self.semester_1))
 
     def test_generate_assignments(self):
         self.env["school.calendar.day"].create({
@@ -204,10 +254,11 @@ class TestGradebook(GradebookCase):
         tests = created - lessons
         self.assertEqual(lessons.mapped("date"), [
             date(2030, 8, 26), date(2030, 8, 28), date(2030, 8, 30),
-            date(2030, 9, 4), date(2030, 9, 6),  # no Monday Sep 2: Labor Day
+            date(2030, 9, 3),  # Monday Sep 2 is Labor Day: moved to Tuesday
+            date(2030, 9, 4), date(2030, 9, 6),
             date(2030, 9, 9), date(2030, 9, 11), date(2030, 9, 13),
         ])
-        self.assertEqual(lessons.mapped("name"), [f"Lesson {n}" for n in range(1, 9)])
+        self.assertEqual(lessons.mapped("name"), [f"Lesson {n}" for n in range(1, 10)])
         self.assertEqual(set(lessons.mapped("entry_mode")), {"percent"})
         self.assertEqual(tests.mapped("date"), [date(2030, 8, 30), date(2030, 9, 6), date(2030, 9, 13)])
         self.assertEqual(set(tests.mapped("name")), {"Spelling Test"})
@@ -225,7 +276,7 @@ class TestGradebook(GradebookCase):
         self.semester_2.date_end = "2031-01-17"
         later = self.section_5._generate_assignments(self.semester_2)
         first_lesson = later.filtered(lambda a: a.category_id == self.homework)[0]
-        self.assertEqual((first_lesson.date, first_lesson.name), (date(2031, 1, 13), "Lesson 9"))
+        self.assertEqual((first_lesson.date, first_lesson.name), (date(2031, 1, 13), "Lesson 10"))
 
     def test_generate_wizard(self):
         self._schedule(friday=True)
