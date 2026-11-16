@@ -51,6 +51,9 @@ venv/bin/python odoo/odoo-bin -c odoo.conf -d test_<module> -i <module> \
 | `horizonforge_project_custom` | In development | Small-contractor jobs: portal privacy toggles, auto-follow, timesheet payroll, job templates |
 | `horizonforge_accounting` | In development | Small-business books on CE Accounting + OCA (MIS Builder, reconcile, bank feeds). See its `PLAN.md` |
 | `horizonforge_job_accounting` | In development | Bridge (auto-installs): job profitability for `horizonforge_project_custom` |
+| `horizonforge_school_core` | In development | School records (years, periods, calendar, homerooms, students, patrons, courses, classes), setup guide, new-year setup. No dependency on the other modules here |
+| `horizonforge_school_gradebook` | In development | Gradebook on `horizonforge_school_core`: categories, weights, scales, assignment schedules, OWL keyboard grid, grade engine (`school.grade.engine`: all grade math lives there), PDF/CSV reports |
+| `horizonforge_school_attendance` | In development | Daily attendance on `horizonforge_school_core`: present unless recorded, part-day codes, OWL grid by homeroom, summary report; feeds the gradebook's report card through `school.student._school_attendance_totals` |
 
 ## Odoo 19 conventions
 
