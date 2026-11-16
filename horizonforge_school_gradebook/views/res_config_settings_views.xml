@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.school.gradebook</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="horizonforge_school_core.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <block name="school_report_setting_container" position="before">
+                <block title="Gradebook" name="school_gradebook_setting_container">
+                    <setting string="Entry Mode" company_dependent="1"
+                             help="What teachers type: a percent, the points earned, or the number wrong. A class or an assignment can use another mode.">
+                        <field name="school_entry_mode"/>
+                    </setting>
+                    <setting string="Weight Scheme" company_dependent="1"
+                             help="How much each score category counts. A course or a class can have its own.">
+                        <field name="school_weight_scheme_id" options="{'no_create': True}"/>
+                    </setting>
+                    <setting string="Grading Scale" company_dependent="1"
+                             help="Turns a percent into a letter. A grade level or a course can have its own.">
+                        <field name="school_grading_scale_id" options="{'no_create': True}"/>
+                    </setting>
+                    <setting string="Missing Work" company_dependent="1"
+                             help="How a score marked missing (M) counts in the averages.">
+                        <field name="school_missing_work" widget="radio"/>
+                    </setting>
+                    <setting string="Year Grade" company_dependent="1"
+                             help="How the year grade is made from the grading periods.">
+                        <field name="school_year_grade" widget="radio"/>
+                    </setting>
+                    <setting string="Rounding" company_dependent="1"
+                             help="Grades are rounded half up (92.5 becomes 93 with 0 decimals) before the letter is looked up.">
+                        <div class="content-group">
+                            <div class="row mt8">
+                                <label for="school_grade_decimals" string="Grade decimals" class="col-lg-5 o_light_label"/>
+                                <field name="school_grade_decimals" class="col-lg-2"/>
+                            </div>
+                            <div class="row">
+                                <label for="school_display_decimals" string="Average decimals" class="col-lg-5 o_light_label"/>
+                                <field name="school_display_decimals" class="col-lg-2"/>
+                            </div>
+                        </div>
+                    </setting>
+                </block>
+            </block>
+        </field>
+    </record>
+</odoo>

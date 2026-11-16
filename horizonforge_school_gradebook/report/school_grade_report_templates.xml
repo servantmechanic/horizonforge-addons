@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Shared by the four reports: compact tables, one record per page.
+         Called inside the page: the PDF builder drops anything outside it. -->
+    <template id="report_styles">
+        <style>
+            .o_school_report h2 { font-size: 20px; margin: 0 0 2px 0; }
+            .o_school_report .o_school_sub { color: #555; margin-bottom: 12px; }
+            .o_school_report table { width: 100%; border-collapse: collapse; font-size: 12px; }
+            .o_school_report th, .o_school_report td { border: 1px solid #999; padding: 3px 6px; }
+            .o_school_report th { background-color: #eee; text-align: left; }
+            .o_school_report .o_num { text-align: right; white-space: nowrap; }
+            .o_school_report .o_center { text-align: center; }
+            .o_school_report tr { page-break-inside: avoid; }
+            .o_school_report .o_school_total td { font-weight: bold; background-color: #f5f5f5; }
+            .o_school_report .o_school_lines { margin-top: 28px; }
+            .o_school_report .o_school_line { border-bottom: 1px solid #555; height: 26px; }
+            .o_school_report .o_school_sign { margin-top: 36px; width: 45%; border-top: 1px solid #555; padding-top: 2px; font-size: 11px; }
+        </style>
+    </template>
+
+    <template id="report_card">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="wizard">
+                <t t-foreach="wizard._get_report_cards()" t-as="card">
+                    <t t-call="web.external_layout">
+                        <t t-set="o" t-value="wizard"/>
+                        <div class="page o_school_report">
+                            <t t-call="horizonforge_school_gradebook.report_styles"/>
+                            <h2>Report Card</h2>
+                            <div class="o_school_sub">
+                                <strong t-out="card['student'].first_name"/> <strong t-out="card['student'].last_name"/>
+                                <t t-if="card['student'].grade_level_id"> · <t t-out="card['student'].grade_level_id.name"/></t>
+                                <t t-if="card['student'].student_code"> · ID <t t-out="card['student'].student_code"/></t>
+                                · <t t-out="wizard.year_id.name"/>, <t t-out="wizard.period_id.name"/>
+                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Subject</th>
+                                        <th>Teacher</th>
+                                        <th t-foreach="card['periods']" t-as="period" class="o_center" colspan="2"
+                                            t-out="period.name"/>
+                                        <th class="o_center" colspan="2">Year</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="card['rows']" t-as="row">
+                                        <td t-out="row['course']"/>
+                                        <td t-out="row['teacher']"/>
+                                        <t t-foreach="row['grades']" t-as="grade">
+                                            <td class="o_num" t-out="grade['grade']"/>
+                                            <td class="o_center" t-out="grade['letter']"/>
+                                        </t>
+                                        <td class="o_num"><strong t-out="row['year']['grade']"/></td>
+                                        <td class="o_center"><strong t-out="row['year']['letter']"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table t-if="card['attendance']" style="margin-top: 14px;">
+                                <thead>
+                                    <tr>
+                                        <th>Attendance</th>
+                                        <th t-foreach="card['periods']" t-as="period" class="o_center" t-out="period.name"/>
+                                        <th class="o_center">Year</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="card['attendance']" t-as="line">
+                                        <td t-out="line['label']"/>
+                                        <td t-foreach="line['values']" t-as="value" class="o_center" t-out="value"/>
+                                        <td class="o_center"><strong t-out="line['total']"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="o_school_lines">
+                                <strong>Teacher comments</strong>
+                                <t t-foreach="card['rows']" t-as="row">
+                                    <p t-if="row['comment']" style="margin: 4px 0;">
+                                        <strong><t t-out="row['course']"/>:</strong> <t t-out="row['comment']"/>
+                                    </p>
+                                </t>
+                                <div class="o_school_line"/>
+                                <div class="o_school_line"/>
+                                <div class="o_school_line"/>
+                            </div>
+                            <div class="o_school_sign">
+                                <t t-out="wizard.env.company.school_principal_name or ''"/>
+                                <t t-if="wizard.env.company.school_principal_name">, </t>Principal
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_class_sheet">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="wizard">
+                <t t-foreach="wizard._get_class_sheets()" t-as="sheet">
+                    <t t-call="web.external_layout">
+                        <t t-set="o" t-value="wizard"/>
+                        <div class="page o_school_report">
+                            <t t-call="horizonforge_school_gradebook.report_styles"/>
+                            <h2>Class Grade Sheet</h2>
+                            <div class="o_school_sub">
+                                <strong t-out="sheet['section'].display_name"/>
+                                · <t t-out="wizard.period_id.name"/>
+                                <t t-if="sheet['section'].teacher_id"> · <t t-out="sheet['section'].teacher_id.name"/></t>
+                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th t-foreach="sheet['categories']" t-as="category" class="o_num">
+                                            <t t-out="category.name"/>
+                                            <t t-if="sheet['weights'][category.id]"> (<t t-out="sheet['weights'][category.id]"/>)</t>
+                                        </th>
+                                        <th class="o_num">Grade</th>
+                                        <th class="o_center">Letter</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="sheet['rows']" t-as="row">
+                                        <td t-out="row['student'].display_name"/>
+                                        <td t-foreach="row['categories']" t-as="average" class="o_num" t-out="average"/>
+                                        <td class="o_num"><strong t-out="row['grade']"/></td>
+                                        <td class="o_center"><strong t-out="row['letter']"/></td>
+                                    </tr>
+                                    <tr class="o_school_total">
+                                        <td t-att-colspan="1 + len(sheet['categories'])">Class average</td>
+                                        <td class="o_num" t-out="sheet['average']"/>
+                                        <td/>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_progress">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="wizard">
+                <t t-foreach="wizard._get_progress_reports()" t-as="report">
+                    <t t-call="web.external_layout">
+                        <t t-set="o" t-value="wizard"/>
+                        <div class="page o_school_report">
+                            <t t-call="horizonforge_school_gradebook.report_styles"/>
+                            <h2>Progress Report</h2>
+                            <div class="o_school_sub">
+                                <strong t-out="report['student'].first_name"/> <strong t-out="report['student'].last_name"/>
+                                · <t t-out="report['section'].display_name"/>
+                                · <t t-out="wizard.period_id.name"/>
+                                <t t-if="report['section'].teacher_id"> · <t t-out="report['section'].teacher_id.name"/></t>
+                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Assignment</th>
+                                        <th class="o_center">Category</th>
+                                        <th class="o_num">Score</th>
+                                        <th class="o_num">Percent</th>
+                                        <th>Comment</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="report['rows']" t-as="row">
+                                        <td t-out="row['date']" t-options="{'widget': 'date'}"/>
+                                        <td t-out="row['name']"/>
+                                        <td class="o_center" t-out="row['category']"/>
+                                        <td class="o_num" t-out="row['score']"/>
+                                        <td class="o_num" t-out="row['percent']"/>
+                                        <td t-out="row['comment']"/>
+                                    </tr>
+                                    <tr t-foreach="report['categories']" t-as="category" class="o_school_total">
+                                        <td colspan="4"><t t-out="category['name']"/> average</td>
+                                        <td class="o_num" t-out="category['average']"/>
+                                        <td/>
+                                    </tr>
+                                    <tr class="o_school_total">
+                                        <td colspan="4">Period grade</td>
+                                        <td class="o_num" t-out="report['grade']"/>
+                                        <td t-out="report['letter']"/>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_missing">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="wizard">
+                <t t-call="web.external_layout">
+                    <t t-set="o" t-value="wizard"/>
+                    <div class="page o_school_report">
+                            <t t-call="horizonforge_school_gradebook.report_styles"/>
+                        <h2>Missing Work</h2>
+                        <div class="o_school_sub">
+                            <t t-out="wizard.year_id.name"/>
+                            <t t-if="wizard.period_id">, <t t-out="wizard.period_id.name"/></t>
+                        </div>
+                        <t t-foreach="wizard._get_missing_work()" t-as="group">
+                            <table style="margin-bottom: 14px;">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2">
+                                            <t t-out="group['section'].display_name"/>
+                                            <t t-if="group['section'].teacher_id"> · <t t-out="group['section'].teacher_id.name"/></t>
+                                            · <t t-out="group['count']"/> missing
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="group['rows']" t-as="row">
+                                        <td style="width: 30%;" t-out="row['student'].display_name"/>
+                                        <td>
+                                            <t t-foreach="row['assignments']" t-as="assignment">
+                                                <t t-out="assignment.name"/>
+                                                (<t t-out="assignment.date" t-options="{'widget': 'date'}"/>)<t t-if="not assignment_last">, </t>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

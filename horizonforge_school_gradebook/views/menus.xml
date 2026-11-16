@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_school_gradebook_root" name="Gradebook"
+              parent="horizonforge_school_core.menu_school_root" sequence="5"/>
+    <menuitem id="menu_school_gradebook" parent="menu_school_gradebook_root"
+              action="school_gradebook_action" sequence="10"/>
+    <menuitem id="menu_school_assignments" parent="menu_school_gradebook_root"
+              action="school_assignment_action" sequence="20"/>
+    <menuitem id="menu_school_period_marks" parent="menu_school_gradebook_root"
+              action="school_period_mark_server_action" sequence="15"/>
+    <menuitem id="menu_school_assignment_generate" parent="menu_school_gradebook_root"
+              action="school_assignment_generate_action" sequence="30"/>
+
+    <menuitem id="menu_school_score_categories" parent="horizonforge_school_core.menu_school_config"
+              action="school_score_category_action" sequence="50"/>
+    <menuitem id="menu_school_weight_schemes" parent="horizonforge_school_core.menu_school_config"
+              action="school_weight_scheme_action" sequence="55"/>
+    <menuitem id="menu_school_grading_scales" parent="horizonforge_school_core.menu_school_config"
+              action="school_grading_scale_action" sequence="60"/>
+    <menuitem id="menu_school_assignment_templates" parent="menu_school_gradebook_root"
+              action="school_assignment_template_action" sequence="25"/>
+    <menuitem id="menu_school_grade_reports" name="Reports" parent="horizonforge_school_core.menu_school_root"
+              action="school_grade_report_action" sequence="50"/>
+</odoo>

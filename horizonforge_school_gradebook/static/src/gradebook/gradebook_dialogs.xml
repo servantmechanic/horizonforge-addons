@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="horizonforge_school_gradebook.PromptDialog">
+        <Dialog title="props.title" size="'sm'">
+            <label t-if="props.label" class="form-label" t-esc="props.label"/>
+            <input type="text" class="form-control o_gradebook_prompt_input" t-ref="input"
+                   t-model="state.value" t-on-keydown="onKeydown"/>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="confirm">
+                    <t t-esc="props.confirmLabel or 'Save'"/>
+                </button>
+                <button class="btn btn-secondary" t-on-click="props.close">Cancel</button>
+            </t>
+        </Dialog>
+    </t>
+
+    <t t-name="horizonforge_school_gradebook.HelpDialog">
+        <Dialog title="'Gradebook shortcuts'" size="'md'">
+            <table class="table table-sm o_gradebook_help mb-0">
+                <tbody>
+                    <tr><th>Type a number</th><td>Enter a score, replacing what is there</td></tr>
+                    <tr><th>Enter / Shift+Enter</th><td>Save and move to the next / previous student</td></tr>
+                    <tr><th>Tab / Shift+Tab</th><td>Save and move right / left</td></tr>
+                    <tr><th>Arrow keys</th><td>Move (saves the cell being typed)</td></tr>
+                    <tr><th>F2</th><td>Edit the cell, keeping its value</td></tr>
+                    <tr><th>Esc</th><td>Cancel the edit</td></tr>
+                    <tr><th>x</th><td>Mark excused (EX)</td></tr>
+                    <tr><th>m</th><td>Mark missing (M)</td></tr>
+                    <tr><th>Delete</th><td>Clear the score</td></tr>
+                    <tr><th>c, or double-click a score</th><td>Add or edit a comment</td></tr>
+                    <tr><th>Ctrl+Z / Ctrl+Y</th><td>Undo / redo</td></tr>
+                    <tr><th>Ctrl+Shift+A</th><td>New assignment</td></tr>
+                    <tr><th>Ctrl+Shift+F</th><td>Fill the column's empty cells with one value</td></tr>
+                    <tr><th>Ctrl+V</th><td>Paste a column or block from a spreadsheet</td></tr>
+                    <tr><th>?</th><td>Show this list</td></tr>
+                </tbody>
+            </table>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="props.close">Close</button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

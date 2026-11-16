@@ -1,0 +1,231 @@
+.o_school_gradebook {
+    --gb-name-width: 190px;
+    --gb-col-width: 92px;
+    --gb-header-height: 68px;
+    --gb-border: #{$border-color};
+    background-color: $o-view-background-color;
+
+    .o_gradebook_scroll {
+        outline: none;
+    }
+
+    .o_gradebook_table {
+        border-collapse: separate;
+        border-spacing: 0;
+        font-variant-numeric: tabular-nums;
+    }
+
+    th, td {
+        border-right: 1px solid var(--gb-border);
+        border-bottom: 1px solid var(--gb-border);
+        background-color: $o-view-background-color;
+    }
+
+    // Header row and name column stay in place while the scores scroll.
+    thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        height: var(--gb-header-height);
+        padding: 4px 6px;
+        vertical-align: top;
+        font-weight: normal;
+    }
+
+    .o_gradebook_corner,
+    .o_gradebook_student {
+        position: sticky;
+        left: 0;
+        min-width: var(--gb-name-width);
+        max-width: var(--gb-name-width);
+        padding: 4px 10px;
+        text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .o_gradebook_corner {
+        z-index: 3;
+        vertical-align: bottom;
+        color: $text-muted;
+    }
+
+    .o_gradebook_student {
+        z-index: 1;
+        font-weight: 500;
+    }
+
+    // Period grade and category averages: fixed beside the names.
+    .o_gradebook_grade,
+    .o_gradebook_category_average {
+        position: sticky;
+        z-index: 1;
+        padding: 0 8px;
+        text-align: right;
+        white-space: nowrap;
+        background-color: $o-gray-100;
+
+        &.o_gradebook_grade_head {
+            z-index: 3;
+            padding: 4px 6px;
+            text-align: center;
+        }
+    }
+
+    .o_gradebook_grade {
+        left: var(--gb-name-width);
+        min-width: var(--gb-grade-width);
+        max-width: var(--gb-grade-width);
+        border-right-width: 2px;
+        font-weight: 600;
+    }
+
+    .o_gradebook_letter {
+        display: inline-block;
+        min-width: 1.6em;
+        margin-left: 6px;
+        text-align: left;
+        color: $o-brand-primary;
+    }
+
+    .o_gradebook_class_average {
+        font-weight: 600;
+    }
+
+    .o_gradebook_assignment {
+        min-width: var(--gb-col-width);
+        max-width: var(--gb-col-width);
+        cursor: pointer;
+        text-align: center;
+
+        &:hover {
+            background-color: $o-gray-200;
+        }
+
+        &.o_today {
+            box-shadow: inset 0 3px 0 $o-brand-primary;
+        }
+
+        &.o_selected_col {
+            background-color: mix($o-brand-primary, $o-view-background-color, 12%);
+        }
+    }
+
+    .o_gradebook_assignment_name {
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .o_gradebook_assignment_meta,
+    .o_gradebook_assignment_mode {
+        font-size: 0.8em;
+        color: $text-muted;
+    }
+
+    .o_gradebook_category {
+        display: inline-block;
+        margin-left: 4px;
+        padding: 0 5px;
+        border-radius: 3px;
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .o_gradebook_filler {
+        width: 100%;
+        min-width: 24px;
+        border-right: 0;
+        text-align: left;
+        color: $text-muted;
+        white-space: nowrap;
+    }
+
+    tbody td[data-row] {
+        position: relative;
+        height: 30px;
+        padding: 0 8px;
+        text-align: right;
+        cursor: cell;
+        // Keep the selected cell clear of the sticky header and names.
+        scroll-margin-top: var(--gb-header-height);
+        scroll-margin-left: calc(var(--gb-name-width) + var(--gb-fixed-extra));
+
+        &.o_selected {
+            outline: 2px solid $o-brand-primary;
+            outline-offset: -2px;
+        }
+
+        &.o_status_excused {
+            color: $text-muted;
+            font-style: italic;
+        }
+
+        &.o_status_missing {
+            color: $danger;
+            font-weight: 600;
+        }
+
+        // Corner marks: a comment (top right), not saved yet (top left).
+        &.o_has_comment::after,
+        &.o_unsaved_pending::before,
+        &.o_unsaved_failed::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            border: 4px solid transparent;
+        }
+
+        &.o_has_comment::after {
+            right: 0;
+            border-top-color: $warning;
+            border-right-color: $warning;
+        }
+
+        &.o_unsaved_pending::before {
+            left: 0;
+            border-top-color: $o-gray-400;
+            border-left-color: $o-gray-400;
+        }
+
+        &.o_unsaved_failed::before {
+            left: 0;
+            border-top-color: $danger;
+            border-left-color: $danger;
+        }
+    }
+
+    tr.o_selected_row .o_gradebook_student {
+        background-color: mix($o-brand-primary, $o-view-background-color, 12%);
+    }
+
+    .o_gradebook_editor {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        text-align: right;
+        font: inherit;
+        color: inherit;
+    }
+
+    .o_gradebook_status {
+        min-width: 130px;
+        text-align: right;
+        color: $text-muted;
+
+        &.o_status_offline {
+            color: $danger;
+            font-weight: 600;
+        }
+    }
+}
+
+.o_gradebook_help th {
+    width: 40%;
+    white-space: nowrap;
+}

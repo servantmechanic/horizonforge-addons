@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_card" model="ir.actions.report">
+        <field name="name">Report Card Sheet</field>
+        <field name="model">school.grade.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">horizonforge_school_gradebook.report_card</field>
+        <field name="report_file">horizonforge_school_gradebook.report_card</field>
+        <field name="print_report_name">'Report Cards %s' % (object.period_id.name or '')</field>
+    </record>
+    <record id="action_report_class_sheet" model="ir.actions.report">
+        <field name="name">Class Grade Sheet</field>
+        <field name="model">school.grade.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">horizonforge_school_gradebook.report_class_sheet</field>
+        <field name="report_file">horizonforge_school_gradebook.report_class_sheet</field>
+        <field name="print_report_name">'Class Grade Sheet %s' % (object.period_id.name or '')</field>
+    </record>
+    <record id="action_report_progress" model="ir.actions.report">
+        <field name="name">Progress Report</field>
+        <field name="model">school.grade.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">horizonforge_school_gradebook.report_progress</field>
+        <field name="report_file">horizonforge_school_gradebook.report_progress</field>
+        <field name="print_report_name">'Progress Reports %s' % (object.period_id.name or '')</field>
+    </record>
+    <record id="action_report_missing" model="ir.actions.report">
+        <field name="name">Missing Work</field>
+        <field name="model">school.grade.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">horizonforge_school_gradebook.report_missing</field>
+        <field name="report_file">horizonforge_school_gradebook.report_missing</field>
+        <field name="print_report_name">'Missing Work %s' % (object.period_id.name or object.year_id.name)</field>
+    </record>
+</odoo>

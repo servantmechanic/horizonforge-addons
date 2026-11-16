@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_grade_report_view_form" model="ir.ui.view">
+        <field name="name">school.grade.report.view.form</field>
+        <field name="model">school.grade.report</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group string="Report">
+                        <field name="report_type" widget="radio"/>
+                    </group>
+                    <group string="For">
+                        <field name="year_id" options="{'no_create': True, 'no_open': True}"/>
+                        <field name="period_id" options="{'no_create': True, 'no_open': True}"
+                               required="report_type != 'missing'"
+                               placeholder="Whole year"/>
+                        <field name="section_ids" widget="many2many_tags" options="{'no_create': True}"
+                               placeholder="All classes"/>
+                        <field name="homeroom_id" options="{'no_create': True, 'no_open': True}"
+                               invisible="report_type == 'class_sheet'" placeholder="All homerooms"/>
+                        <field name="grade_level_id" options="{'no_create': True, 'no_open': True}"
+                               invisible="report_type == 'class_sheet'" placeholder="All grade levels"/>
+                        <field name="student_ids" widget="many2many_tags" options="{'no_create': True}"
+                               placeholder="All students"/>
+                    </group>
+                </group>
+                <p class="text-muted" invisible="report_type != 'report_card'">
+                    One page per student: every subject with its grade for each grading period so far and for the year.
+                    Pick a homeroom or grade level to print a whole group in one PDF.
+                </p>
+                <p class="text-muted" invisible="report_type != 'class_sheet'">
+                    One page per class: each student's category averages, period grade and letter.
+                </p>
+                <p class="text-muted" invisible="report_type != 'progress'">
+                    One page per student and class: every assignment of the grading period with its score.
+                </p>
+                <p class="text-muted" invisible="report_type != 'missing'">
+                    Students with work marked missing (M), by class. Leave the grading period empty for the whole year.
+                </p>
+                <footer>
+                    <button name="action_print" type="object" string="Print" class="btn-primary"/>
+                    <button name="action_export_csv" type="object" string="Export CSV" class="btn-secondary"/>
+                    <button string="Close" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="school_grade_report_action" model="ir.actions.act_window">
+        <field name="name">Grade Reports</field>
+        <field name="res_model">school.grade.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

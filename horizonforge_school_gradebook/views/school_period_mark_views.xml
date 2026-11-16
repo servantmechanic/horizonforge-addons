@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_period_mark_view_list" model="ir.ui.view">
+        <field name="name">school.period.mark.view.list</field>
+        <field name="model">school.period.mark</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" create="0" delete="0">
+                <field name="grading_type" column_invisible="1"/>
+                <field name="section_id" readonly="1" optional="show"/>
+                <field name="period_id" readonly="1" optional="show"/>
+                <field name="student_id" readonly="1"/>
+                <field name="letter" readonly="grading_type != 'letter'"
+                       placeholder="Letter" width="90px"/>
+                <field name="comment" placeholder="Comment for the report card"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="school_period_mark_view_search" model="ir.ui.view">
+        <field name="name">school.period.mark.view.search</field>
+        <field name="model">school.period.mark</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="student_id"/>
+                <field name="section_id"/>
+                <field name="period_id"/>
+                <filter name="letter_courses" string="Letter Grade Courses"
+                        domain="[('section_id.course_id.grading_type', '=', 'letter')]"/>
+                <filter name="comment_courses" string="Comment Courses"
+                        domain="[('section_id.course_id.grading_type', '=', 'comment')]"/>
+                <separator/>
+                <filter name="to_fill" string="Nothing Entered"
+                        domain="[('letter', '=', False), ('comment', '=', False)]"/>
+                <group>
+                    <filter name="group_section" string="Class" context="{'group_by': 'section_id'}"/>
+                    <filter name="group_period" string="Grading Period" context="{'group_by': 'period_id'}"/>
+                    <filter name="group_student" string="Student" context="{'group_by': 'student_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="school_period_mark_action" model="ir.actions.act_window">
+        <field name="name">Letter Grades &amp; Comments</field>
+        <field name="res_model">school.period.mark</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No students to grade here</p>
+            <p>Each student gets a line per class and grading period: a letter for the courses
+               graded by letter only, and a comment that prints on the report card.</p>
+        </field>
+    </record>
+
+    <!-- The menu goes through code: it first adds the missing lines. -->
+    <record id="school_period_mark_server_action" model="ir.actions.server">
+        <field name="name">Letter Grades &amp; Comments</field>
+        <field name="model_id" ref="model_school_period_mark"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_marks()</field>
+    </record>
+</odoo>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_assignment_template_view_list" model="ir.ui.view">
+        <field name="name">school.assignment.template.view.list</field>
+        <field name="model">school.assignment.template</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="course_id" options="{'no_create': True}"/>
+                <field name="name" placeholder="e.g. Lesson"/>
+                <field name="category_id" options="{'no_create': True}"/>
+                <field name="monday" widget="boolean_toggle"/>
+                <field name="tuesday" widget="boolean_toggle"/>
+                <field name="wednesday" widget="boolean_toggle"/>
+                <field name="thursday" widget="boolean_toggle"/>
+                <field name="friday" widget="boolean_toggle"/>
+                <field name="numbered" optional="show"/>
+                <field name="max_points" optional="show"/>
+                <field name="entry_mode" optional="show" placeholder="Class default"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="school_assignment_template_view_search" model="ir.ui.view">
+        <field name="name">school.assignment.template.view.search</field>
+        <field name="model">school.assignment.template</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="course_id"/>
+                <field name="name"/>
+                <field name="category_id"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_course" string="Course" context="{'group_by': 'course_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="school_assignment_template_action" model="ir.actions.act_window">
+        <field name="name">Assignment Schedules</field>
+        <field name="res_model">school.assignment.template</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_group_course': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add an assignment schedule</p>
+            <p>Say which assignments a course has each week, for example a Math Lesson every day
+               and a Spelling Test on Friday. Generate Assignments then creates a whole grading
+               period of gradebook columns at once, skipping days off.</p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Teachers: full access in their own classes. Office: reads every
+         class (Office implies Teacher, so it still edits classes it teaches).
+         Administrators: everything. -->
+    <record id="rule_school_assignment_teacher" model="ir.rule">
+        <field name="name">Assignment: teacher's own classes</field>
+        <field name="model_id" ref="model_school_assignment"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_teacher'))]"/>
+        <field name="domain_force">['|', ('section_id.teacher_id', '=', user.id), ('section_id.co_teacher_ids', 'in', user.id)]</field>
+    </record>
+    <record id="rule_school_assignment_office" model="ir.rule">
+        <field name="name">Assignment: office reads all</field>
+        <field name="model_id" ref="model_school_assignment"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_office'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_school_assignment_admin" model="ir.rule">
+        <field name="name">Assignment: administrator manages all</field>
+        <field name="model_id" ref="model_school_assignment"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="rule_school_score_teacher" model="ir.rule">
+        <field name="name">Score: teacher's own classes</field>
+        <field name="model_id" ref="model_school_score"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_teacher'))]"/>
+        <field name="domain_force">['|', ('section_id.teacher_id', '=', user.id), ('section_id.co_teacher_ids', 'in', user.id)]</field>
+    </record>
+    <record id="rule_school_score_office" model="ir.rule">
+        <field name="name">Score: office reads all</field>
+        <field name="model_id" ref="model_school_score"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_office'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_school_score_admin" model="ir.rule">
+        <field name="name">Score: administrator manages all</field>
+        <field name="model_id" ref="model_school_score"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="rule_school_period_mark_teacher" model="ir.rule">
+        <field name="name">Period mark: teacher's own classes</field>
+        <field name="model_id" ref="model_school_period_mark"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_teacher'))]"/>
+        <field name="domain_force">['|', ('section_id.teacher_id', '=', user.id), ('section_id.co_teacher_ids', 'in', user.id)]</field>
+    </record>
+    <record id="rule_school_period_mark_office" model="ir.rule">
+        <field name="name">Period mark: office reads all</field>
+        <field name="model_id" ref="model_school_period_mark"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_office'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_school_period_mark_admin" model="ir.rule">
+        <field name="name">Period mark: administrator manages all</field>
+        <field name="model_id" ref="model_school_period_mark"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <!-- Schedules: everyone reads them; teachers change those of the courses
+         they teach, administrators all. -->
+    <record id="rule_school_assignment_template_read" model="ir.rule">
+        <field name="name">Assignment schedule: teachers read all</field>
+        <field name="model_id" ref="model_school_assignment_template"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_teacher'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_school_assignment_template_teacher" model="ir.rule">
+        <field name="name">Assignment schedule: teacher's own courses</field>
+        <field name="model_id" ref="model_school_assignment_template"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_teacher'))]"/>
+        <field name="domain_force">['|', ('course_id.section_ids.teacher_id', '=', user.id), ('course_id.section_ids.co_teacher_ids', 'in', user.id)]</field>
+        <field name="perm_read" eval="False"/>
+    </record>
+    <record id="rule_school_assignment_template_admin" model="ir.rule">
+        <field name="name">Assignment schedule: administrator manages all</field>
+        <field name="model_id" ref="model_school_assignment_template"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+</odoo>
