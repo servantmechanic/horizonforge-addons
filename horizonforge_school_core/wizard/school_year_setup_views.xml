@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_year_setup_view_form" model="ir.ui.view">
+        <field name="name">school.year.setup.view.form</field>
+        <field name="model">school.year.setup</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group string="New School Year">
+                        <field name="source_year_id" options="{'no_create': True}" placeholder="None: first school year"/>
+                        <field name="name" placeholder="e.g. 2027-28"/>
+                        <field name="date_start"/>
+                        <field name="date_end"/>
+                        <field name="make_current"/>
+                    </group>
+                    <group string="Set Up">
+                        <field name="period_mode" widget="radio"/>
+                        <label for="period_count" invisible="period_mode != 'generate'"/>
+                        <div class="d-flex gap-2" invisible="period_mode != 'generate'">
+                            <field name="period_count" class="oe_inline" style="max-width: 4rem;"/>
+                            <span>named</span>
+                            <field name="period_name" class="oe_inline" placeholder="Period"/>
+                        </div>
+                        <field name="copy_days_off" invisible="not source_year_id"/>
+                        <field name="class_mode" widget="radio"/>
+                        <field name="promote_students"/>
+                        <field name="archive_graduates" invisible="not promote_students"/>
+                        <field name="enroll_students" invisible="class_mode == 'none'"/>
+                    </group>
+                </group>
+                <group string="Graduating Students" invisible="not graduate_ids">
+                    <field name="graduate_ids" widget="many2many_tags" nolabel="1" colspan="2" readonly="1"/>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object" string="Create School Year" class="btn-primary"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="school_year_setup_action" model="ir.actions.act_window">
+        <field name="name">New Year Setup</field>
+        <field name="res_model">school.year.setup</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_year_view_list" model="ir.ui.view">
+        <field name="name">school.year.view.list</field>
+        <field name="model">school.year</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="is_current" widget="boolean_toggle"/>
+                <field name="section_count" string="Classes"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="school_year_view_form" model="ir.ui.view">
+        <field name="name">school.year.view.form</field>
+        <field name="model">school.year</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_set_current" type="object" string="Make Current Year"
+                            class="btn-primary" invisible="is_current or not id"/>
+                    <button name="action_add_holidays" type="object" string="Add Holidays"
+                            invisible="not id"
+                            help="Show Good Friday, Easter, Thanksgiving and Christmas on this year's calendar."/>
+                    <button name="action_generate_sections" type="object" string="Generate Classes"
+                            invisible="not id"
+                            help="Create the missing classes from the homerooms and enroll their students."/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_sections" type="object" class="oe_stat_button"
+                                icon="fa-users" invisible="not id">
+                            <field name="section_count" widget="statinfo" string="Classes"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Current" invisible="not is_current"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. 2026-27"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                        </group>
+                        <group>
+                            <field name="is_current" invisible="1"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Grading Periods" name="periods">
+                            <field name="period_ids" context="{'school_period_short_name': True}">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name" placeholder="e.g. Quarter 1"/>
+                                    <field name="date_start"/>
+                                    <field name="date_end"/>
+                                    <field name="locked" widget="boolean_toggle"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Calendar" name="days_off">
+                            <field name="day_off_ids">
+                                <list editable="bottom">
+                                    <field name="name" placeholder="e.g. Thanksgiving break"/>
+                                    <field name="date_start"/>
+                                    <field name="date_end"/>
+                                    <field name="day_type"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="school_year_view_search" model="ir.ui.view">
+        <field name="name">school.year.view.search</field>
+        <field name="model">school.year</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <filter name="current" string="Current" domain="[('is_current', '=', True)]"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="school_year_action" model="ir.actions.act_window">
+        <field name="name">School Years</field>
+        <field name="res_model">school.year</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add a school year</p>
+            <p>Each year has its own grading periods (quarters, trimesters, six weeks) and classes.</p>
+        </field>
+    </record>
+
+    <record id="school_calendar_day_view_list" model="ir.ui.view">
+        <field name="name">school.calendar.day.view.list</field>
+        <field name="model">school.calendar.day</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="year_id" options="{'no_create': True}" optional="show"/>
+                <field name="name" placeholder="e.g. Thanksgiving break"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="day_type"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="school_calendar_day_view_calendar" model="ir.ui.view">
+        <field name="name">school.calendar.day.view.calendar</field>
+        <field name="model">school.calendar.day</field>
+        <field name="arch" type="xml">
+            <calendar string="School Calendar" date_start="date_start" date_stop="date_end"
+                      mode="month" color="color" quick_create="0" event_open_popup="1">
+                <field name="name"/>
+                <field name="day_type"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- The popup a click on the calendar opens. -->
+    <record id="school_calendar_day_view_form" model="ir.ui.view">
+        <field name="name">school.calendar.day.view.form</field>
+        <field name="model">school.calendar.day</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" placeholder="e.g. Thanksgiving break"/>
+                            <field name="year_id" options="{'no_create': True, 'no_open': True}"/>
+                        </group>
+                        <group>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                            <field name="day_type" widget="radio"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="school_calendar_day_view_search" model="ir.ui.view">
+        <field name="name">school.calendar.day.view.search</field>
+        <field name="model">school.calendar.day</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="year_id"/>
+                <filter name="current_year" string="Current Year" domain="[('year_id.is_current', '=', True)]"/>
+                <separator/>
+                <filter name="no_school" string="No School" domain="[('day_type', '=', 'off')]"/>
+                <filter name="shown_only" string="Shown Only" domain="[('day_type', '=', 'info')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="school_calendar_day_action" model="ir.actions.act_window">
+        <field name="name">School Calendar</field>
+        <field name="res_model">school.calendar.day</field>
+        <field name="view_mode">calendar,list</field>
+        <field name="context">{'search_default_current_year': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add a day off</p>
+            <p>List the holidays and breaks of the school year. Weekends are always off.
+               Red days have no school; the others are shown for information.
+               No assignments are generated on these days. Switch between the calendar and the list at the top right.</p>
+        </field>
+    </record>
+</odoo>

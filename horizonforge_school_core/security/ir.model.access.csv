@@ -1,0 +1,23 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_school_year_teacher,school.year teacher,model_school_year,group_school_teacher,1,0,0,0
+access_school_year_admin,school.year admin,model_school_year,group_school_admin,1,1,1,1
+access_school_period_teacher,school.period teacher,model_school_period,group_school_teacher,1,0,0,0
+access_school_period_admin,school.period admin,model_school_period,group_school_admin,1,1,1,1
+access_school_grade_level_teacher,school.grade.level teacher,model_school_grade_level,group_school_teacher,1,0,0,0
+access_school_grade_level_admin,school.grade.level admin,model_school_grade_level,group_school_admin,1,1,1,1
+access_school_course_teacher,school.course teacher,model_school_course,group_school_teacher,1,0,0,0
+access_school_course_admin,school.course admin,model_school_course,group_school_admin,1,1,1,1
+access_school_section_teacher,school.section teacher,model_school_section,group_school_teacher,1,0,0,0
+access_school_section_admin,school.section admin,model_school_section,group_school_admin,1,1,1,1
+access_school_student_teacher,school.student teacher,model_school_student,group_school_teacher,1,0,0,0
+access_school_student_office,school.student office,model_school_student,group_school_office,1,1,1,0
+access_school_student_admin,school.student admin,model_school_student,group_school_admin,1,1,1,1
+access_school_enrollment_teacher,school.enrollment teacher,model_school_enrollment,group_school_teacher,1,0,0,0
+access_school_enrollment_office,school.enrollment office,model_school_enrollment,group_school_office,1,1,1,1
+access_school_enrollment_admin,school.enrollment admin,model_school_enrollment,group_school_admin,1,1,1,1
+access_school_homeroom_teacher,school.homeroom teacher,model_school_homeroom,group_school_teacher,1,0,0,0
+access_school_homeroom_admin,school.homeroom admin,model_school_homeroom,group_school_admin,1,1,1,1
+access_school_calendar_day_teacher,school.calendar.day teacher,model_school_calendar_day,group_school_teacher,1,0,0,0
+access_school_calendar_day_office,school.calendar.day office,model_school_calendar_day,group_school_office,1,1,1,1
+access_school_year_setup_admin,school.year.setup admin,model_school_year_setup,group_school_admin,1,1,1,1
+access_school_setup_guide_admin,school.setup.guide admin,model_school_setup_guide,group_school_admin,1,1,1,1

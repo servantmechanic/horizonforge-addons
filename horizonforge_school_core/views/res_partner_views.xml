@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_partner_view_form" model="ir.ui.view">
+        <field name="name">res.partner.view.form.inherit.school.core</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="School" name="school"
+                      groups="horizonforge_school_core.group_school_teacher">
+                    <group>
+                        <group>
+                            <field name="is_patron"/>
+                            <field name="relationship" invisible="not is_patron"/>
+                        </group>
+                    </group>
+                    <field name="student_ids" invisible="not is_patron">
+                        <list>
+                            <field name="last_name"/>
+                            <field name="first_name"/>
+                            <field name="grade_level_id"/>
+                        </list>
+                    </field>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+    <record id="school_patron_view_list" model="ir.ui.view">
+        <field name="name">res.partner.view.list.school.patron</field>
+        <field name="model">res.partner</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="relationship"/>
+                <field name="student_ids" widget="many2many_tags"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="city" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Only what a school needs of a contact: no sales, purchase or accounting fields. -->
+    <record id="school_patron_view_form" model="ir.ui.view">
+        <field name="name">res.partner.view.form.school.patron</field>
+        <field name="model">res.partner</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <field name="is_patron" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Mary Example"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="relationship"/>
+                            <field name="phone" widget="phone"/>
+                            <field name="email" widget="email"/>
+                        </group>
+                        <group>
+                            <label for="street" string="Address"/>
+                            <div class="o_address_format">
+                                <field name="street" placeholder="Street..." class="o_address_street"/>
+                                <field name="street2" placeholder="Street 2..." class="o_address_street"/>
+                                <field name="city" placeholder="City" class="o_address_city"/>
+                                <field name="state_id" placeholder="State" class="o_address_state"
+                                       options="{'no_open': True, 'no_create': True}"/>
+                                <field name="zip" placeholder="ZIP" class="o_address_zip"/>
+                                <field name="country_id" placeholder="Country" class="o_address_country"
+                                       options="{'no_open': True, 'no_create': True}"/>
+                            </div>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Students" name="students">
+                            <field name="student_ids" readonly="1">
+                                <list>
+                                    <field name="last_name"/>
+                                    <field name="first_name"/>
+                                    <field name="grade_level_id"/>
+                                    <field name="homeroom_id"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="comment" placeholder="Notes about this family contact..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="school_patron_view_search" model="ir.ui.view">
+        <field name="name">res.partner.view.search.school.patron</field>
+        <field name="model">res.partner</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" filter_domain="['|', '|', ('name', 'ilike', self), ('email', 'ilike', self), ('phone', 'ilike', self)]"/>
+                <field name="student_ids"/>
+                <field name="city"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="school_patron_action" model="ir.actions.act_window">
+        <field name="name">Patrons</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="school_patron_view_search"/>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('school_patron_view_list'), 'sequence': 1}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('school_patron_view_form'), 'sequence': 2}),
+        ]"/>
+        <field name="domain">[('is_patron', '=', True)]</field>
+        <field name="context">{'default_is_patron': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add a patron</p>
+            <p>Patrons are the parents, guardians and other family contacts of your students.</p>
+        </field>
+    </record>
+</odoo>

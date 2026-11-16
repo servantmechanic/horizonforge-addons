@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_setup_guide_view_form" model="ir.ui.view">
+        <field name="name">school.setup.guide.view.form</field>
+        <field name="model">school.setup.guide</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <h2>School setup</h2>
+                    <p class="text-muted">
+                        Work down the list. Every step opens the normal screen, so anything can be changed later in the year.
+                    </p>
+                    <table class="table align-middle o_school_setup_guide" name="steps">
+                        <tbody>
+                            <tr name="step_year">
+                                <td style="width: 2rem;">
+                                    <i class="fa fa-check-circle text-success" invisible="not year_id or not period_count" title="Done"/>
+                                    <i class="fa fa-circle-o text-muted" invisible="year_id and period_count" title="To do"/>
+                                </td>
+                                <td>
+                                    <strong>1. School year and grading periods</strong>
+                                    <div class="text-muted">The year's dates and its grading periods, for example six periods that each end on a Friday.</div>
+                                </td>
+                                <td class="text-nowrap">
+                                    <span invisible="not year_id"><field name="year_id" options="{'no_open': True}" nolabel="1" class="oe_inline"/>, <field name="period_count" class="oe_inline"/> periods</span>
+                                </td>
+                                <td class="text-end">
+                                    <button name="action_year" type="object" string="Open" class="btn-secondary"/>
+                                </td>
+                            </tr>
+                            <tr name="step_calendar">
+                                <td>
+                                    <i class="fa fa-check-circle text-success" invisible="not day_off_count" title="Done"/>
+                                    <i class="fa fa-circle-o text-muted" invisible="day_off_count" title="To do"/>
+                                </td>
+                                <td>
+                                    <strong>2. School calendar</strong>
+                                    <div class="text-muted">Holidays and breaks. Change it any time under School, School Calendar.</div>
+                                </td>
+                                <td class="text-nowrap"><field name="day_off_count" class="oe_inline"/> days off</td>
+                                <td class="text-end">
+                                    <button name="action_calendar" type="object" string="Open" class="btn-secondary"/>
+                                </td>
+                            </tr>
+                            <tr name="step_grade_levels">
+                                <td>
+                                    <i class="fa fa-check-circle text-success" invisible="not grade_level_count" title="Done"/>
+                                    <i class="fa fa-circle-o text-muted" invisible="grade_level_count" title="To do"/>
+                                </td>
+                                <td>
+                                    <strong>3. Grade levels</strong>
+                                    <div class="text-muted">Lowest grade first.</div>
+                                </td>
+                                <td class="text-nowrap"><field name="grade_level_count" class="oe_inline"/> grade levels</td>
+                                <td class="text-end">
+                                    <button name="action_grade_levels" type="object" string="Open" class="btn-secondary"/>
+                                </td>
+                            </tr>
+                            <tr name="step_homerooms">
+                                <td>
+                                    <i class="fa fa-check-circle text-success" invisible="not homeroom_count" title="Done"/>
+                                    <i class="fa fa-circle-o text-muted" invisible="homeroom_count" title="To do"/>
+                                </td>
+                                <td>
+                                    <strong>4. Homerooms</strong>
+                                    <div class="text-muted">Each room with its teacher and grade levels, for example Lower Room and Upper Room.</div>
+                                </td>
+                                <td class="text-nowrap"><field name="homeroom_count" class="oe_inline"/> homerooms</td>
+                                <td class="text-end">
+                                    <button name="action_homerooms" type="object" string="Open" class="btn-secondary"/>
+                                </td>
+                            </tr>
+                            <tr name="step_courses">
+                                <td>
+                                    <i class="fa fa-check-circle text-success" invisible="not course_count" title="Done"/>
+                                    <i class="fa fa-circle-o text-muted" invisible="course_count" title="To do"/>
+                                </td>
+                                <td>
+                                    <strong>5. Courses</strong>
+                                    <div class="text-muted">The subjects of each grade level. Name a teacher only where it isn't the homeroom teacher.</div>
+                                </td>
+                                <td class="text-nowrap"><field name="course_count" class="oe_inline"/> courses</td>
+                                <td class="text-end">
+                                    <button name="action_courses" type="object" string="Open" class="btn-secondary"/>
+                                </td>
+                            </tr>
+                            <tr name="step_students">
+                                <td>
+                                    <i class="fa fa-check-circle text-success" invisible="not student_count" title="Done"/>
+                                    <i class="fa fa-circle-o text-muted" invisible="student_count" title="To do"/>
+                                </td>
+                                <td>
+                                    <strong>6. Students</strong>
+                                    <div class="text-muted">Add them by hand, or import a spreadsheet from the list's Actions menu.</div>
+                                </td>
+                                <td class="text-nowrap"><field name="student_count" class="oe_inline"/> students</td>
+                                <td class="text-end">
+                                    <button name="action_students" type="object" string="Open" class="btn-secondary"/>
+                                </td>
+                            </tr>
+                            <tr name="step_sections">
+                                <td>
+                                    <i class="fa fa-check-circle text-success" invisible="not section_count" title="Done"/>
+                                    <i class="fa fa-circle-o text-muted" invisible="section_count" title="To do"/>
+                                </td>
+                                <td>
+                                    <strong>7. Classes</strong>
+                                    <div class="text-muted">Generate one class per course for each homeroom, with its students enrolled. Safe to run again after changes.</div>
+                                </td>
+                                <td class="text-nowrap"><field name="section_count" class="oe_inline"/> classes</td>
+                                <td class="text-end text-nowrap">
+                                    <button name="action_generate_sections" type="object" string="Generate" class="btn-primary me-1"/>
+                                    <button name="action_sections" type="object" string="Open" class="btn-secondary"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="school_setup_guide_action" model="ir.actions.act_window">
+        <field name="name">Setup Guide</field>
+        <field name="res_model">school.setup.guide</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+</odoo>

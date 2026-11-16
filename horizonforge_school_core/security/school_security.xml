@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_category_school" model="ir.module.category">
+        <field name="name">School</field>
+        <field name="sequence">35</field>
+    </record>
+
+    <record id="res_groups_privilege_school" model="res.groups.privilege">
+        <field name="name">School</field>
+        <field name="sequence">35</field>
+        <field name="category_id" ref="module_category_school"/>
+    </record>
+
+    <record id="group_school_teacher" model="res.groups">
+        <field name="name">Teacher</field>
+        <field name="sequence">10</field>
+        <field name="privilege_id" ref="res_groups_privilege_school"/>
+        <field name="comment">Sees their own classes and the students enrolled in them.</field>
+    </record>
+
+    <record id="group_school_office" model="res.groups">
+        <field name="name">Office</field>
+        <field name="sequence">20</field>
+        <field name="privilege_id" ref="res_groups_privilege_school"/>
+        <!-- Contact creation: students and patrons are contacts. -->
+        <field name="implied_ids" eval="[(4, ref('group_school_teacher')), (4, ref('base.group_partner_manager'))]"/>
+        <field name="comment">Sees every class, and manages students, patrons and enrollments.</field>
+    </record>
+
+    <record id="group_school_admin" model="res.groups">
+        <field name="name">Administrator</field>
+        <field name="sequence">30</field>
+        <field name="privilege_id" ref="res_groups_privilege_school"/>
+        <field name="implied_ids" eval="[(4, ref('group_school_office'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <field name="comment">Full access: school years, grading periods, courses, classes and settings.</field>
+    </record>
+
+    <!-- Teachers: their own classes only. Office and up: everything (group
+         rules add up, and Office implies Teacher). -->
+    <record id="rule_school_section_teacher" model="ir.rule">
+        <field name="name">Class: teacher's own classes</field>
+        <field name="model_id" ref="model_school_section"/>
+        <field name="groups" eval="[(4, ref('group_school_teacher'))]"/>
+        <field name="domain_force">['|', ('teacher_id', '=', user.id), ('co_teacher_ids', 'in', user.id)]</field>
+    </record>
+    <record id="rule_school_section_office" model="ir.rule">
+        <field name="name">Class: office sees all</field>
+        <field name="model_id" ref="model_school_section"/>
+        <field name="groups" eval="[(4, ref('group_school_office'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="rule_school_enrollment_teacher" model="ir.rule">
+        <field name="name">Enrollment: teacher's own classes</field>
+        <field name="model_id" ref="model_school_enrollment"/>
+        <field name="groups" eval="[(4, ref('group_school_teacher'))]"/>
+        <field name="domain_force">['|', ('section_id.teacher_id', '=', user.id), ('section_id.co_teacher_ids', 'in', user.id)]</field>
+    </record>
+    <record id="rule_school_enrollment_office" model="ir.rule">
+        <field name="name">Enrollment: office sees all</field>
+        <field name="model_id" ref="model_school_enrollment"/>
+        <field name="groups" eval="[(4, ref('group_school_office'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="rule_school_student_teacher" model="ir.rule">
+        <field name="name">Student: enrolled in the teacher's classes</field>
+        <field name="model_id" ref="model_school_student"/>
+        <field name="groups" eval="[(4, ref('group_school_teacher'))]"/>
+        <field name="domain_force">['|', ('enrollment_ids.section_id.teacher_id', '=', user.id), ('enrollment_ids.section_id.co_teacher_ids', 'in', user.id)]</field>
+    </record>
+    <record id="rule_school_student_office" model="ir.rule">
+        <field name="name">Student: office sees all</field>
+        <field name="model_id" ref="model_school_student"/>
+        <field name="groups" eval="[(4, ref('group_school_office'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+</odoo>

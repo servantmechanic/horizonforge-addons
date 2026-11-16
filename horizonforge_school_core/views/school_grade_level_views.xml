@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_grade_level_view_list" model="ir.ui.view">
+        <field name="name">school.grade.level.view.list</field>
+        <field name="model">school.grade.level</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="student_count" string="Students"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="school_grade_level_action" model="ir.actions.act_window">
+        <field name="name">Grade Levels</field>
+        <field name="res_model">school.grade.level</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add a grade level</p>
+            <p>List them lowest grade first: drag the rows to reorder.</p>
+        </field>
+    </record>
+</odoo>
