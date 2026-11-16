@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Starting folders: rename, add or delete them freely. -->
+    <record id="folder_reference" model="school.document.folder">
+        <field name="name">School Reference</field>
+        <field name="scope">school</field>
+        <field name="note">Kept from year to year, for everyone.</field>
+    </record>
+    <record id="folder_handbooks" model="school.document.folder">
+        <field name="name">Handbooks and Policies</field>
+        <field name="parent_id" ref="folder_reference"/>
+    </record>
+    <record id="folder_forms" model="school.document.folder">
+        <field name="name">Forms</field>
+        <field name="parent_id" ref="folder_reference"/>
+    </record>
+    <record id="folder_curriculum" model="school.document.folder">
+        <field name="name">Curriculum</field>
+        <field name="parent_id" ref="folder_reference"/>
+    </record>
+
+    <!-- Folders for the school years and homerooms already there. -->
+    <function model="school.document.folder" name="_sync_auto_folders"/>
+</odoo>

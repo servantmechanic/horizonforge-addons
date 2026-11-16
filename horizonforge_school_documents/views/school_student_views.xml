@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_student_view_form" model="ir.ui.view">
+        <field name="name">school.student.view.form.inherit.documents</field>
+        <field name="model">school.student</field>
+        <field name="inherit_id" ref="horizonforge_school_core.school_student_view_form"/>
+        <field name="arch" type="xml">
+            <page name="notes" position="before">
+                <page string="Files" name="documents">
+                    <field name="document_ids" widget="many2many_binary" nolabel="1"
+                           readonly="not id" string="Add a file"/>
+                    <p class="text-muted" invisible="id">Save the student first, then add files.</p>
+                    <p class="text-muted" invisible="not id">
+                        Enrollment forms, records and other files of this student.
+                        Seen by the office and the student's teachers.
+                    </p>
+                </page>
+            </page>
+        </field>
+    </record>
+</odoo>

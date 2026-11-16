@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Schoolwide and school year folders: every teacher. A homeroom's
+         folders: its teacher. The office and administrators: everything. -->
+    <record id="rule_school_document_folder_teacher" model="ir.rule">
+        <field name="name">Document folder: shared, or the teacher's own homeroom</field>
+        <field name="model_id" ref="model_school_document_folder"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_teacher'))]"/>
+        <field name="domain_force">['|', ('scope', 'in', ('school', 'year')), ('homeroom_id.teacher_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_school_document_folder_office" model="ir.rule">
+        <field name="name">Document folder: office sees all</field>
+        <field name="model_id" ref="model_school_document_folder"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_office'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="rule_school_document_teacher" model="ir.rule">
+        <field name="name">Document: shared, or the teacher's own homeroom</field>
+        <field name="model_id" ref="model_school_document"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_teacher'))]"/>
+        <field name="domain_force">['|', ('scope', 'in', ('school', 'year')), ('homeroom_id.teacher_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_school_document_office" model="ir.rule">
+        <field name="name">Document: office sees all</field>
+        <field name="model_id" ref="model_school_document"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_office'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+</odoo>
