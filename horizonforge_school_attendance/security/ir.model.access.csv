@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_school_attendance_code_teacher,school.attendance.code teacher,model_school_attendance_code,horizonforge_school_core.group_school_teacher,1,0,0,0
+access_school_attendance_code_admin,school.attendance.code admin,model_school_attendance_code,horizonforge_school_core.group_school_admin,1,1,1,1
+access_school_attendance_teacher,school.attendance teacher,model_school_attendance,horizonforge_school_core.group_school_teacher,1,1,1,1
+access_school_attendance_report_teacher,school.attendance.report teacher,model_school_attendance_report,horizonforge_school_core.group_school_teacher,1,1,1,1

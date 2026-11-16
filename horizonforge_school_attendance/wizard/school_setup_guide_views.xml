@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_setup_guide_view_form" model="ir.ui.view">
+        <field name="name">school.setup.guide.view.form.inherit.attendance</field>
+        <field name="model">school.setup.guide</field>
+        <field name="inherit_id" ref="horizonforge_school_core.school_setup_guide_view_form"/>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <xpath expr="//table[@name='steps']/tbody" position="inside">
+                <tr name="step_attendance_codes">
+                    <td>
+                        <i class="fa fa-check-circle text-success" invisible="not attendance_code_count" title="Done"/>
+                        <i class="fa fa-circle-o text-muted" invisible="attendance_code_count" title="To do"/>
+                    </td>
+                    <td>
+                        <strong>Attendance codes</strong>
+                        <div class="text-muted">Absent, excused, part day, tardy. Students are present unless one is recorded.</div>
+                    </td>
+                    <td class="text-nowrap"><field name="attendance_code_count" class="oe_inline"/> codes</td>
+                    <td class="text-end">
+                        <button name="action_attendance_codes" type="object" string="Open" class="btn-secondary"/>
+                    </td>
+                </tr>
+            </xpath>
+        </field>
+    </record>
+</odoo>

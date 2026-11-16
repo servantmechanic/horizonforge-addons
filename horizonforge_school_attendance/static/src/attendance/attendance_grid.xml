@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="horizonforge_school_attendance.NoteDialog">
+        <Dialog title="props.title" size="'sm'">
+            <input type="text" class="form-control o_attendance_note_input" t-ref="input"
+                   t-model="state.value" t-on-keydown="onKeydown" placeholder="e.g. Doctor's appointment"/>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="confirm">Save</button>
+                <button class="btn btn-secondary" t-on-click="props.close">Cancel</button>
+            </t>
+        </Dialog>
+    </t>
+
+    <t t-name="horizonforge_school_attendance.AttendanceGrid">
+        <div class="o_school_attendance o_action d-flex flex-column h-100" t-ref="root" t-on-keydown="onKeydown">
+            <div class="o_attendance_bar d-flex flex-wrap align-items-center gap-2 px-3 py-2 border-bottom bg-view">
+                <t t-if="state.homerooms.length">
+                    <select class="form-select w-auto o_attendance_homeroom" aria-label="Homeroom"
+                            t-on-change="onHomeroomChange">
+                        <t t-foreach="state.homerooms" t-as="homeroom" t-key="homeroom.id">
+                            <option t-att-value="homeroom.id" t-att-selected="homeroom.id === state.homeroomId"
+                                    t-esc="homeroom.name"/>
+                        </t>
+                    </select>
+                    <div class="btn-group">
+                        <button class="btn btn-secondary o_attendance_prev" t-on-click="() => this.shift(-1)"
+                                title="Previous"><i class="fa fa-arrow-left"/></button>
+                        <button class="btn btn-secondary o_attendance_today" t-on-click="goToday">Today</button>
+                        <button class="btn btn-secondary o_attendance_next" t-on-click="() => this.shift(1)"
+                                title="Next"><i class="fa fa-arrow-right"/></button>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn o_attendance_week"
+                                t-att-class="state.mode === 'week' ? 'btn-primary' : 'btn-secondary'"
+                                t-on-click="() => this.setMode('week')">Week</button>
+                        <button class="btn o_attendance_period"
+                                t-att-class="state.mode === 'period' ? 'btn-primary' : 'btn-secondary'"
+                                t-on-click="() => this.setMode('period')">Grading period</button>
+                    </div>
+                    <strong class="o_attendance_range" t-esc="state.rangeLabel"/>
+                    <button class="btn btn-link p-0 o_attendance_name_order" t-on-click="toggleNameOrder"
+                            title="Sort students by last name or by first name">
+                        <i class="fa fa-sort-alpha-asc me-1"/>
+                        <t t-if="state.nameOrder === 'last_first'">Last, First</t>
+                        <t t-else="">First Last</t>
+                    </button>
+                    <span t-if="state.locked" class="badge text-bg-warning"><i class="fa fa-lock me-1"/>Locked</span>
+                    <span t-elif="!state.canEdit" class="badge text-bg-secondary">Read only</span>
+                    <div class="ms-auto d-flex align-items-center gap-2">
+                        <span class="text-muted">Everyone is present unless marked:</span>
+                        <t t-foreach="state.codes" t-as="code" t-key="code.id">
+                            <button class="btn btn-sm o_attendance_legend" t-att-disabled="!state.canEdit"
+                                    t-att-title="code.name + ' (press ' + code.code + ')'"
+                                    t-on-click="() => this.onLegendClick(code)">
+                                <span class="o_attendance_code" t-att-style="'background-color:' + code.color"
+                                      t-esc="code.code"/>
+                                <t t-esc="code.name"/>
+                            </button>
+                        </t>
+                        <span class="o_attendance_status" t-att-class="'o_status_' + state.saveStatus"
+                              t-att-data-status="state.saveStatus">
+                            <i t-if="state.saveStatus === 'saved'" class="fa fa-check me-1"/>
+                            <i t-elif="state.saveStatus === 'saving'" class="fa fa-circle-o-notch fa-spin me-1"/>
+                            <i t-else="" class="fa fa-exclamation-triangle me-1"/>
+                            <t t-esc="saveStatusLabel"/>
+                        </span>
+                    </div>
+                </t>
+            </div>
+
+            <div t-if="!state.homerooms.length" class="m-auto text-center text-muted p-4">
+                <h3>No homeroom yet</h3>
+                <p>Attendance is taken by homeroom.<br/>
+                   Ask a school administrator to set you as the teacher of your homeroom.</p>
+            </div>
+            <div t-elif="!state.students.length" class="m-auto text-center text-muted p-4">
+                <h3>No students in this homeroom</h3>
+                <p>A student's homeroom follows their grade level (Students).</p>
+            </div>
+            <div t-else="" class="o_attendance_scroll flex-grow-1 overflow-auto" tabindex="0">
+                <table class="o_attendance_table" t-on-click="onCellClick">
+                    <thead>
+                        <tr>
+                            <th class="o_attendance_corner"><t t-esc="state.students.length"/> students</th>
+                            <th class="o_attendance_total" t-att-title="'Days absent in ' + state.periodName">
+                                <div>Absent</div><div class="o_attendance_sub" t-esc="state.periodName"/>
+                            </th>
+                            <th class="o_attendance_total o_attendance_total_2" t-att-title="'Tardies in ' + state.periodName">
+                                <div>Tardy</div><div class="o_attendance_sub" t-esc="state.periodName"/>
+                            </th>
+                            <t t-foreach="state.days" t-as="day" t-key="day.date">
+                                <th class="o_attendance_day" t-att-data-date="day.date"
+                                    t-att-class="{ o_day_off: day.off, o_today: day.date === state.today, o_selected_col: day_index === state.col }"
+                                    t-att-title="day.off_name">
+                                    <div t-esc="day.weekday"/>
+                                    <div class="o_attendance_sub" t-esc="day.label"/>
+                                </th>
+                            </t>
+                            <th class="o_attendance_filler"/>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="state.students" t-as="student" t-key="student.id">
+                            <tr t-att-class="{ o_selected_row: student_index === state.row }">
+                                <th class="o_attendance_student" t-esc="student.name"/>
+                                <td class="o_attendance_total" t-att-data-student="student.id"
+                                    t-esc="state.totals[student.id] ? state.totals[student.id].absent : ''"/>
+                                <td class="o_attendance_total o_attendance_total_2"
+                                    t-esc="state.totals[student.id] ? state.totals[student.id].tardy : ''"/>
+                                <t t-foreach="state.days" t-as="day" t-key="day.date">
+                                    <t t-set="cell" t-value="getCell(student, day)"/>
+                                    <td t-att-class="cellClass(student, day, student_index, day_index)"
+                                        t-att-data-row="student_index" t-att-data-col="day_index"
+                                        t-att-title="cellTitle(cell, day)">
+                                        <span t-if="cell and codesById[cell.code_id]" class="o_attendance_code"
+                                              t-att-style="'background-color:' + codesById[cell.code_id].color"
+                                              t-esc="codesById[cell.code_id].code"/>
+                                    </td>
+                                </t>
+                                <td class="o_attendance_filler"/>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </t>
+</templates>

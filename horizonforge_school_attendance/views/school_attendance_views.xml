@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_attendance_code_view_list" model="ir.ui.view">
+        <field name="name">school.attendance.code.view.list</field>
+        <field name="model">school.attendance.code</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="kind"/>
+                <field name="absence_days" invisible="kind != 'absent'"/>
+                <field name="excused" invisible="kind != 'absent'"/>
+                <field name="color" widget="color"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="school_attendance_code_action" model="ir.actions.act_window">
+        <field name="name">Attendance Codes</field>
+        <field name="res_model">school.attendance.code</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add an attendance code</p>
+            <p>Students are present unless something is recorded. Each code's letter is its key in the attendance grid.</p>
+        </field>
+    </record>
+
+    <record id="school_attendance_view_list" model="ir.ui.view">
+        <field name="name">school.attendance.view.list</field>
+        <field name="model">school.attendance</field>
+        <field name="arch" type="xml">
+            <list editable="top">
+                <field name="date"/>
+                <field name="student_id" options="{'no_create': True}"/>
+                <field name="homeroom_id" optional="show"/>
+                <field name="code_id" options="{'no_create': True, 'no_open': True}"/>
+                <field name="note"/>
+                <field name="recorded_by" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="school_attendance_view_search" model="ir.ui.view">
+        <field name="name">school.attendance.view.search</field>
+        <field name="model">school.attendance</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="student_id"/>
+                <field name="homeroom_id"/>
+                <field name="code_id"/>
+                <filter name="today" string="Today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="date" string="Date" date="date"/>
+                <separator/>
+                <filter name="absent" string="Absences" domain="[('kind', '=', 'absent')]"/>
+                <filter name="unexcused" string="Unexcused" domain="[('kind', '=', 'absent'), ('excused', '=', False)]"/>
+                <filter name="tardy" string="Tardies" domain="[('kind', '=', 'tardy')]"/>
+                <group>
+                    <filter name="group_student" string="Student" context="{'group_by': 'student_id'}"/>
+                    <filter name="group_homeroom" string="Homeroom" context="{'group_by': 'homeroom_id'}"/>
+                    <filter name="group_code" string="Code" context="{'group_by': 'code_id'}"/>
+                    <filter name="group_date" string="Date" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="school_attendance_action" model="ir.actions.act_window">
+        <field name="name">Absences &amp; Tardies</field>
+        <field name="res_model">school.attendance</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Nothing recorded</p>
+            <p>Every absence, part day and tardy is listed here. Students without a line were present.</p>
+        </field>
+    </record>
+
+    <record id="school_attendance_grid_action" model="ir.actions.client">
+        <field name="name">Attendance</field>
+        <field name="tag">school_attendance_grid</field>
+    </record>
+</odoo>

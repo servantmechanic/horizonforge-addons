@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_attendance_summary" model="ir.actions.report">
+        <field name="name">Attendance Summary</field>
+        <field name="model">school.attendance.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">horizonforge_school_attendance.report_attendance_summary</field>
+        <field name="report_file">horizonforge_school_attendance.report_attendance_summary</field>
+        <field name="print_report_name">'Attendance %s to %s' % (object.date_from, object.date_to)</field>
+    </record>
+
+    <template id="report_attendance_summary">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="wizard">
+                <t t-call="web.external_layout">
+                    <t t-set="o" t-value="wizard"/>
+                    <div class="page">
+                        <style>
+                            .o_school_att table { width: 100%; border-collapse: collapse; font-size: 12px; }
+                            .o_school_att th, .o_school_att td { border: 1px solid #999; padding: 3px 6px; }
+                            .o_school_att th { background-color: #eee; text-align: left; }
+                            .o_school_att .o_num { text-align: right; }
+                            .o_school_att tr { page-break-inside: avoid; }
+                        </style>
+                        <div class="o_school_att">
+                            <h2 style="font-size: 20px; margin: 0 0 2px 0;">Attendance Summary</h2>
+                            <div style="color: #555; margin-bottom: 12px;">
+                                <span t-field="wizard.date_from"/> to <span t-field="wizard.date_to"/>
+                                <t t-if="wizard.period_id"> · <t t-out="wizard.period_id.name"/></t>
+                                <t t-if="wizard.homeroom_id"> · <t t-out="wizard.homeroom_id.name"/></t>
+                                <t t-if="wizard.grade_level_id"> · <t t-out="wizard.grade_level_id.name"/></t>
+                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Grade Level</th>
+                                        <th class="o_num">School days</th>
+                                        <th class="o_num">Present</th>
+                                        <th class="o_num">Absent</th>
+                                        <th class="o_num">Excused</th>
+                                        <th class="o_num">Unexcused</th>
+                                        <th class="o_num">Tardy</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="wizard._get_rows()" t-as="row">
+                                        <td t-out="row['student'].display_name"/>
+                                        <td t-out="row['student'].grade_level_id.name"/>
+                                        <td class="o_num" t-out="row['school_days']"/>
+                                        <td class="o_num" t-out="row['present']"/>
+                                        <td class="o_num"><strong t-out="row['absent']"/></td>
+                                        <td class="o_num" t-out="row['excused']"/>
+                                        <td class="o_num" t-out="row['unexcused']"/>
+                                        <td class="o_num" t-out="row['tardy']"/>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

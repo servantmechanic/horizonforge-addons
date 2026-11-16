@@ -1,0 +1,193 @@
+.o_school_attendance {
+    --att-name-width: 190px;
+    --att-total-width: 70px;
+    --att-col-width: 62px;
+    background-color: $o-view-background-color;
+
+    .o_attendance_scroll {
+        outline: none;
+    }
+
+    .o_attendance_table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    th, td {
+        border-right: 1px solid $border-color;
+        border-bottom: 1px solid $border-color;
+        background-color: $o-view-background-color;
+    }
+
+    thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        height: 48px;
+        padding: 4px 6px;
+        text-align: center;
+        font-weight: 600;
+    }
+
+    .o_attendance_sub {
+        font-size: 0.8em;
+        font-weight: normal;
+        color: $text-muted;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    // Names and the period's totals stay in place.
+    .o_attendance_corner,
+    .o_attendance_student {
+        position: sticky;
+        left: 0;
+        min-width: var(--att-name-width);
+        max-width: var(--att-name-width);
+        padding: 4px 10px;
+        text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .o_attendance_corner {
+        z-index: 3;
+        vertical-align: bottom;
+        font-weight: normal;
+        color: $text-muted;
+    }
+
+    .o_attendance_student {
+        z-index: 1;
+        font-weight: 500;
+    }
+
+    .o_attendance_total {
+        position: sticky;
+        left: var(--att-name-width);
+        z-index: 1;
+        min-width: var(--att-total-width);
+        max-width: var(--att-total-width);
+        padding: 0 10px;
+        text-align: right;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+        background-color: $o-gray-100;
+
+        &.o_attendance_total_2 {
+            left: calc(var(--att-name-width) + var(--att-total-width));
+            border-right-width: 2px;
+        }
+    }
+
+    thead .o_attendance_total {
+        z-index: 3;
+        text-align: center;
+        padding: 4px 6px;
+    }
+
+    .o_attendance_day {
+        min-width: var(--att-col-width);
+        max-width: var(--att-col-width);
+
+        &.o_today {
+            box-shadow: inset 0 3px 0 $o-brand-primary;
+        }
+
+        &.o_selected_col {
+            background-color: mix($o-brand-primary, $o-view-background-color, 12%);
+        }
+    }
+
+    .o_day_off,
+    thead th.o_day_off {
+        background-color: $o-gray-200;
+        color: $text-muted;
+    }
+
+    .o_attendance_filler {
+        width: 100%;
+        border-right: 0;
+    }
+
+    tbody td[data-row] {
+        position: relative;
+        height: 32px;
+        text-align: center;
+        cursor: cell;
+        scroll-margin-top: 48px;
+        scroll-margin-left: calc(var(--att-name-width) + 2 * var(--att-total-width));
+
+        &.o_day_off {
+            cursor: default;
+        }
+
+        &.o_selected {
+            outline: 2px solid $o-brand-primary;
+            outline-offset: -2px;
+        }
+
+        &.o_has_note::after,
+        &.o_unsaved_pending::before,
+        &.o_unsaved_failed::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            border: 4px solid transparent;
+        }
+
+        &.o_has_note::after {
+            right: 0;
+            border-top-color: $warning;
+            border-right-color: $warning;
+        }
+
+        &.o_unsaved_pending::before {
+            left: 0;
+            border-top-color: $o-gray-400;
+            border-left-color: $o-gray-400;
+        }
+
+        &.o_unsaved_failed::before {
+            left: 0;
+            border-top-color: $danger;
+            border-left-color: $danger;
+        }
+    }
+
+    tr.o_selected_row .o_attendance_student {
+        background-color: mix($o-brand-primary, $o-view-background-color, 12%);
+    }
+
+    .o_attendance_code {
+        display: inline-block;
+        min-width: 1.7em;
+        padding: 1px 5px;
+        border-radius: 3px;
+        color: #fff;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .o_attendance_legend {
+        border: 1px solid $border-color;
+        white-space: nowrap;
+
+        .o_attendance_code {
+            margin-right: 5px;
+        }
+    }
+
+    .o_attendance_status {
+        min-width: 120px;
+        text-align: right;
+        color: $text-muted;
+
+        &.o_status_offline {
+            color: $danger;
+            font-weight: 600;
+        }
+    }
+}
