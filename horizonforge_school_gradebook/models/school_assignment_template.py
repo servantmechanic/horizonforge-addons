@@ -35,6 +35,20 @@ class SchoolAssignmentTemplate(models.Model):
     wednesday = fields.Boolean(string="Wed")
     thursday = fields.Boolean(string="Thu")
     friday = fields.Boolean(string="Fri")
+    week_interval = fields.Integer(
+        string="Every (Weeks)",
+        default=1,
+        required=True,
+        help="1 for every week, 2 for every other week, 3 for every third "
+        "week and so on. Weeks without school aren't counted.",
+    )
+    first_week = fields.Integer(
+        string="First Week",
+        default=1,
+        required=True,
+        help="The school week of the first one, counted from the start of "
+        "the year. A test every 3 weeks that closes each unit starts in week 3.",
+    )
     numbered = fields.Boolean(
         default=True,
         help="Number the assignments through the year: Lesson 1, Lesson 2 and so on.",
@@ -48,6 +62,19 @@ class SchoolAssignmentTemplate(models.Model):
         help="Leave empty to use the class's entry mode.",
     )
     active = fields.Boolean(default=True)
+
+    _week_interval_positive = models.Constraint(
+        "CHECK(week_interval >= 1 AND first_week >= 1)",
+        "Every (weeks) and the first week must be 1 or more.",
+    )
+
+    def _in_week(self, week_number):
+        """Whether the schedule has its assignments in this school week."""
+        self.ensure_one()
+        return (
+            week_number >= self.first_week
+            and (week_number - self.first_week) % self.week_interval == 0
+        )
 
     @api.constrains("course_id", *WEEKDAY_FIELDS)
     def _check_weekdays(self):

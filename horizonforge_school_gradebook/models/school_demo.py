@@ -27,7 +27,7 @@ class SchoolYear(models.Model):
             if subject == "Math":
                 vals_list.append({"course_id": course.id, "name": "Lesson", "category_id": homework.id, **every_day})
                 vals_list.append({"course_id": course.id, "name": "Test", "category_id": test.id,
-                                  "friday": True, "sequence": 20})
+                                  "friday": True, "sequence": 20, "week_interval": 2, "first_week": 2})
             elif subject == "English":
                 vals_list.append({"course_id": course.id, "name": "Lesson", "category_id": homework.id,
                                   "monday": True, "wednesday": True, "friday": True})
@@ -37,7 +37,8 @@ class SchoolYear(models.Model):
                 vals_list.append({"course_id": course.id, "name": "Lesson", "category_id": homework.id,
                                   "tuesday": True, "thursday": True})
                 vals_list.append({"course_id": course.id, "name": "Quiz", "category_id": test.id,
-                                  "thursday": True, "sequence": 20, "entry_mode": "points", "max_points": 25})
+                                  "thursday": True, "sequence": 20, "entry_mode": "points", "max_points": 25,
+                                  "week_interval": 3, "first_week": 3})
             else:
                 vals_list.append({"course_id": course.id, "name": "Lesson", "category_id": homework.id,
                                   "tuesday": True, "thursday": True})

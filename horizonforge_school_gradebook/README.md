@@ -61,6 +61,10 @@ week, for example:
 | Spelling 5 | Spelling Test | T | Fri |
 | English 5 | Lesson | HW | Mon, Wed, Fri |
 
+A schedule doesn't have to run every week: **Every (Weeks)** set to 3 with
+**First Week** 3 gives a test on the chosen weekday in school weeks 3, 6, 9 and
+so on. Weeks without any school day aren't counted.
+
 **Generate from schedule** in the grid (one class), or Gradebook, Generate
 Assignments (many classes), creates the whole grading period at once. It skips
 weekends and the school calendar's days off, numbers the assignments through the

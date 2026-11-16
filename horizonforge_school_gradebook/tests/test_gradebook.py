@@ -251,3 +251,32 @@ class TestGradebook(GradebookCase):
         created = section._generate_assignments(year.period_ids[0])
         self.assertTrue(created)
         self.assertEqual(created[0].name, "Lesson 1")
+
+    def test_schedule_every_n_weeks(self):
+        # Six school weeks from Aug 26; the week of Sep 9 is a break.
+        self.semester_1.date_end = "2030-10-11"
+        self.env["school.calendar.day"].create({
+            "year_id": self.year.id, "name": "Break",
+            "date_start": "2030-09-09", "date_end": "2030-09-13",
+        })
+        weekly = self._schedule(name="Quiz", friday=True)
+        every_3 = self._schedule(name="Test", category_id=self.test.id, friday=True,
+                                 week_interval=3, first_week=3, sequence=20)
+        every_2 = self._schedule(name="Review", thursday=True, week_interval=2, sequence=30)
+        created = self.section_5._generate_assignments(self.semester_1)
+
+        def dates(template):
+            return created.filtered(lambda a: a.template_id == template).mapped("date")
+
+        self.assertEqual(len(dates(weekly)), 6)
+        # School weeks 3 and 6: the break week isn't counted.
+        self.assertEqual(dates(every_3), [date(2030, 9, 20), date(2030, 10, 11)])
+        self.assertEqual(
+            created.filtered(lambda a: a.template_id == every_3).mapped("name"), ["Test 1", "Test 2"]
+        )
+        # Every other week from week 1: weeks 1, 3 and 5.
+        self.assertEqual(dates(every_2), [date(2030, 8, 29), date(2030, 9, 19), date(2030, 10, 3)])
+        self.assertFalse(self.section_5._generate_assignments(self.semester_1))
+        with self.assertRaises(IntegrityError), mute_logger("odoo.sql_db"):
+            every_2.week_interval = 0
+            every_2.flush_recordset()

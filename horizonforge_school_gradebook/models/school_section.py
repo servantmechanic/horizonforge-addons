@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
@@ -72,6 +74,11 @@ class SchoolSection(models.Model):
                 ("date", "not in", days),
                 ("score_ids", "=", False),
             ]).unlink()
+            # School weeks, numbered from the start of the year: a week
+            # without any school day isn't counted.
+            week_numbers = {}
+            for day in section.year_id._get_school_days():
+                week_numbers.setdefault(day - timedelta(days=day.weekday()), len(week_numbers) + 1)
             for template in section.course_id.assignment_template_ids:
                 weekdays = template._weekdays()
                 existing = Assignment.search([
@@ -81,6 +88,8 @@ class SchoolSection(models.Model):
                 taken = sorted(existing.mapped("date"))
                 for day in days:
                     if day.weekday() not in weekdays or day in taken:
+                        continue
+                    if not template._in_week(week_numbers[day - timedelta(days=day.weekday())]):
                         continue
                     name = template.name
                     if template.numbered:
