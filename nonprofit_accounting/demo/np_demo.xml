@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Built in Python: see models/np_demo.py. -->
+    <function model="np.move" name="_load_np_demo"/>
+</odoo>
