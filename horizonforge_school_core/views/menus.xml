@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="menu_school_root" name="School" sequence="35"
+    <!-- First app (before Discuss, at 5): Odoo opens the first app a user
+         can see after login, so school users land here. -->
+    <menuitem id="menu_school_root" name="School" sequence="3"
               web_icon="horizonforge_school_core,static/description/icon.png"
               groups="group_school_teacher"/>
 

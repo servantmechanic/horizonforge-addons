@@ -1,6 +1,6 @@
 {
     "name": "School Core",
-    "version": "19.0.0.4.0",
+    "version": "19.0.0.4.1",
     "category": "School",
     "summary": "School records for small schools: years, grading periods, "
                "grade levels, homerooms, students, patrons, courses, classes, enrollments",
