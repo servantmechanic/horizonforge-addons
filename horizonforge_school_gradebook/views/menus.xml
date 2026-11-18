@@ -5,7 +5,7 @@
     <menuitem id="menu_school_gradebook" parent="menu_school_gradebook_root"
               action="school_gradebook_action" sequence="10"/>
     <menuitem id="menu_school_assignments" parent="menu_school_gradebook_root"
-              action="school_assignment_action" sequence="20"/>
+              action="school_assignment_server_action" sequence="20"/>
     <menuitem id="menu_school_period_marks" parent="menu_school_gradebook_root"
               action="school_period_mark_server_action" sequence="15"/>
     <menuitem id="menu_school_assignment_generate" parent="menu_school_gradebook_root"

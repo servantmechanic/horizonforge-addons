@@ -277,3 +277,20 @@ class TestGradebookUi(HttpCase, SchoolCoreCase):
         """)
         self.assertEqual(self.lesson.score_ids.comment, "Well done")
         self.assertEqual(self.ui_teacher.school_name_order, "first_last")
+
+    def test_sidebar_opens_grid(self):
+        """Gradebook in the School sidebar opens the grid in one click and
+        lists the other gradebook screens under it."""
+        code = HELPERS + """(async () => {
+            const item = '.o_school_sidebar_item[data-menu-xmlid="horizonforge_school_gradebook.menu_school_gradebook_root"]';
+            (await waitFor(item)).click();
+            await waitFor(".o_school_gradebook", "gradebook grid");
+            await waitFor(item + ".active", "Gradebook highlighted");
+            await waitFor('.o_school_sidebar_subitem.active[data-menu-xmlid="horizonforge_school_gradebook.menu_school_gradebook"]',
+                "grid listed under Gradebook");
+            console.log("test successful");
+        })().catch((e) => console.error(e.message));"""
+        self.browser_js(
+            "/odoo/action-horizonforge_school_core.school_student_action",
+            code, login="grid_teacher", timeout=120,
+        )

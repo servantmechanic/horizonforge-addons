@@ -23,7 +23,15 @@
             <search>
                 <field name="student_id"/>
                 <field name="section_id"/>
+                <field name="grade_level_ids"/>
                 <field name="period_id"/>
+                <filter name="my_classes" string="My Classes"
+                        domain="['|', ('section_id.teacher_id', '=', uid), ('section_id.co_teacher_ids', 'in', uid)]"/>
+                <separator/>
+                <filter name="current_year" string="Current Year" domain="[('section_id.year_id.is_current', '=', True)]"/>
+                <filter name="current_period" string="Current Grading Period" domain="[('period_id.is_current', '=', True)]"/>
+                <filter name="previous_period" string="Previous Grading Period" domain="[('period_id.is_previous', '=', True)]"/>
+                <separator/>
                 <filter name="letter_courses" string="Letter Grade Courses"
                         domain="[('section_id.course_id.grading_type', '=', 'letter')]"/>
                 <filter name="comment_courses" string="Comment Courses"
@@ -33,9 +41,15 @@
                         domain="[('letter', '=', False), ('comment', '=', False)]"/>
                 <group>
                     <filter name="group_section" string="Class" context="{'group_by': 'section_id'}"/>
+                    <filter name="group_grade_level" string="Grade Level" context="{'group_by': 'grade_level_ids'}"/>
                     <filter name="group_period" string="Grading Period" context="{'group_by': 'period_id'}"/>
                     <filter name="group_student" string="Student" context="{'group_by': 'student_id'}"/>
                 </group>
+                <searchpanel>
+                    <field name="period_id" string="Grading Period" icon="fa-calendar"/>
+                    <field name="grade_level_ids" string="Grade Level" select="multi" icon="fa-signal" enable_counters="1"/>
+                    <field name="section_id" string="Class" select="multi" icon="fa-graduation-cap" enable_counters="1"/>
+                </searchpanel>
             </search>
         </field>
     </record>

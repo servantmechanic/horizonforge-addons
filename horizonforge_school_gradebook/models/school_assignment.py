@@ -39,7 +39,32 @@ class SchoolAssignment(models.Model):
         help="Set from the date.",
     )
     year_id = fields.Many2one(related="section_id.year_id")
-    course_id = fields.Many2one(related="section_id.course_id")
+    course_id = fields.Many2one(
+        related="section_id.course_id",
+        store=True,
+        index=True,
+    )
+    homeroom_id = fields.Many2one(
+        related="section_id.homeroom_id",
+        store=True,
+    )
+    grade_level_ids = fields.Many2many(
+        related="section_id.course_id.grade_level_ids",
+        string="Grade Levels",
+        store=True,
+    )
+    unscored_count = fields.Integer(
+        string="To Score",
+        compute="_compute_unscored_count",
+        help="Students enrolled in the class on the assignment's date who "
+             "have no score yet. Missing and Excused count as scored.",
+    )
+    is_unscored = fields.Boolean(
+        string="Not Fully Scored",
+        compute="_compute_unscored_count",
+        search="_search_is_unscored",
+        help="Dated today or earlier, with students still to score.",
+    )
     category_id = fields.Many2one(
         "school.score.category",
         string="Category",
@@ -50,6 +75,7 @@ class SchoolAssignment(models.Model):
     max_points = fields.Float(
         default=100.0,
         required=True,
+        aggregator=None,  # A total of max points means nothing.
     )
     entry_mode = fields.Selection(
         ENTRY_MODES,
@@ -94,6 +120,48 @@ class SchoolAssignment(models.Model):
             self.entry_mode = template.entry_mode or self.section_id._get_entry_mode()
         if not self._origin.id:
             self.name = template._next_name(self.section_id, self.date)
+
+    def _unscored_counts(self, ids=None):
+        """{assignment id: students without a score}, for the assignments
+        ``ids`` (all, if None) dated today or earlier."""
+        query = """
+            SELECT a.id, COUNT(*)
+              FROM school_assignment a
+              JOIN school_enrollment e
+                ON e.section_id = a.section_id
+               AND e.date_start <= a.date
+               AND (e.date_end IS NULL OR e.date_end >= a.date)
+              JOIN school_student st ON st.id = e.student_id AND st.active
+         LEFT JOIN school_score s ON s.assignment_id = a.id AND s.student_id = e.student_id
+             WHERE s.id IS NULL AND a.date <= %s
+        """
+        params = [fields.Date.context_today(self)]
+        if ids is not None:
+            query += " AND a.id = ANY(%s)"
+            params.append(list(ids))
+        self.env.flush_all()
+        self.env.cr.execute(query + " GROUP BY a.id", params)
+        return dict(self.env.cr.fetchall())
+
+    def _compute_unscored_count(self):
+        counts = self._unscored_counts(self.ids) if self.ids else {}
+        for assignment in self:
+            assignment.unscored_count = counts.get(assignment.id, 0)
+            assignment.is_unscored = bool(assignment.unscored_count)
+
+    def _search_is_unscored(self, operator, value):
+        if operator not in ("=", "!=", "in", "not in"):
+            return NotImplemented
+        wanted = bool(value) if operator in ("=", "!=") else True in value
+        if operator in ("!=", "not in"):
+            wanted = not wanted
+        ids = list(self._unscored_counts())
+        return [("id", "in" if wanted else "not in", ids)]
+
+    @api.model
+    def action_open_list(self):
+        return self.env["school.period"]._school_list_action(
+            "horizonforge_school_gradebook.school_assignment_action", "my_classes")
 
     @api.depends("date", "section_id")
     def _compute_period_id(self):

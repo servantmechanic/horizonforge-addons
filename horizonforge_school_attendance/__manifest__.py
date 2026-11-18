@@ -1,6 +1,6 @@
 {
     "name": "School Attendance",
-    "version": "19.0.0.2.0",
+    "version": "19.0.0.7.0",
     "category": "School",
     "summary": "Daily attendance for small schools: students are present unless "
                "an absence, part day or tardy is recorded, in a keyboard grid",

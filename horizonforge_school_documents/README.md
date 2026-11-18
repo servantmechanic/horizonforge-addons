@@ -41,8 +41,8 @@ only by the office and administrators.
 ## Student files
 
 The student form has a **Files** tab for enrollment forms, records and the
-like. Whoever can see the student can open them: the office and the student's
-teachers. They are not part of the shared folders.
+like. Whoever can see the student can open them: the office and every
+teacher. They are not part of the shared folders.
 
 ## Tests
 

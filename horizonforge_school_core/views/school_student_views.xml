@@ -98,6 +98,12 @@
                 <field name="grade_level_id"/>
                 <field name="homeroom_id"/>
                 <field name="patron_ids"/>
+                <filter name="my_students" string="My Students"
+                        domain="['|', ('homeroom_id.teacher_id', '=', uid),
+                                 ('enrollment_ids', 'any', [('year_id.is_current', '=', True),
+                                     '|', ('section_id.teacher_id', '=', uid), ('section_id.co_teacher_ids', 'in', uid)])]"
+                        help="In my homeroom, or in one of my classes this year"/>
+                <separator/>
                 <filter name="archived" string="Withdrawn" domain="[('active', '=', False)]"/>
                 <group>
                     <filter name="group_grade_level" string="Grade Level" context="{'group_by': 'grade_level_id'}"/>

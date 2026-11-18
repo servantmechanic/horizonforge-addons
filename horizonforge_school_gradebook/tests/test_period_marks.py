@@ -65,9 +65,19 @@ class TestPeriodMarks(GradebookCase):
         marks[0].with_user(self.teacher).write({"letter": "A", "comment": "Great effort"})
 
     def test_menu_opens_own_classes(self):
+        """From the menu: rows for the teacher's classes, shown with My Classes
+        and the period picked in the side panel, none of it fixed."""
         action = self.Mark.with_user(self.teacher).action_open_marks()
-        sections = self.env["school.section"].browse(action["domain"][0][2])
+        self.assertFalse(action.get("domain"))
+        context = action["context"]
+        self.assertEqual(context["search_default_my_classes"], 1)
+        self.assertEqual(context["search_default_current_year"], 1)
+        self.assertEqual(context["searchpanel_default_period_id"], self.semester_1.id)
+        sections = self.Mark.search([]).section_id
         self.assertEqual(sections, self.section_5 | self.pe_class | self.conduct_class)
+        # The office starts on every class.
+        context = self.Mark.with_user(self.office).action_open_marks()["context"]
+        self.assertNotIn("search_default_my_classes", context)
 
     def test_security_and_lock(self):
         mark = self._mark(self.pe_class, self.anna, letter="A")

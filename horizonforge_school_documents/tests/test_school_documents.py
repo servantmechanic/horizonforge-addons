@@ -203,10 +203,9 @@ class TestSchoolDocuments(SchoolCoreCase):
         self.anna.with_user(self.office).document_ids = [Command.link(upload.id)]
         self.assertEqual((upload.res_model, upload.res_id), ("school.student", self.anna.id))
         self.assertEqual(self.anna.document_count, 1)
-        # Anna's teacher opens it; a teacher who doesn't teach her can't.
+        # Every teacher sees every student, so every teacher opens it.
         self.assertEqual(upload.with_user(self.teacher).name, "Enrollment.pdf")
-        with self.assertRaises(AccessError):
-            upload.with_user(self.other_teacher).read(["name"])
+        self.assertEqual(upload.with_user(self.other_teacher).name, "Enrollment.pdf")
 
     def test_demo_loader(self):
         self.Document.with_context(active_test=False).search([]).unlink()

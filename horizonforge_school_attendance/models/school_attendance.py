@@ -38,9 +38,31 @@ class SchoolAttendance(models.Model):
         readonly=True,
     )
     homeroom_id = fields.Many2one(
-        related="student_id.homeroom_id",
+        "school.homeroom",
+        string="Homeroom",
+        compute="_compute_student_snapshot",
         store=True,
         index=True,
+        help="The student's homeroom when the line was recorded: it stays "
+             "when the student changes rooms. Who may see the line follows "
+             "the student's current homeroom.",
+    )
+    grade_level_id = fields.Many2one(
+        "school.grade.level",
+        string="Grade Level",
+        compute="_compute_student_snapshot",
+        store=True,
+        index=True,
+        help="The student's grade level when the line was recorded: it stays "
+             "when the student moves up a grade.",
+    )
+    period_id = fields.Many2one(
+        "school.period",
+        string="Grading Period",
+        compute="_compute_period_id",
+        store=True,
+        index=True,
+        ondelete="set null",
     )
     kind = fields.Selection(related="code_id.kind", store=True)
     excused = fields.Boolean(related="code_id.excused", store=True)
@@ -50,6 +72,24 @@ class SchoolAttendance(models.Model):
         "UNIQUE(student_id, date)",
         "A student has one attendance line per day.",
     )
+
+    @api.depends("student_id")
+    def _compute_student_snapshot(self):
+        # Copied when the line is recorded, not followed afterwards.
+        for attendance in self:
+            attendance.grade_level_id = attendance.student_id.grade_level_id
+            attendance.homeroom_id = attendance.student_id.homeroom_id
+
+    @api.depends("date")
+    def _compute_period_id(self):
+        Period = self.env["school.period"]
+        for attendance in self:
+            attendance.period_id = Period._get_for_date(attendance.date) if attendance.date else False
+
+    @api.model
+    def action_open_list(self):
+        return self.env["school.period"]._school_list_action(
+            "horizonforge_school_attendance.school_attendance_action", "my_homeroom")
 
     @api.depends("student_id", "date", "code_id")
     def _compute_display_name(self):

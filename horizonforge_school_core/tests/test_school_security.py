@@ -27,11 +27,13 @@ class TestSchoolSecurity(SchoolCoreCase):
         Student = self.env["school.student"].with_user(self.teacher)
         self.assertIn(self.carl, Student.search([]))
 
-    def test_teacher_sees_own_students(self):
+    def test_teacher_sees_all_students(self):
+        """Every teacher reads every student and patron; enrollments stay
+        limited to the teacher's own classes."""
         Student = self.env["school.student"].with_user(self.teacher)
-        self.assertEqual(Student.search([]), self.anna | self.ben)
-        with self.assertRaises(AccessError):
-            self.carl.with_user(self.teacher).read(["first_name"])
+        self.assertEqual(Student.search([]), self.anna | self.ben | self.carl)
+        self.assertEqual(self.carl.with_user(self.teacher).first_name, "Carl")
+        self.assertEqual(self.anna.with_user(self.other_teacher).patron_ids.name, "Pat Example")
         Enrollment = self.env["school.enrollment"].with_user(self.teacher)
         self.assertEqual(Enrollment.search([]).section_id, self.section_5)
 

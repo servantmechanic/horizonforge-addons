@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-inherit="web.WebClient" t-inherit-mode="extension">
+        <xpath expr="//ActionContainer" position="before">
+            <SchoolSidebar t-if="!state.fullscreen"/>
+        </xpath>
+    </t>
+
+    <t t-name="horizonforge_school_core.SchoolSidebar">
+        <nav t-if="visible" class="o_school_sidebar d-flex flex-column d-print-none" aria-label="School">
+            <ul class="list-unstyled flex-grow-1 overflow-auto mb-0 py-2">
+                <li t-foreach="sections" t-as="section" t-key="section.id">
+                    <a t-att-href="href(section)"
+                       class="o_school_sidebar_item d-flex align-items-center"
+                       t-att-class="{ 'active': contains(section) }"
+                       t-att-data-menu-xmlid="section.xmlid"
+                       t-on-click="(ev) => this.onClick(ev, section)">
+                        <i t-attf-class="fa fa-fw {{ icon(section) }} me-2" aria-hidden="true"/>
+                        <span class="text-truncate" t-esc="section.name"/>
+                    </a>
+                    <ul t-if="isOpen(section)" class="o_school_sidebar_sub list-unstyled mb-1">
+                        <li t-foreach="leaves(section)" t-as="leaf" t-key="leaf.id">
+                            <a t-att-href="href(leaf)"
+                               class="o_school_sidebar_subitem d-block text-truncate"
+                               t-att-class="{ 'active': leaf.id === state.activeId }"
+                               t-att-data-menu-xmlid="leaf.xmlid"
+                               t-on-click="(ev) => this.onClick(ev, leaf)"
+                               t-esc="leaf.name"/>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <div t-if="version" class="o_school_sidebar_version small text-muted px-3 py-2"
+                 title="Version of the school addons; see CHANGELOG.md">
+                School <t t-esc="version"/>
+            </div>
+        </nav>
+    </t>
+
+</templates>

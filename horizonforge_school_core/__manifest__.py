@@ -1,6 +1,6 @@
 {
     "name": "School Core",
-    "version": "19.0.0.4.1",
+    "version": "19.0.0.7.0",
     "category": "School",
     "summary": "School records for small schools: years, grading periods, "
                "grade levels, homerooms, students, patrons, courses, classes, enrollments",
@@ -28,6 +28,11 @@
     "demo": [
         "demo/school_demo.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "horizonforge_school_core/static/src/sidebar/*",
+        ],
+    },
     "installable": True,
     "application": True,
 }

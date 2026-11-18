@@ -33,7 +33,11 @@
                 <field name="course_id"/>
                 <field name="name"/>
                 <field name="category_id"/>
+                <filter name="my_courses" string="My Courses"
+                        domain="['|', ('course_id.section_ids.teacher_id', '=', uid), ('course_id.section_ids.co_teacher_ids', 'in', uid)]"/>
+                <separator/>
                 <filter name="by_hand" string="Placed by Hand" domain="[('is_scheduled', '=', False)]"/>
+                <separator/>
                 <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
                 <group>
                     <filter name="group_course" string="Course" context="{'group_by': 'course_id'}"/>

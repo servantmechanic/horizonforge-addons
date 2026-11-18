@@ -1,0 +1,77 @@
+$o-school-sidebar-width: 13rem;
+
+// Navbar across the top, sidebar and action side by side below it. Other
+// children of the web client (dialogs, overlays) are positioned and take no
+// room in the extra row they fall into.
+.o_web_client.o_school_sidebar_on {
+    display: grid;
+    grid-template-columns: $o-school-sidebar-width minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+
+    > * {
+        grid-column: 1 / -1;
+    }
+    > .o_school_sidebar {
+        grid-column: 1;
+        grid-row: 2;
+    }
+    > .o_action_manager {
+        grid-column: 2;
+        grid-row: 2;
+        min-width: 0;
+    }
+
+    // The sidebar replaces the menus in the top bar.
+    .o_main_navbar .o_menu_sections {
+        display: none !important;
+    }
+}
+
+.o_school_sidebar {
+    min-height: 0;
+    background-color: $o-view-background-color;
+    border-right: 1px solid $border-color;
+
+    .o_school_sidebar_item,
+    .o_school_sidebar_subitem {
+        color: $body-color;
+        text-decoration: none;
+        border-left: 3px solid transparent;
+
+        &:hover {
+            background-color: rgba($o-action, 0.06);
+        }
+    }
+
+    .o_school_sidebar_item {
+        padding: 0.55rem 1rem;
+        font-weight: 500;
+
+        .fa {
+            color: $o-gray-600;
+        }
+
+        &.active {
+            color: $o-action;
+            background-color: rgba($o-action, 0.1);
+            border-left-color: $o-action;
+
+            .fa {
+                color: $o-action;
+            }
+        }
+    }
+
+    .o_school_sidebar_subitem {
+        padding: 0.35rem 1rem 0.35rem 2.9rem;
+
+        &.active {
+            color: $o-action;
+            font-weight: 500;
+        }
+    }
+
+    .o_school_sidebar_version {
+        border-top: 1px solid $border-color;
+    }
+}

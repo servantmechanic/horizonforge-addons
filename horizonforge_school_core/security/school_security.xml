@@ -64,11 +64,14 @@
         <field name="domain_force">[(1, '=', 1)]</field>
     </record>
 
+    <!-- A small school: every teacher reads every student (and, through
+         the student, their patrons, notes and files). Classes, enrollments,
+         grades and attendance stay limited to the teacher's own. -->
     <record id="rule_school_student_teacher" model="ir.rule">
-        <field name="name">Student: enrolled in the teacher's classes</field>
+        <field name="name">Student: teachers read all</field>
         <field name="model_id" ref="model_school_student"/>
         <field name="groups" eval="[(4, ref('group_school_teacher'))]"/>
-        <field name="domain_force">['|', ('enrollment_ids.section_id.teacher_id', '=', user.id), ('enrollment_ids.section_id.co_teacher_ids', 'in', user.id)]</field>
+        <field name="domain_force">[(1, '=', 1)]</field>
     </record>
     <record id="rule_school_student_office" model="ir.rule">
         <field name="name">Student: office sees all</field>

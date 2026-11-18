@@ -43,7 +43,7 @@ class SchoolStudent(models.Model):
         "attachment_id",
         string="Files",
         help="Enrollment forms, records and other files of this student. "
-        "Seen by the office and by the student's teachers.",
+        "Seen by the office and every teacher.",
     )
     document_count = fields.Integer(compute="_compute_document_count")
 

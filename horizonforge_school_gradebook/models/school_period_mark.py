@@ -33,6 +33,11 @@ class SchoolPeriodMark(models.Model):
         index=True,
     )
     grading_type = fields.Selection(related="section_id.grading_type")
+    grade_level_ids = fields.Many2many(
+        related="section_id.course_id.grade_level_ids",
+        string="Grade Levels",
+        store=True,
+    )
     letter = fields.Char(
         string="Letter Grade",
         help="Only for courses graded by letter only. Other courses get "
@@ -141,10 +146,10 @@ class SchoolPeriodMark(models.Model):
             if not user.has_group("horizonforge_school_core.group_school_admin"):
                 domain += ["|", ("teacher_id", "=", user.id), ("co_teacher_ids", "in", user.id)]
             sections = self.env["school.section"].search(domain)
+            from_menu = True
+        else:
+            from_menu = False
         self._ensure_rows(sections)
-        action = self.env["ir.actions.act_window"]._for_xml_id(
-            "horizonforge_school_gradebook.school_period_mark_action"
-        )
         today = fields.Date.context_today(self)
         periods = sections.year_id.period_ids
         current = (
@@ -152,9 +157,19 @@ class SchoolPeriodMark(models.Model):
             or periods.filtered(lambda p: p.date_end < today)[-1:]
             or periods[:1]
         )
-        action["domain"] = [("section_id", "in", sections.ids)]
-        action["context"] = {
-            "search_default_period_id": current[:1].id,
-            "search_default_group_section": 0 if len(sections) == 1 else 1,
-        }
+        if from_menu:
+            # Teachers start on their own classes; nothing is fixed, so any
+            # class or period can be picked again after clearing a filter.
+            action = self.env["school.period"]._school_list_action(
+                "horizonforge_school_gradebook.school_period_mark_action", "my_classes")
+            action["context"]["search_default_current_year"] = 1
+        else:
+            action = self.env["ir.actions.act_window"]._for_xml_id(
+                "horizonforge_school_gradebook.school_period_mark_action"
+            )
+            action["domain"] = [("section_id", "in", sections.ids)]
+            action["context"] = {}
+        if current:
+            action["context"]["searchpanel_default_period_id"] = current[:1].id
+        action["context"]["search_default_group_section"] = 0 if len(sections) == 1 else 1
         return action

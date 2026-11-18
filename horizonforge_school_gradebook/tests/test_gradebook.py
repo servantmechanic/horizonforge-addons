@@ -1,11 +1,14 @@
 from datetime import date
 
+from freezegun import freeze_time
 from psycopg2 import IntegrityError
 
 from odoo import Command
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests import Form, tagged
 from odoo.tools import mute_logger
+
+from odoo.addons.horizonforge_school_core.tests.common import assert_search_filters
 
 from .common import GradebookCase
 
@@ -81,6 +84,49 @@ class TestGradebook(GradebookCase):
         self.assertEqual(self.env.company.school_entry_mode, "points")
 
     # Assignments
+
+    def test_assignment_grade_levels(self):
+        """Assignments carry their course's grade levels, to search and group by grade."""
+        lesson_5 = self._assignment()
+        lesson_6 = self._assignment(self.section_6)
+        Assignment = self.env["school.assignment"]
+        self.assertEqual(lesson_5.grade_level_ids, self.level_5)
+        self.assertEqual(Assignment.search([("grade_level_ids", "=", self.level_6.id)]), lesson_6)
+        groups = dict(Assignment._read_group(
+            [("id", "in", (lesson_5 | lesson_6).ids)], ["grade_level_ids"], ["__count"]))
+        self.assertEqual((groups[self.level_5], groups[self.level_6]), (1, 1))
+        # A course taught to two grades counts under both.
+        self.math_5.grade_level_ids |= self.level_6
+        self.assertEqual(lesson_5.grade_level_ids, self.level_5 | self.level_6)
+        assert_search_filters(self, Assignment.with_user(self.teacher))
+
+    @freeze_time("2030-12-02")
+    def test_not_fully_scored(self):
+        """Past assignments with enrolled students still to score."""
+        Assignment = self.env["school.assignment"]
+        past = self._assignment(date="2030-09-03")
+        self.assertEqual(past.unscored_count, 2)  # Anna and Ben
+        self.assertTrue(past.is_unscored)
+        self._score(past, self.anna, 90)
+        past.invalidate_recordset(["unscored_count", "is_unscored"])
+        self.assertEqual(past.unscored_count, 1)
+        # Missing and Excused count as scored.
+        self._score(past, self.ben, status="missing")
+        past.invalidate_recordset(["unscored_count", "is_unscored"])
+        self.assertEqual(past.unscored_count, 0)
+        self.assertNotIn(past, Assignment.search([("is_unscored", "=", True)]))
+        other = self._assignment(date="2030-09-04")
+        future = self._assignment(date="2030-12-03")
+        self.assertFalse(future.is_unscored)
+        self.assertEqual(Assignment.search([("id", "in", (past | other).ids), ("is_unscored", "=", True)]), other)
+        self.assertEqual(Assignment.search([("id", "in", (past | other).ids), ("is_unscored", "=", False)]), past)
+
+    def test_list_openers(self):
+        action = self.env["school.assignment"].with_user(self.teacher).action_open_list()
+        self.assertEqual(action["res_model"], "school.assignment")
+        self.assertEqual(action["context"]["search_default_my_classes"], 1)
+        assert_search_filters(self, self.env["school.period.mark"].with_user(self.teacher))
+        assert_search_filters(self, self.env["school.assignment.template"].with_user(self.teacher))
 
     def test_assignment_period_from_date(self):
         assignment = self._assignment()

@@ -20,8 +20,9 @@ addons: the gradebook and attendance addons install on top of it.
 
 ## Groups
 
-- **Teacher**: reads their own classes (as teacher or co-teacher) and the
-  students enrolled in them.
+- **Teacher**: reads every student and patron (a small school, where
+  everyone knows everyone), and their own classes (as teacher or co-teacher)
+  with their enrollments, grades and attendance.
 - **Office**: reads every class, and manages students, patrons and enrollments.
 - **Administrator**: manages years, grading periods, grade levels, homerooms,
   courses, classes and settings.
@@ -68,11 +69,19 @@ grading periods and days off on the same weekdays as last year, last year's clas
 classes generated from the homerooms), students moved up one grade level with
 the top grade archived, and everyone enrolled in their new classes.
 
+## Sidebar and version
+
+On wide screens the School menus show in a sidebar, one click each (Gradebook
+opens the grid, Attendance the daily grid). Phones keep Odoo's menu. The foot
+of the sidebar shows the version of the school addons, which all share one
+version: see [CHANGELOG.md](CHANGELOG.md).
+
 ## Demo data
 
 The demo data builds a made-up reference school: 10 grade levels, 5
 homerooms, 5 teachers (`teacher1` to `teacher5`, password `teacher`), 60 students and
-40 classes. On a database created without demo data, load it from the shell:
+40 classes. It also turns on the simple interface of `horizonforge_ce_custom`
+(no Discuss, Contacts or Apps for non-administrators). On a database created without demo data, load it from the shell:
 
 ```python
 env["school.year"]._load_school_demo()

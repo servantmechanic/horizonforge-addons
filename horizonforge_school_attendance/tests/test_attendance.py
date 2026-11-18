@@ -7,7 +7,7 @@ from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import tagged
 from odoo.tools import mute_logger
 
-from odoo.addons.horizonforge_school_core.tests.common import SchoolCoreCase
+from odoo.addons.horizonforge_school_core.tests.common import SchoolCoreCase, assert_search_filters
 
 
 @tagged("post_install", "-at_install")
@@ -63,6 +63,37 @@ class TestAttendance(SchoolCoreCase):
         self.assertEqual(record.homeroom_id, self.homeroom)
         with self.assertRaises(IntegrityError), mute_logger("odoo.sql_db"):
             self._record(self.anna, "2030-09-03", self.tardy)
+
+    def test_grade_level_and_period(self):
+        record = self._record(self.anna, "2030-09-03")
+        self.assertEqual(record.grade_level_id, self.anna.grade_level_id)
+        self.assertEqual(record.period_id, self.semester_1)
+        # The grade level is the one at the time: moving up doesn't change it.
+        self.anna.grade_level_id = self.level_6
+        self.assertEqual(record.grade_level_id, self.level_5)
+        # Same for the homeroom; the new teacher still sees the line.
+        self.anna.homeroom_id = self.other_homeroom
+        self.assertEqual(record.homeroom_id, self.homeroom)
+        self.assertIn(record, self.Attendance.with_user(self.other_teacher).search([]))
+        # Changing the grading periods moves the line to its new period.
+        semester_2 = self.year.period_ids[1]
+        self.semester_1.date_end = "2030-08-30"
+        semester_2.date_start = "2030-09-02"
+        self.assertEqual(record.period_id, semester_2)
+        lines = self.Attendance.search([("period_id", "=", semester_2.id)])
+        self.assertIn(record, lines)
+
+    def test_search_filters(self):
+        """Every filter of the Absences & Tardies search view runs."""
+        self._record(self.anna, "2030-09-03")
+        assert_search_filters(self, self.Attendance.with_user(self.teacher))
+
+    def test_list_opener(self):
+        action = self.Attendance.with_user(self.teacher).action_open_list()
+        self.assertEqual(action["context"]["search_default_my_homeroom"], 1)
+        self.assertEqual(action["context"]["search_default_current_year"], 1)
+        action = self.Attendance.with_user(self.office).action_open_list()
+        self.assertNotIn("search_default_my_homeroom", action["context"])
 
     def test_school_days_only(self):
         for day in ("2030-09-01", "2030-09-02", "2029-09-03"):  # Sunday, Labor Day, no school year
