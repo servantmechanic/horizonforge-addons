@@ -14,6 +14,11 @@
                         <field name="hf_block_quick_create_product"/>
                     </setting>
                 </block>
+                <block title="Interface" name="hf_interface_setting_container">
+                    <setting id="hf_simple_interface" help="Only administrators see Discuss, Contacts, Apps, the chat and activity icons and OdooBot">
+                        <field name="hf_simple_interface"/>
+                    </setting>
+                </block>
             </xpath>
         </field>
     </record>
