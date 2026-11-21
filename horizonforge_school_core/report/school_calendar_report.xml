@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_school_calendar" model="ir.actions.report">
+        <field name="name">School Calendar</field>
+        <field name="model">school.year</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">horizonforge_school_core.report_school_calendar</field>
+        <field name="report_file">horizonforge_school_core.report_school_calendar</field>
+        <field name="print_report_name">'School Calendar %s' % object.name</field>
+        <field name="binding_model_id" ref="model_school_year"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Year at a glance: the months in three columns, then the days off and
+         the grading periods. Tables, not flexbox: the PDF builder (wkhtmltopdf)
+         doesn't lay out flexbox. -->
+    <template id="report_school_calendar">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="year">
+                <t t-call="web.external_layout">
+                    <t t-set="o" t-value="year"/>
+                    <t t-set="months" t-value="year._get_calendar_months()"/>
+                    <div class="page o_school_cal">
+                        <style>
+                            .o_school_cal h2 { font-size: 20px; margin: 0 0 2px 0; }
+                            .o_school_cal .o_school_sub { color: #555; margin-bottom: 10px; }
+                            .o_school_cal .o_months { width: 100%; border-collapse: separate; border-spacing: 8px 6px; }
+                            .o_school_cal .o_months > tbody > tr > td { width: 33.3%; vertical-align: top; padding: 0; }
+                            .o_school_cal .o_month { width: 100%; border-collapse: separate; border-spacing: 1px; font-size: 10px; }
+                            .o_school_cal .o_month caption { caption-side: top; text-align: left; font-weight: bold; font-size: 12px; color: #000; padding: 0 0 2px 0; }
+                            .o_school_cal .o_month caption span { float: right; font-weight: normal; font-size: 9px; color: #555; padding-top: 2px; }
+                            .o_school_cal .o_month th { text-align: center; color: #555; font-weight: normal; border-bottom: 1px solid #999; padding: 1px 0; }
+                            .o_school_cal .o_month td { text-align: center; height: 14px; padding: 0; border: 1px solid transparent; }
+                            .o_school_cal .o_weekend { background-color: #eee; color: #888; }
+                            .o_school_cal .o_out { color: #bbb; }
+                            .o_school_cal .o_off { background-color: #f4b6b6; font-weight: bold; }
+                            .o_school_cal .o_info { background-color: #c9ddf2; }
+                            .o_school_cal .o_mark { border: 1px solid #000 !important; font-weight: bold; }
+                            .o_school_cal .o_legend { font-size: 10px; color: #333; margin: 2px 8px 12px 8px; }
+                            .o_school_cal .o_legend span.o_swatch { display: inline-block; width: 11px; height: 11px; vertical-align: middle; margin: 0 3px 0 10px; }
+                            .o_school_cal .o_lists { width: 100%; border-collapse: separate; border-spacing: 8px 0; }
+                            .o_school_cal .o_lists > tbody > tr > td { vertical-align: top; padding: 0; }
+                            .o_school_cal .o_list { width: 100%; border-collapse: collapse; font-size: 11px; }
+                            .o_school_cal .o_list th, .o_school_cal .o_list td { border: 1px solid #999; padding: 2px 5px; }
+                            .o_school_cal .o_list th { background-color: #eee; text-align: left; }
+                            .o_school_cal .o_list tr { page-break-inside: avoid; }
+                            .o_school_cal .o_num { text-align: right; white-space: nowrap; }
+                            .o_school_cal .o_nowrap { white-space: nowrap; }
+                            .o_school_cal h3 { font-size: 13px; margin: 0 0 4px 0; }
+                        </style>
+                        <h2>School Calendar <t t-out="year.name"/></h2>
+                        <div class="o_school_sub">
+                            <span t-field="year.date_start"/> to <span t-field="year.date_end"/>
+                            · <t t-out="sum(m['school_days'] for m in months)"/> school days
+                        </div>
+                        <table class="o_months">
+                            <tbody>
+                                <tr t-foreach="[months[i:i + 3] for i in range(0, len(months), 3)]" t-as="row">
+                                    <td t-foreach="row" t-as="month">
+                                        <table class="o_month">
+                                            <caption>
+                                                <t t-out="month['name']"/>
+                                                <span><t t-out="month['school_days']"/> days</span>
+                                            </caption>
+                                            <thead>
+                                                <tr><th>S</th><th>M</th><th>T</th><th>W</th><th>T</th><th>F</th><th>S</th></tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr t-foreach="month['weeks']" t-as="week">
+                                                    <td t-foreach="week" t-as="cell" t-att-class="cell['class']"
+                                                        t-out="cell['day']"/>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td t-foreach="range(3 - len(row))" t-as="blank"/>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="o_legend">
+                            <span class="o_swatch o_off"/>No school
+                            <span class="o_swatch o_info"/>Shown only (school in session)
+                            <span class="o_swatch o_weekend"/>Weekend
+                            <span class="o_swatch o_mark"/>First day, last day, end of a grading period
+                        </div>
+                        <table class="o_lists">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 60%;">
+                                        <h3>Days Off and Events</h3>
+                                        <table class="o_list">
+                                            <thead>
+                                                <tr><th>Dates</th><th>Name</th><th>Type</th></tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr t-foreach="year._get_calendar_entries()" t-as="entry">
+                                                    <td class="o_nowrap" t-out="entry['dates']"/>
+                                                    <td t-out="entry['name']"/>
+                                                    <td class="o_nowrap">
+                                                        <strong t-if="entry['off']">No school</strong>
+                                                        <t t-else="">Shown only</t>
+                                                    </td>
+                                                </tr>
+                                                <tr t-if="not year.day_off_ids">
+                                                    <td colspan="3">No days off on the calendar yet.</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td style="width: 40%;">
+                                        <h3>Grading Periods</h3>
+                                        <table class="o_list" t-if="year.period_ids">
+                                            <thead>
+                                                <tr><th>Period</th><th>Dates</th><th class="o_num">Days</th></tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr t-foreach="year.period_ids" t-as="period">
+                                                    <td t-out="period.name"/>
+                                                    <td class="o_nowrap">
+                                                        <t t-out="'%s %s' % (period.date_start.strftime('%b'), period.date_start.day)"/> – <t t-out="'%s %s' % (period.date_end.strftime('%b'), period.date_end.day)"/>
+                                                    </td>
+                                                    <td class="o_num" t-out="len(year._get_school_days(period.date_start, period.date_end))"/>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

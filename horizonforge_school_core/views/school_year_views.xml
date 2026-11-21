@@ -22,6 +22,9 @@
                 <header>
                     <button name="action_set_current" type="object" string="Make Current Year"
                             class="btn-primary" invisible="is_current or not id"/>
+                    <button name="action_print_calendar" type="object" string="Print Calendar"
+                            invisible="not id"
+                            help="A year-at-a-glance calendar with the days off and grading periods, as a PDF."/>
                     <button name="action_add_holidays" type="object" string="Add Holidays"
                             invisible="not id"
                             help="Show Good Friday, Easter, Thanksgiving and Christmas on this year's calendar."/>
@@ -120,7 +123,7 @@
         <field name="name">school.calendar.day.view.calendar</field>
         <field name="model">school.calendar.day</field>
         <field name="arch" type="xml">
-            <calendar string="School Calendar" date_start="date_start" date_stop="date_end"
+            <calendar string="School Calendar" js_class="school_calendar" date_start="date_start" date_stop="date_end"
                       mode="month" color="color" quick_create="0" event_open_popup="1">
                 <field name="name"/>
                 <field name="day_type"/>

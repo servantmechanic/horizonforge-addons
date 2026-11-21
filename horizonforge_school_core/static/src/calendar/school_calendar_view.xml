@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="horizonforge_school_core.SchoolCalendarButtons">
+        <button type="button" class="btn btn-secondary o_school_calendar_print"
+                title="Print the school year's calendar" t-on-click="onPrintCalendar">
+            <i class="fa fa-print me-1"/>Print
+        </button>
+    </t>
+</templates>

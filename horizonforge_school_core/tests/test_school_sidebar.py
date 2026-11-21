@@ -54,3 +54,18 @@ class TestSchoolSidebar(HttpCase):
             "/odoo/action-horizonforge_school_core.school_student_action",
             code, login="sidebar_teacher",
         )
+
+    def test_calendar_print_button(self):
+        """The School Calendar has a Print button."""
+        new_test_user(
+            self.env, login="calendar_office", password="calendar_office",
+            groups="base.group_user,horizonforge_school_core.group_school_office",
+        )
+        code = WAIT_FOR + """(async () => {
+            await waitFor(".o_calendar_view .o_school_calendar_print", "Print button");
+            console.log("test successful");
+        })().catch((e) => console.error(e.message));"""
+        self.browser_js(
+            "/odoo/action-horizonforge_school_core.school_calendar_day_action",
+            code, login="calendar_office",
+        )

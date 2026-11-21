@@ -24,6 +24,7 @@
         "wizard/school_year_setup_views.xml",
         "wizard/school_setup_guide_views.xml",
         "views/menus.xml",
+        "report/school_calendar_report.xml",
     ],
     "demo": [
         "demo/school_demo.xml",
@@ -31,6 +32,7 @@
     "assets": {
         "web.assets_backend": [
             "horizonforge_school_core/static/src/sidebar/*",
+            "horizonforge_school_core/static/src/calendar/*",
         ],
     },
     "installable": True,

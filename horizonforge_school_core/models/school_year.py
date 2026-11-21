@@ -1,7 +1,10 @@
 from datetime import date, timedelta
 
+from dateutil.relativedelta import relativedelta
+
 from odoo import Command, _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
+from odoo.tools import format_date
 
 
 class SchoolYear(models.Model):
@@ -176,6 +179,88 @@ class SchoolYear(models.Model):
                 days.append(day)
             day += timedelta(days=1)
         return days
+
+    def _get_calendar_months(self):
+        """The months of the year for the printed calendar. Each month has
+        its weeks (Sunday to Saturday) of day cells, with the CSS class that
+        shades them, and its number of school days."""
+        self.ensure_one()
+        # A day off wins over a day shown only when both fall on a date.
+        marks = {}
+        for entry in self.day_off_ids.sorted(lambda d: d.day_type == "off"):
+            day = entry.date_start
+            while day <= entry.date_end:
+                marks[day] = entry
+                day += timedelta(days=1)
+        school_days = self._get_school_days()
+        period_ends = set(self.period_ids.mapped("date_end"))
+        months = []
+        month = self.date_start.replace(day=1)
+        while month <= self.date_end:
+            next_month = month + relativedelta(months=1)
+            day = month - timedelta(days=(month.weekday() + 1) % 7)
+            weeks = []
+            while day < next_month:
+                week = []
+                for _weekday in range(7):
+                    week.append(self._calendar_cell(day, month, marks, period_ends))
+                    day += timedelta(days=1)
+                weeks.append(week)
+            months.append({
+                "name": format_date(self.env, month, date_format="MMMM yyyy"),
+                "weeks": weeks,
+                "school_days": len([d for d in school_days if month <= d < next_month]),
+            })
+            month = next_month
+        return months
+
+    def _calendar_cell(self, day, month, marks, period_ends):
+        if day.month != month.month:
+            return {"day": "", "class": ""}
+        entry = marks.get(day)
+        if day < self.date_start or day > self.date_end:
+            css = "o_out"
+        elif entry and entry.day_type == "off":
+            css = "o_off"
+        elif entry:
+            css = "o_info"
+        elif day.weekday() >= 5:
+            css = "o_weekend"
+        else:
+            css = ""
+        if day in period_ends or day in (self.date_start, self.date_end):
+            css += " o_mark"
+        return {"day": day.day, "class": css.strip()}
+
+    def _get_calendar_entries(self):
+        """The days off and days shown only, for the list under the months."""
+        self.ensure_one()
+        rows = []
+        for entry in self.day_off_ids.sorted(lambda d: (d.date_start, d.date_end)):
+            dates = format_date(self.env, entry.date_start, date_format="EEE MMM d")
+            if entry.date_end != entry.date_start:
+                dates += " – " + format_date(self.env, entry.date_end, date_format="EEE MMM d")
+            rows.append({"dates": dates, "name": entry.name, "off": entry.day_type == "off"})
+        return rows
+
+    def action_print_calendar(self):
+        # sudo: only system admins can read report actions. config=False:
+        # under sudo, Odoo would ask every user to set up the report layout.
+        return self.env.ref(
+            "horizonforge_school_core.action_report_school_calendar"
+        ).sudo().report_action(self, config=False)
+
+    @api.model
+    def action_print_calendar_for_date(self, day):
+        """Print the calendar of the school year around a date (the one shown
+        on the calendar screen), else of the current year."""
+        day = fields.Date.to_date(day)
+        year = self.search(
+            [("date_start", "<=", day), ("date_end", ">=", day)], limit=1
+        ) or self._get_current()
+        if not year:
+            raise UserError(_("Add a school year first."))
+        return year.action_print_calendar()
 
     def _generate_periods(self, count, name):
         """Split the year into ``count`` grading periods of about the same
