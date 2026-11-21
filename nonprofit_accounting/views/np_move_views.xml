@@ -23,7 +23,7 @@
         <field name="name">np.move.form</field>
         <field name="model">np.move</field>
         <field name="arch" type="xml">
-            <form>
+            <form js_class="np_move_form">
                 <header>
                     <button name="action_post" string="Post" type="object" class="oe_highlight"
                             invisible="state != 'draft' or move_type == 'payment'"
@@ -48,19 +48,34 @@
                             <span invisible="name != '/'">Draft</span>
                         </h1>
                     </div>
-                    <group>
+                    <!-- Bills: the fields typed for every bill come first, in tab
+                         order; Pay From (it has a default) and the type after. -->
+                    <group invisible="move_type != 'payment'">
+                        <group>
+                            <field name="partner_id" string="Paid To"
+                                   readonly="state == 'posted'"/>
+                            <field name="bill_date" readonly="state == 'posted'"/>
+                            <field name="ref" string="Bill / Invoice #" readonly="state == 'posted'"/>
+                            <field name="memo" readonly="state == 'posted'"/>
+                        </group>
+                        <group>
+                            <field name="bank_account_id" string="Pay From"
+                                   readonly="state == 'posted'" options="{'no_create': True}"/>
+                            <field name="check_number" readonly="state == 'posted'"/>
+                            <field name="date" string="Paid Date" readonly="state == 'posted'"
+                                   invisible="state == 'draft'"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="amount_total"/>
+                            <!-- Read-only from the Bills menu: not a tab stop. -->
+                            <field name="move_type" readonly="context.get('default_move_type') == 'payment'"/>
+                        </group>
+                    </group>
+                    <group invisible="move_type == 'payment'">
                         <group>
                             <field name="move_type"/>
-                            <field name="bill_date" invisible="move_type != 'payment'"
-                                   readonly="state == 'posted'"/>
-                            <label for="date" string="Paid Date"
-                                   invisible="move_type != 'payment' or state == 'draft'"/>
-                            <label for="date" invisible="move_type == 'payment'"/>
-                            <field name="date" nolabel="1" readonly="state == 'posted'"
-                                   invisible="move_type == 'payment' and state == 'draft'"/>
+                            <field name="date" readonly="state == 'posted'"/>
 
                             <label for="bank_account_id" string="Deposit To" invisible="move_type != 'deposit'"/>
-                            <label for="bank_account_id" string="Pay From" invisible="move_type != 'payment'"/>
                             <label for="bank_account_id" string="From Account" invisible="move_type != 'transfer'"/>
                             <field name="bank_account_id" nolabel="1"
                                    invisible="move_type == 'journal'"
@@ -75,18 +90,11 @@
                         </group>
                         <group>
                             <label for="partner_id" string="Received From" invisible="move_type != 'deposit'"/>
-                            <label for="partner_id" string="Paid To" invisible="move_type != 'payment'"/>
                             <label for="partner_id" string="Contact" invisible="move_type != 'journal'"/>
                             <field name="partner_id" nolabel="1" invisible="move_type == 'transfer'"
                                    readonly="state == 'posted'"/>
-
-                            <label for="ref" string="Bill / Invoice #" invisible="move_type != 'payment'"/>
-                            <label for="ref" invisible="move_type == 'payment'"/>
-                            <field name="ref" nolabel="1" readonly="state == 'posted'"/>
-                            <field name="check_number" invisible="move_type != 'payment'"
-                                   readonly="state == 'posted'"/>
+                            <field name="ref" readonly="state == 'posted'"/>
                             <field name="memo" readonly="state == 'posted'"/>
-                            <field name="currency_id" invisible="1"/>
                             <field name="amount_total" invisible="move_type == 'transfer'"/>
                         </group>
                     </group>
