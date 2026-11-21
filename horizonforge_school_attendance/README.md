@@ -49,8 +49,9 @@ whole period instead of one week.
   present, absent, excused, unexcused and tardies, for a grading period or any
   dates, as PDF or CSV. School days are counted up to today.
 - **Absences & Tardies**: the list of everything recorded, to filter and group.
-- With the gradebook installed, the **report card** gets an attendance table:
-  days absent, of which excused, and tardies, per grading period.
+- With the gradebook installed, the **report card** shows absences and days
+  present per grading period and for the year, and so does the report card
+  reference.
 
 ## Tests
 

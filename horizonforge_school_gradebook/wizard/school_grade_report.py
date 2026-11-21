@@ -7,6 +7,7 @@ from odoo.exceptions import UserError
 
 REPORTS = {
     "report_card": "horizonforge_school_gradebook.action_report_card",
+    "reference": "horizonforge_school_gradebook.action_report_card_reference",
     "class_sheet": "horizonforge_school_gradebook.action_report_class_sheet",
     "progress": "horizonforge_school_gradebook.action_report_progress",
     "missing": "horizonforge_school_gradebook.action_report_missing",
@@ -22,7 +23,8 @@ class SchoolGradeReport(models.TransientModel):
 
     report_type = fields.Selection(
         [
-            ("report_card", "Report card sheet"),
+            ("report_card", "Report card"),
+            ("reference", "Report card reference"),
             ("class_sheet", "Class grade sheet"),
             ("progress", "Progress report"),
             ("missing", "Missing work"),
@@ -206,6 +208,7 @@ class SchoolGradeReport(models.TransientModel):
                 mark = marks.get((student.id, self.period_id.id))
                 rows.append({
                     "section": section,
+                    "grading_type": section.grading_type,
                     "course": section.course_id.name,
                     "teacher": section.teacher_id.name or "",
                     "grades": grades,
@@ -213,15 +216,110 @@ class SchoolGradeReport(models.TransientModel):
                     "comment": mark.comment or "" if mark else "",
                 })
             if rows:
+                totals = [period_totals.get(student.id) for period_totals in attendance]
+                scales = self.env["school.grading.scale"]
+                for row in rows:
+                    if row["grading_type"] == "percent":
+                        scales |= row["section"]._get_grading_scale(student)
                 cards.append({
                     "student": student,
                     "periods": periods,
                     "rows": rows,
-                    "attendance": self._attendance_lines([
-                        totals.get(student.id) for totals in attendance
-                    ]),
+                    "attendance": self._attendance_lines(totals),
+                    "attendance_totals": totals,
+                    "scales": scales,
                 })
         return cards
+
+    def _get_card_pages(self):
+        """The folded report card: the report card data laid out over all
+        the year's grading periods, the later ones left blank."""
+        all_periods = self.year_id.period_ids
+        decimals = self.env.company.school_grade_decimals
+        pages = []
+        for card in self._get_report_cards():
+            blank = len(all_periods) - len(card["periods"])
+            subjects = []
+            comments = []
+            for row in card["rows"]:
+                if row["comment"]:
+                    comments.append({"course": row["course"], "comment": row["comment"]})
+                if row["grading_type"] == "comment":
+                    continue
+                cells = [
+                    grade["grade"] if row["grading_type"] == "percent" else grade["letter"]
+                    for grade in row["grades"]
+                ]
+                subjects.append({
+                    "course": row["course"],
+                    "cells": cells + [""] * blank,
+                    "average": row["year"]["grade"],
+                })
+            totals = card["attendance_totals"]
+            has_attendance = any(totals)
+            absences = [f"{t['absent']:g}" if t else "0" for t in totals] if has_attendance else []
+            present = [f"{t['present']:g}" if t else "" for t in totals] if has_attendance else []
+            pages.append({
+                "student": card["student"],
+                "periods": all_periods,
+                "subjects": subjects,
+                "comments": comments,
+                "keys": [scale._get_key(decimals) for scale in card["scales"]],
+                "absences": absences + [""] * (blank if has_attendance else len(all_periods)),
+                "absences_total": f"{sum(t['absent'] for t in totals if t):g}" if has_attendance else "",
+                "present": present + [""] * (blank if has_attendance else len(all_periods)),
+                "present_total": f"{sum(t['present'] for t in totals if t):g}" if has_attendance else "",
+            })
+        return pages
+
+    def _get_reference_sheets(self):
+        """For copying grades onto a paper report card: one page per
+        homeroom, a table per grade level, a row per student with this
+        period's grade in each course (and the year grade so far)."""
+        groups = {}
+        for card in self._get_report_cards():
+            student = card["student"]
+            groups.setdefault(student.homeroom_id, {}).setdefault(student.grade_level_id, []).append(card)
+        sheets = []
+        for homeroom, levels in sorted(
+            groups.items(), key=lambda item: (not item[0], item[0].name or "")
+        ):
+            tables = []
+            for level, cards in sorted(levels.items(), key=lambda item: (item[0].sequence, item[0].name or "")):
+                courses = []
+                for card in cards:
+                    for row in card["rows"]:
+                        if row["grading_type"] != "comment" and row["course"] not in courses:
+                            courses.append(row["course"])
+                rows = []
+                for card in cards:
+                    by_course = {row["course"]: row for row in card["rows"]}
+                    cells = []
+                    for course in courses:
+                        row = by_course.get(course)
+                        if not row:
+                            cells.append({"grade": "", "average": ""})
+                            continue
+                        grade = row["grades"][-1]
+                        percent = row["grading_type"] == "percent"
+                        cells.append({
+                            "grade": grade["grade"] if percent else grade["letter"],
+                            "average": row["year"]["grade"] if percent else "",
+                        })
+                    totals = card["attendance_totals"][-1] if card["attendance_totals"] else None
+                    rows.append({
+                        "student": card["student"],
+                        "cells": cells,
+                        "absent": f"{totals['absent']:g}" if totals else "",
+                        "present": f"{totals['present']:g}" if totals else "",
+                        "absent_year": f"{sum(t['absent'] for t in card['attendance_totals'] if t):g}"
+                        if totals else "",
+                        "present_year": f"{sum(t['present'] for t in card['attendance_totals'] if t):g}"
+                        if totals else "",
+                    })
+                tables.append({"grade_level": level, "courses": courses, "rows": rows})
+            sheets.append({"homeroom": homeroom, "tables": tables})
+        return sheets
 
     @api.model
     def _attendance_lines(self, totals):
@@ -391,6 +489,7 @@ class SchoolGradeReport(models.TransientModel):
     def _check_not_empty(self):
         getter = {
             "report_card": self._get_report_cards,
+            "reference": self._get_report_cards,
             "class_sheet": self._get_class_sheets,
             "progress": self._get_progress_reports,
             "missing": self._get_missing_work,
@@ -404,12 +503,13 @@ class SchoolGradeReport(models.TransientModel):
     def action_print(self):
         self.ensure_one()
         self._check_not_empty()
-        return self.env.ref(REPORTS[self.report_type]).report_action(self)
+        # sudo: only system admins can read report actions
+        return self.env.ref(REPORTS[self.report_type]).sudo().report_action(self, config=False)
 
     def _csv_rows(self):
         """Header and rows of the CSV export of the chosen report."""
         self.ensure_one()
-        if self.report_type == "report_card":
+        if self.report_type in ("report_card", "reference"):
             cards = self._get_report_cards()
             periods = cards[0]["periods"] if cards else self.env["school.period"]
             header = [_("Student ID"), _("Last Name"), _("First Name"), _("Grade Level"), _("Course"), _("Teacher")]

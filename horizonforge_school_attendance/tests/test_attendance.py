@@ -264,6 +264,11 @@ class TestAttendance(SchoolCoreCase):
         self.assertEqual(wizard.action_print()["report_name"],
                          "horizonforge_school_attendance.report_attendance_summary")
         self.assertIn("/web/content/", wizard.action_export_csv()["url"])
+        office_wizard = self.env["school.attendance.report"].with_user(self.office).create({
+            "year_id": self.year.id, "period_id": self.semester_1.id,
+        })
+        self.assertEqual(office_wizard.action_print()["report_name"],
+                         "horizonforge_school_attendance.report_attendance_summary")
         own_dates = self.env["school.attendance.report"].create({
             "year_id": self.year.id, "date_from": "2030-09-04", "date_to": "2030-09-04",
             "student_ids": self.anna.ids,
@@ -297,7 +302,16 @@ class TestAttendance(SchoolCoreCase):
         html = self.env["ir.actions.report"]._render_qweb_html(
             "horizonforge_school_gradebook.report_card", wizard.ids
         )[0].decode()
-        self.assertIn("Days absent", html)
+        self.assertIn("Total Days Present", html)
+        page, = wizard._get_card_pages()
+        # Days present count up to today only.
+        present = self.anna._school_attendance_totals(
+            self.semester_1.date_start, self.semester_1.date_end
+        )[self.anna.id]["present"]
+        blank = [""] * (len(self.year.period_ids) - 1)
+        self.assertEqual(page["absences"], ["1.5"] + blank)
+        self.assertEqual(page["present"], [f"{present:g}"] + blank)
+        self.assertEqual(page["present_total"], f"{present:g}")
 
     def test_setup_guide_step(self):
         guide = self.env["school.setup.guide"].create({})

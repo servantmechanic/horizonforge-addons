@@ -11,6 +11,27 @@ has no changes. The version is shown at the foot of the School sidebar.
 
 Each release is tagged in git as `school-<version>`, for example `school-0.7.0`.
 
+## Unreleased
+
+- **Print the school calendar.** The School Calendar has a Print button, and
+  each school year a Print Calendar button: a one-page PDF of the year at a
+  glance, with days off shaded red, days shown only in blue, the first and
+  last days and grading period ends outlined, school days per month, and the
+  lists of days off and grading periods.
+- **New report card.** The report card is now a folded card, two landscape
+  pages per student: parent signature and teacher comments on the back, a
+  cover with the student, school, a verse or motto and a letter to parents,
+  and inside the grades for every grading period with the year average, the
+  grading scale's key, conduct traits with blank boxes to mark by hand, and
+  attendance. The cover texts and conduct traits are School settings; grading
+  scale lines get a description for the key. It replaces the report card sheet.
+- **Report card reference.** A new grade report, one page per homeroom, for
+  copying grades onto a separate paper card: each student's period grade in
+  every subject, the year grade so far, absences and days present.
+- **Printing works for teachers and office staff.** Report cards, class
+  sheets and the attendance summary failed for users who aren't system
+  admins (they can't read report actions).
+
 ## 0.7.0 (2026-11-18)
 
 - **Sidebar.** On wide screens the School menus are in a sidebar, each one

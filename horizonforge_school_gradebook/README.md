@@ -120,14 +120,18 @@ School, Reports prints a PDF or exports the same data as CSV.
 
 | Report | Contents |
 |---|---|
-| Report card sheet | One page per student: every subject in course order, the grade of each period so far and the year grade, comment lines. Pick a homeroom or grade level to print a whole group in one PDF |
+| Report card | The folded card, two Letter landscape pages per student (print both sides, fold in half). Outside: parent signature and the period's teacher comments on the back; the cover with the student, grade level, school year, school logo and name, a verse or motto and a letter to parents. Inside: every graded subject with its grade for each period so far (later periods blank) and the year average, the key of the grading scale, the conduct traits with empty boxes to fill in by hand, and attendance (absences and days present). Pick a homeroom or grade level to print a whole group in one PDF |
+| Report card reference | One page per homeroom, a table per grade level, for copying grades onto a paper card: each student's period grade in every subject with the year grade so far under it, and absences and days present |
 | Class grade sheet | One page per class: each student's category averages, period grade and letter, and the class average |
 | Progress report | One page per student and class: every assignment with its score, then the averages |
 | Missing work | Students with work marked missing, by class, for a period or the whole year |
 
 Teachers get their own classes; the office and administrators every class.
 The header uses the company's name, address and logo, and the principal's
-name from the settings.
+name from the settings. School settings, Reports, holds the report card's
+verse or motto, letter to parents and conduct traits (a heading per line,
+then its traits starting with a dash). A grading scale line's description
+(for example Excellent Work) prints in the card's key.
 
 ## Demo data
 

@@ -42,6 +42,29 @@
                     </setting>
                 </block>
             </block>
+            <block name="school_report_setting_container" position="inside">
+                <setting string="Report Card Cover" company_dependent="1"
+                         help="The verse or motto and the letter to parents on the cover. The school name and logo come from the company.">
+                    <div class="content-group">
+                        <div class="mt8">
+                            <label for="school_card_motto" string="Verse or motto" class="o_light_label"/>
+                            <field name="school_card_motto" placeholder="e.g. a verse and its reference"/>
+                        </div>
+                        <div class="mt8">
+                            <label for="school_card_letter" string="Letter to parents" class="o_light_label"/>
+                            <field name="school_card_letter"/>
+                        </div>
+                        <div class="mt8">
+                            <label for="school_card_letter_signature" string="Signed by" class="o_light_label"/>
+                            <field name="school_card_letter_signature"/>
+                        </div>
+                    </div>
+                </setting>
+                <setting string="Conduct Grades" company_dependent="1"
+                         help="Printed on the report card with empty boxes for each grading period, for the teacher to fill in by hand. One line each: a heading, then its traits starting with a dash.">
+                    <field name="school_conduct_traits"/>
+                </setting>
+            </block>
         </field>
     </record>
 </odoo>

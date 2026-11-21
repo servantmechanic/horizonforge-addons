@@ -25,8 +25,14 @@
                     </group>
                 </group>
                 <p class="text-muted" invisible="report_type != 'report_card'">
-                    One page per student: every subject with its grade for each grading period so far and for the year.
+                    The folded report card, two landscape pages per student: print both sides and fold in half.
+                    Grades for each grading period so far and the year average; conduct prints blank, to fill in by hand.
                     Pick a homeroom or grade level to print a whole group in one PDF.
+                    The cover text and conduct traits are in the School settings.
+                </p>
+                <p class="text-muted" invisible="report_type != 'reference'">
+                    One page per homeroom, for copying grades onto a paper report card: each student's grade for the
+                    grading period in every subject, the year grade so far, and attendance.
                 </p>
                 <p class="text-muted" invisible="report_type != 'class_sheet'">
                     One page per class: each student's category averages, period grade and letter.

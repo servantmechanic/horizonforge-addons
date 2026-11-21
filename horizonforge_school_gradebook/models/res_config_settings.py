@@ -4,6 +4,23 @@ from odoo import fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
+    school_card_motto = fields.Text(
+        related="company_id.school_card_motto",
+        readonly=False,
+    )
+    school_card_letter = fields.Text(
+        related="company_id.school_card_letter",
+        readonly=False,
+    )
+    school_card_letter_signature = fields.Char(
+        related="company_id.school_card_letter_signature",
+        readonly=False,
+    )
+    school_conduct_traits = fields.Text(
+        related="company_id.school_conduct_traits",
+        readonly=False,
+    )
+
     school_entry_mode = fields.Selection(
         related="company_id.school_entry_mode",
         readonly=False,

@@ -104,7 +104,7 @@ class SchoolAttendanceReport(models.TransientModel):
             raise UserError(_("No students for this selection."))
         return self.env.ref(
             "horizonforge_school_attendance.action_report_attendance_summary"
-        ).report_action(self)
+        ).sudo().report_action(self, config=False)  # only admins can read report actions
 
     def _csv_rows(self):
         header = [_("Student ID"), _("Last Name"), _("First Name"), _("Grade Level"), _("Homeroom"),
