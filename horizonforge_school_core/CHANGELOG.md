@@ -13,6 +13,8 @@ Each release is tagged in git as `school-<version>`, for example `school-0.7.0`.
 
 ## Unreleased
 
+- **Attendance notes by double-click.** Double-clicking a recorded absence or
+  tardy in the attendance grid opens its note, like the N key.
 - **Print the school calendar.** The School Calendar has a Print button, and
   each school year a Print Calendar button: a one-page PDF of the year at a
   glance, with days off shaded red, days shown only in blue, the first and

@@ -78,7 +78,7 @@
                 <p>A student's homeroom follows their grade level (Students).</p>
             </div>
             <div t-else="" class="o_attendance_scroll flex-grow-1 overflow-auto" tabindex="0">
-                <table class="o_attendance_table" t-on-click="onCellClick">
+                <table class="o_attendance_table" t-on-click="onCellClick" t-on-dblclick="onCellDblClick">
                     <thead>
                         <tr>
                             <th class="o_attendance_corner"><t t-esc="state.students.length"/> students</th>

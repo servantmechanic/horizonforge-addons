@@ -113,6 +113,15 @@ class TestAttendanceUi(HttpCase, SchoolCoreCase):
             await waitFor(() => cell(0, "{wednesday}").classList.contains("o_has_note"), "note mark");
             await saved();
 
+            // Double-click Ben's tardy for a note.
+            cell(1, "{wednesday}").dispatchEvent(new MouseEvent("dblclick", {{ bubbles: true }}));
+            const input2 = await waitFor(".o_attendance_note_input");
+            input2.value = "Late bus";
+            input2.dispatchEvent(new Event("input", {{ bubbles: true }}));
+            input2.dispatchEvent(new KeyboardEvent("keydown", {{ key: "Enter", bubbles: true }}));
+            await waitFor(() => cell(1, "{wednesday}").classList.contains("o_has_note"), "note by double-click");
+            await saved();
+
             // Next week and back, then the whole grading period.
             document.querySelector(".o_attendance_next").click();
             await waitFor(() => !cell(0, "{wednesday}"), "next week");
@@ -131,5 +140,5 @@ class TestAttendanceUi(HttpCase, SchoolCoreCase):
         self.assertEqual(
             sorted(records.mapped(lambda r: (r.student_id.first_name, r.date, r.code_id.code, r.note or ""))),
             [("Anna", self.wednesday, "A", "Sick"), ("Anna", self.thursday, "H", ""),
-             ("Ben", self.wednesday, "T", "")],
+             ("Ben", self.wednesday, "T", "Late bus")],
         )

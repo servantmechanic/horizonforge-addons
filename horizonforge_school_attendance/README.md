@@ -29,7 +29,7 @@ greyed.
 |---|---|
 | A code's letter (A, E, H, X, T) | Record it on the selected student and day |
 | Delete, Backspace or Space | Clear it: the student was present |
-| n | Add a note to what is recorded |
+| n, or double-click the cell | Add a note to what is recorded |
 | Arrows, Tab, Enter | Move |
 | Ctrl+Z / Ctrl+Y | Undo / redo |
 

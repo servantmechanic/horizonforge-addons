@@ -515,6 +515,14 @@ export class AttendanceGrid extends Component {
         }
     }
 
+    onCellDblClick(ev) {
+        const td = ev.target.closest("td[data-row]");
+        if (td) {
+            this.select(Number(td.dataset.row), Number(td.dataset.col));
+            this.editNote();
+        }
+    }
+
     onLegendClick(code) {
         this.setCode(code);
         this.focusGrid();
