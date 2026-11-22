@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Starting values: every school changes them to its own. -->
+    <record id="score_category_homework" model="school.score.category">
+        <field name="name">Lesson/Homework</field>
+        <field name="code">HW</field>
+        <field name="color">#2f9e44</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="score_category_test" model="school.score.category">
+        <field name="name">Test</field>
+        <field name="code">T</field>
+        <field name="color">#e8590c</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="weight_scheme_standard" model="school.weight.scheme">
+        <field name="name">Standard</field>
+        <field name="method">average</field>
+        <field name="line_ids" eval="[
+            (0, 0, {'category_id': ref('score_category_homework'), 'weight': 50}),
+            (0, 0, {'category_id': ref('score_category_test'), 'weight': 50}),
+        ]"/>
+    </record>
+
+    <record id="grading_scale_letters" model="school.grading.scale">
+        <field name="name">Letter Grades</field>
+        <field name="line_ids" eval="[
+            (0, 0, {'letter': 'A', 'min_percent': 93, 'gpa': 4}),
+            (0, 0, {'letter': 'B', 'min_percent': 85, 'gpa': 3}),
+            (0, 0, {'letter': 'C', 'min_percent': 77, 'gpa': 2}),
+            (0, 0, {'letter': 'D', 'min_percent': 70, 'gpa': 1}),
+            (0, 0, {'letter': 'F', 'min_percent': 0, 'gpa': 0}),
+        ]"/>
+    </record>
+
+    <!-- An example for the lower grades: set it on those grade levels. -->
+    <record id="grading_scale_esnu" model="school.grading.scale">
+        <field name="name">Lower Grades (E/S/N/U)</field>
+        <field name="line_ids" eval="[
+            (0, 0, {'letter': 'E', 'min_percent': 93}),
+            (0, 0, {'letter': 'S', 'min_percent': 77}),
+            (0, 0, {'letter': 'N', 'min_percent': 70}),
+            (0, 0, {'letter': 'U', 'min_percent': 0}),
+        ]"/>
+    </record>
+
+    <function model="res.company" name="_school_gradebook_set_defaults"/>
+</odoo>

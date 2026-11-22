@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_assignment_generate_view_form" model="ir.ui.view">
+        <field name="name">school.assignment.generate.view.form</field>
+        <field name="model">school.assignment.generate</field>
+        <field name="arch" type="xml">
+            <form>
+                <p class="text-muted">
+                    Creates every scheduled assignment of the grading period, skipping weekends and days off.
+                    Assignments that already exist are left alone, so it is safe to run again.
+                </p>
+                <group>
+                    <field name="year_id" invisible="1"/>
+                    <field name="period_id" options="{'no_create': True, 'no_open': True}"/>
+                    <field name="section_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                </group>
+                <footer>
+                    <button name="action_generate" type="object" string="Generate" class="btn-primary"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="school_assignment_generate_action" model="ir.actions.act_window">
+        <field name="name">Generate Assignments</field>
+        <field name="res_model">school.assignment.generate</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.school.core</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="86"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="School" string="School" name="horizonforge_school_core"
+                     groups="horizonforge_school_core.group_school_admin">
+                    <block title="School Year" name="school_year_setting_container">
+                        <setting string="Current School Year"
+                                 help="The year new classes are created in and the one teachers see first.">
+                            <field name="school_current_year_id" options="{'no_create': True}"/>
+                        </setting>
+                    </block>
+                    <block title="Reports" name="school_report_setting_container">
+                        <setting string="Principal" company_dependent="1"
+                                 help="Printed in the report header. The school name, address and logo come from the company.">
+                            <field name="school_principal_name"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="school_settings_action" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="context">{'module': 'horizonforge_school_core', 'bin_size': False}</field>
+    </record>
+</odoo>

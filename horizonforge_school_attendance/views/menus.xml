@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_school_attendance_root" name="Attendance"
+              parent="horizonforge_school_core.menu_school_root" sequence="7"/>
+    <menuitem id="menu_school_attendance_grid" parent="menu_school_attendance_root"
+              action="school_attendance_grid_action" sequence="10"/>
+    <menuitem id="menu_school_attendance_list" parent="menu_school_attendance_root"
+              action="school_attendance_server_action" sequence="20"/>
+    <menuitem id="menu_school_attendance_report" parent="menu_school_attendance_root"
+              action="school_attendance_report_action" sequence="30"/>
+    <menuitem id="menu_school_attendance_codes" parent="horizonforge_school_core.menu_school_config"
+              action="school_attendance_code_action" sequence="70"/>
+</odoo>

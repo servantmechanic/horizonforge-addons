@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="timesheet_payroll_wizard_view_form" model="ir.ui.view">
+        <field name="name">hf.timesheet.payroll.wizard.form</field>
+        <field name="model">hf.timesheet.payroll.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Timesheet Payroll">
+                <group>
+                    <group>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group>
+                        <field name="employee_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_print" type="object" string="Print PDF" class="btn-primary"/>
+                    <button name="action_export_xlsx" type="object" string="Export XLSX" class="btn-secondary"/>
+                    <button name="action_view_job_cost" type="object" string="Job Cost" class="btn-secondary"/>
+                    <button special="cancel" string="Cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_timesheet_payroll_wizard" model="ir.actions.act_window">
+        <field name="name">Payroll</field>
+        <field name="res_model">hf.timesheet.payroll.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="job_cost_line_view_list" model="ir.ui.view">
+        <field name="name">hf.job.cost.line.list</field>
+        <field name="model">hf.job.cost.line</field>
+        <field name="arch" type="xml">
+            <list string="Job Cost" create="false" edit="false" delete="false">
+                <field name="hf_job_code"/>
+                <field name="project_id"/>
+                <field name="task_id"/>
+                <field name="hours" widget="float_time" sum="Total Hours"/>
+                <field name="cost" sum="Total Cost"/>
+                <field name="currency_id" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <menuitem id="menu_timesheet_payroll"
+              name="Payroll"
+              parent="hr_timesheet.menu_timesheets_reports"
+              action="action_timesheet_payroll_wizard"
+              groups="hr_timesheet.group_timesheet_manager"
+              sequence="90"/>
+</odoo>

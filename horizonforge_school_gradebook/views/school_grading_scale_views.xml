@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_grading_scale_view_list" model="ir.ui.view">
+        <field name="name">school.grading.scale.view.list</field>
+        <field name="model">school.grading.scale</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="school_grading_scale_view_form" model="ir.ui.view">
+        <field name="name">school.grading.scale.view.form</field>
+        <field name="model">school.grading.scale</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <group>
+                        <group>
+                            <field name="active" invisible="1"/>
+                            <field name="name"/>
+                        </group>
+                    </group>
+                    <field name="line_ids">
+                        <list editable="bottom">
+                            <field name="letter"/>
+                            <field name="min_percent"/>
+                            <field name="gpa"/>
+                            <field name="description" placeholder="e.g. Excellent Work"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="school_grading_scale_action" model="ir.actions.act_window">
+        <field name="name">Grading Scales</field>
+        <field name="res_model">school.grading.scale</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

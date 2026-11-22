@@ -1,0 +1,3 @@
+student_code,first_name,last_name,grade_level_id,birthdate,patron_ids,street,city,zip,phone,email
+1001,Anna,Example,Grade 5,2015-03-14,"Mary Example,John Example",12 Sample Road,Springfield,65000,555-0100,
+1002,Ben,Example,Grade 3,2017-09-02,"Mary Example,John Example",12 Sample Road,Springfield,65000,555-0100,

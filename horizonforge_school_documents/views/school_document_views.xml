@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Files -->
+    <record id="school_document_view_kanban" model="ir.ui.view">
+        <field name="name">school.document.view.kanban</field>
+        <field name="model">school.document</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="icon"/>
+                <templates>
+                    <t t-name="card" class="flex-row align-items-center gap-3">
+                        <i t-attf-class="fa fa-2x text-muted {{ record.icon.raw_value }}" title="File"/>
+                        <div class="flex-grow-1 overflow-hidden">
+                            <field name="name" class="fw-bold text-truncate d-block"/>
+                            <div class="text-muted small text-truncate">
+                                <field name="folder_id"/>
+                            </div>
+                            <div class="text-muted small">
+                                <field name="size_label"/> · <field name="write_date" widget="date"/>
+                            </div>
+                        </div>
+                        <a name="action_download" type="object" class="btn btn-light" role="button" title="Download">
+                            <i class="fa fa-download"/>
+                        </a>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="school_document_view_list" model="ir.ui.view">
+        <field name="name">school.document.view.list</field>
+        <field name="model">school.document</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="folder_id"/>
+                <field name="filename" optional="hide"/>
+                <field name="size_label"/>
+                <field name="write_date" string="Changed" widget="date"/>
+                <field name="write_uid" string="By" optional="show"/>
+                <button name="action_download" type="object" icon="fa-download" title="Download"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="school_document_view_form" model="ir.ui.view">
+        <field name="name">school.document.view.form</field>
+        <field name="model">school.document</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_download" type="object" string="Download" class="btn-primary"
+                            invisible="not id"/>
+                    <button name="action_trash" type="object" string="Delete" invisible="not id or not active"
+                            confirm="Delete this file? It moves to the trash, out of everyone's folders. The office can restore it or remove it for good."/>
+                    <button name="action_restore" type="object" string="Restore" class="btn-primary"
+                            invisible="active"/>
+                    <button name="action_delete_forever" type="object" string="Delete for Good"
+                            class="btn-danger" invisible="active"
+                            groups="horizonforge_school_core.group_school_office"
+                            confirm="Delete this file for good? This can't be undone: the file is erased from the server."/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="In the Trash" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <field name="file_type" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="Defaults to the file's name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="folder_id" options="{'no_create': True}"/>
+                            <field name="datas" filename="filename"/>
+                            <field name="filename" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="size_label" invisible="not id"/>
+                            <field name="write_date" string="Changed" invisible="not id"/>
+                            <field name="write_uid" string="By" invisible="not id"/>
+                        </group>
+                    </group>
+                    <field name="note" placeholder="Notes about this file..."/>
+                    <div invisible="file_type != 'pdf' or not id" class="mt-3">
+                        <field name="datas" widget="pdf_viewer" readonly="1" nolabel="1"/>
+                    </div>
+                    <div invisible="file_type != 'image' or not id" class="mt-3 text-center">
+                        <field name="datas" widget="image" readonly="1" nolabel="1"
+                               options="{'size': [0, 600]}"/>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="school_document_view_search" model="ir.ui.view">
+        <field name="name">school.document.view.search</field>
+        <field name="model">school.document</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" filter_domain="['|', ('name', 'ilike', self), ('filename', 'ilike', self)]"/>
+                <field name="folder_id" operator="child_of"/>
+                <field name="note"/>
+                <filter name="reference" string="Schoolwide" domain="[('scope', '=', 'school')]"/>
+                <filter name="current_year" string="Current Year" domain="[('year_id.is_current', '=', True)]"/>
+                <filter name="mine" string="Added by Me" domain="[('create_uid', '=', uid)]"/>
+                <separator/>
+                <filter name="trash" string="In the Trash" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_folder" string="Folder" context="{'group_by': 'folder_id'}"/>
+                    <filter name="group_type" string="Kind of File" context="{'group_by': 'file_type'}"/>
+                </group>
+                <searchpanel>
+                    <field name="folder_id" icon="fa-folder" enable_counters="1"/>
+                </searchpanel>
+            </search>
+        </field>
+    </record>
+
+    <record id="school_document_action" model="ir.actions.act_window">
+        <field name="name">Documents</field>
+        <field name="res_model">school.document</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No files here yet</p>
+            <p>Pick a folder on the left. Add files with Upload Files in the Documents menu,
+               or with New for a single file.</p>
+        </field>
+    </record>
+
+    <record id="school_document_trash_action" model="ir.actions.act_window">
+        <field name="name">Trash</field>
+        <field name="res_model">school.document</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('active', '=', False)]</field>
+        <field name="context">{'active_test': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">The trash is empty</p>
+            <p>Deleted files wait here. Open one to restore it or to delete it for good.</p>
+        </field>
+    </record>
+
+    <!-- Folders -->
+    <record id="school_document_folder_view_list" model="ir.ui.view">
+        <field name="name">school.document.folder.view.list</field>
+        <field name="model">school.document.folder</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="complete_name"/>
+                <field name="scope"/>
+                <field name="note" optional="show"/>
+                <field name="document_count" string="Files"/>
+                <button name="action_open_documents" type="object" string="Open" class="btn-link"/>
+                <button name="action_upload" type="object" string="Upload" class="btn-link"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="school_document_folder_view_form" model="ir.ui.view">
+        <field name="name">school.document.folder.view.form</field>
+        <field name="model">school.document.folder</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_upload" type="object" string="Upload Files" class="btn-primary"
+                            invisible="not id"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_documents" type="object" class="oe_stat_button"
+                                icon="fa-files-o" invisible="not id">
+                            <field name="document_count" widget="statinfo" string="Files"/>
+                        </button>
+                    </div>
+                    <field name="is_auto" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" readonly="is_auto" placeholder="e.g. Field Trips"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="parent_id" options="{'no_create': True}" readonly="is_auto"
+                                   placeholder="None: a top folder"/>
+                            <field name="note"/>
+                        </group>
+                        <group>
+                            <field name="scope" readonly="parent_id or is_auto"/>
+                            <field name="year_id" options="{'no_create': True}"
+                                   invisible="scope == 'school'" readonly="parent_id or is_auto"
+                                   required="scope != 'school'"/>
+                            <field name="homeroom_id" options="{'no_create': True}"
+                                   invisible="scope != 'homeroom'" readonly="parent_id or is_auto"
+                                   required="scope == 'homeroom'"/>
+                        </group>
+                    </group>
+                    <p class="text-muted" invisible="not is_auto">
+                        This folder was created for the school year or homeroom and follows its name.
+                    </p>
+                    <notebook>
+                        <page string="Folders Inside" name="children">
+                            <field name="child_ids" context="{'default_parent_id': id}">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="note"/>
+                                    <field name="document_count" string="Files"/>
+                                    <button name="action_open_documents" type="object" string="Open" class="btn-link"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="school_document_folder_view_search" model="ir.ui.view">
+        <field name="name">school.document.folder.view.search</field>
+        <field name="model">school.document.folder</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="complete_name"/>
+                <filter name="reference" string="Schoolwide" domain="[('scope', '=', 'school')]"/>
+                <filter name="current_year" string="Current Year" domain="[('year_id.is_current', '=', True)]"/>
+                <group>
+                    <filter name="group_scope" string="For" context="{'group_by': 'scope'}"/>
+                    <filter name="group_year" string="School Year" context="{'group_by': 'year_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="school_document_folder_action" model="ir.actions.act_window">
+        <field name="name">Folders</field>
+        <field name="res_model">school.document.folder</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add a folder</p>
+            <p>Schoolwide folders are for everyone. Each school year gets a folder, with one inside per homeroom.</p>
+        </field>
+    </record>
+</odoo>

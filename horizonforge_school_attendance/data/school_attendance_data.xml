@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Starting codes: every school changes them to its own. There is no
+         "present" code: a student is present unless something is recorded. -->
+    <record id="attendance_code_absent" model="school.attendance.code">
+        <field name="name">Absent</field>
+        <field name="code">A</field>
+        <field name="kind">absent</field>
+        <field name="absence_days">1</field>
+        <field name="color">#e03131</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="attendance_code_excused" model="school.attendance.code">
+        <field name="name">Excused absence</field>
+        <field name="code">E</field>
+        <field name="kind">absent</field>
+        <field name="absence_days">1</field>
+        <field name="excused" eval="True"/>
+        <field name="color">#1971c2</field>
+        <field name="sequence">20</field>
+    </record>
+    <record id="attendance_code_half" model="school.attendance.code">
+        <field name="name">Part day absent</field>
+        <field name="code">H</field>
+        <field name="kind">absent</field>
+        <field name="absence_days">0.5</field>
+        <field name="color">#e8590c</field>
+        <field name="sequence">30</field>
+    </record>
+    <record id="attendance_code_half_excused" model="school.attendance.code">
+        <field name="name">Part day excused</field>
+        <field name="code">X</field>
+        <field name="kind">absent</field>
+        <field name="absence_days">0.5</field>
+        <field name="excused" eval="True"/>
+        <field name="color">#0c8599</field>
+        <field name="sequence">40</field>
+    </record>
+    <record id="attendance_code_tardy" model="school.attendance.code">
+        <field name="name">Tardy</field>
+        <field name="code">T</field>
+        <field name="kind">tardy</field>
+        <field name="color">#f08c00</field>
+        <field name="sequence">50</field>
+    </record>
+</odoo>

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_student_view_list" model="ir.ui.view">
+        <field name="name">school.student.view.list</field>
+        <field name="model">school.student</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="student_code" optional="show"/>
+                <field name="last_name"/>
+                <field name="first_name"/>
+                <field name="grade_level_id"/>
+                <field name="homeroom_id" optional="show"/>
+                <field name="birthdate" optional="hide"/>
+                <field name="patron_ids" widget="many2many_tags" optional="show"/>
+                <field name="phone" optional="hide"/>
+                <field name="email" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="school_student_view_form" model="ir.ui.view">
+        <field name="name">school.student.view.form</field>
+        <field name="model">school.student</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon" title="Withdrawn" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'avatar_128'}"/>
+                    <field name="avatar_128" invisible="1"/>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_title">
+                        <h1 class="d-flex gap-2">
+                            <field name="first_name" placeholder="First name"/>
+                            <field name="last_name" placeholder="Last name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="School">
+                            <field name="student_code"/>
+                            <field name="grade_level_id" options="{'no_create': True}"/>
+                            <field name="homeroom_id" options="{'no_create': True}"/>
+                            <field name="birthdate"/>
+                        </group>
+                        <group string="Contact">
+                            <label for="street" string="Address"/>
+                            <div class="o_address_format">
+                                <field name="street" placeholder="Street..." class="o_address_street"/>
+                                <field name="street2" placeholder="Street 2..." class="o_address_street"/>
+                                <field name="city" placeholder="City" class="o_address_city"/>
+                                <field name="state_id" placeholder="State" class="o_address_state"
+                                       options="{'no_open': True, 'no_create': True}"/>
+                                <field name="zip" placeholder="ZIP" class="o_address_zip"/>
+                                <field name="country_id" placeholder="Country" class="o_address_country"
+                                       options="{'no_open': True, 'no_create': True}"/>
+                            </div>
+                            <field name="phone" widget="phone"/>
+                            <field name="email" widget="email"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Patrons" name="patrons">
+                            <field name="patron_ids"
+                                   context="{'default_is_patron': True, 'form_view_ref': 'horizonforge_school_core.school_patron_view_form', 'list_view_ref': 'horizonforge_school_core.school_patron_view_list', 'search_view_ref': 'horizonforge_school_core.school_patron_view_search'}">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="relationship"/>
+                                    <field name="phone"/>
+                                    <field name="email"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Classes" name="enrollments">
+                            <field name="enrollment_ids">
+                                <list editable="bottom">
+                                    <field name="section_id" options="{'no_create': True}"/>
+                                    <field name="teacher_id" widget="many2one_avatar"/>
+                                    <field name="date_start"/>
+                                    <field name="date_end"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="comment" placeholder="Notes about the student..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="school_student_view_search" model="ir.ui.view">
+        <field name="name">school.student.view.search</field>
+        <field name="model">school.student</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="last_name" string="Student"
+                       filter_domain="['|', '|', ('last_name', 'ilike', self), ('first_name', 'ilike', self), ('student_code', 'ilike', self)]"/>
+                <field name="grade_level_id"/>
+                <field name="homeroom_id"/>
+                <field name="patron_ids"/>
+                <filter name="my_students" string="My Students"
+                        domain="['|', ('homeroom_id.teacher_id', '=', uid),
+                                 ('enrollment_ids', 'any', [('year_id.is_current', '=', True),
+                                     '|', ('section_id.teacher_id', '=', uid), ('section_id.co_teacher_ids', 'in', uid)])]"
+                        help="In my homeroom, or in one of my classes this year"/>
+                <separator/>
+                <filter name="archived" string="Withdrawn" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_grade_level" string="Grade Level" context="{'group_by': 'grade_level_id'}"/>
+                    <filter name="group_homeroom" string="Homeroom" context="{'group_by': 'homeroom_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="school_student_action" model="ir.actions.act_window">
+        <field name="name">Students</field>
+        <field name="res_model">school.student</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add a student</p>
+            <p>Or import your student list from a spreadsheet: Actions, Import records.</p>
+        </field>
+    </record>
+</odoo>

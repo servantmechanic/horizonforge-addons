@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- QuickBooks-compatible voucher checks, check on top: 8.5 x 11 in,
+         a 3.5 in check and two stubs. Pre-printed stock, so only the
+         variable fields are printed. Positions are measured from the sheet's
+         top left corner. Company Check Top/Left Margin move everything; at
+         their default of 0.25 in nothing moves. -->
+    <record id="paperformat_check_qb_voucher" model="report.paperformat">
+        <field name="name">QuickBooks Voucher Check (Letter)</field>
+        <field name="format">Letter</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">0</field>
+        <field name="margin_bottom">0</field>
+        <field name="margin_left">0</field>
+        <field name="margin_right">0</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="disable_shrinking" eval="True"/>
+        <field name="dpi">96</field>
+    </record>
+
+    <record id="action_print_check_qb_voucher" model="ir.actions.report">
+        <field name="name">QuickBooks Voucher Check (Top)</field>
+        <field name="model">account.payment</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">horizonforge_accounting.print_check_qb_voucher</field>
+        <field name="report_file">horizonforge_accounting.print_check_qb_voucher</field>
+        <field name="print_report_name">'Check - %s' % (object.partner_id.name or '')</field>
+        <field name="paperformat_id" ref="paperformat_check_qb_voucher"/>
+        <field name="binding_type">report</field>
+        <field name="binding_model_id" eval="False"/>
+    </record>
+
+    <template id="check_qb_voucher_stub">
+        <div class="hf_stub" t-attf-style="top: #{top}in;">
+            <div class="hf_stub_head">
+                <span class="hf_stub_payee" t-out="page['partner_name']"/>
+                <span class="hf_stub_meta">
+                    <t t-out="page['date']"/>
+                    <t t-if="page['sequence_number']"> - Check <t t-out="page['sequence_number']"/></t>
+                </span>
+            </div>
+            <table class="hf_stub_lines">
+                <thead>
+                    <tr>
+                        <th class="hf_l">Due Date</th>
+                        <th class="hf_l">Reference</th>
+                        <th class="hf_r">Original Amount</th>
+                        <th class="hf_r">Balance Due</th>
+                        <th class="hf_r">Payment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="page['stub_lines'] or []" t-as="line">
+                        <tr t-if="line.get('header')">
+                            <td colspan="5" class="hf_stub_group" t-out="line['name']"/>
+                        </tr>
+                        <tr t-else="">
+                            <td t-out="line['due_date']"/>
+                            <td t-out="line['number']"/>
+                            <td class="hf_r" t-out="line['amount_total']"/>
+                            <td class="hf_r" t-out="line['amount_residual']"/>
+                            <td class="hf_r" t-out="line['amount_paid']"/>
+                        </tr>
+                    </t>
+                    <tr t-if="page['stub_cropped']">
+                        <td colspan="5">...</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="hf_stub_foot">
+                <span t-if="page['memo']" class="hf_stub_memo">Memo: <t t-out="page['memo']"/></span>
+                <span class="hf_stub_total"><t t-out="page['amount']"/></span>
+            </div>
+        </div>
+    </template>
+
+    <template id="print_check_qb_voucher">
+        <t t-call="web.basic_layout">
+            <style>
+                /* The report wrapper is a Bootstrap container; its padding
+                   would shift every field on the paper. */
+                body, #wrapwrap, main {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    max-width: none !important;
+                }
+                .hf_check_page {
+                    position: relative;
+                    width: 8.5in;
+                    height: 11in;
+                    overflow: hidden;
+                    page-break-after: always;
+                    font-family: Arial, Helvetica, sans-serif;
+                    font-size: 11pt;
+                    color: #000;
+                }
+                .hf_check_page:last-child { page-break-after: auto; }
+                .hf_field { position: absolute; white-space: nowrap; }
+                .hf_words { overflow: hidden; width: 7.55in; }
+                .hf_address { white-space: normal; width: 3.4in; line-height: 1.2; }
+                .hf_stub { position: absolute; left: 0.5in; width: 7.5in; height: 3.2in; overflow: hidden; font-size: 9.5pt; }
+                .hf_stub_head { font-weight: bold; margin-bottom: 0.08in; }
+                .hf_stub_meta { float: right; }
+                .hf_stub_lines { width: 100%; border-collapse: collapse; }
+                .hf_stub_lines th { font-weight: normal; border-bottom: 1px solid #000; padding: 1px 3px; }
+                .hf_stub_lines td { padding: 1px 3px; }
+                .hf_stub_group { font-style: italic; }
+                .hf_stub_foot { position: absolute; bottom: 0; width: 100%; border-top: 1px solid #000; padding-top: 2px; }
+                .hf_stub_total { float: right; font-weight: bold; }
+                .hf_l { text-align: left; }
+                .hf_r { text-align: right; }
+            </style>
+            <t t-foreach="docs" t-as="o">
+                <t t-set="company" t-value="o.company_id"/>
+                <t t-set="dx" t-value="'%.3f' % ((company.account_check_printing_margin_left or 0.0) - 0.25)"/>
+                <t t-set="dy" t-value="'%.3f' % ((company.account_check_printing_margin_top or 0.0) - 0.25)"/>
+                <t t-foreach="o._check_get_pages()" t-as="page">
+                    <div class="hf_check_page">
+                        <div t-attf-style="position: absolute; left: #{dx}in; top: #{dy}in; width: 8.5in; height: 11in;">
+                            <div class="hf_field" style="left: 6.55in; top: 0.78in;">
+                                <t t-if="company.account_check_printing_date_label">DATE </t><t t-out="page['date']"/>
+                            </div>
+                            <div class="hf_field" style="left: 1.05in; top: 1.30in;" t-out="page['partner_name']"/>
+                            <div class="hf_field" style="left: 7.05in; top: 1.30in;">
+                                <t t-if="page['amount'] != 'VOID'">**</t><t t-out="page['amount']"/>
+                            </div>
+                            <div class="hf_field hf_words" style="left: 0.35in; top: 1.68in;" t-out="page['amount_in_word']"/>
+                            <div class="hf_field hf_address" style="left: 1.05in; top: 2.05in;">
+                                <t t-set="payee" t-value="page['partner_id']"/>
+                                <div t-out="page['partner_name']"/>
+                                <div t-if="payee.street" t-out="payee.street"/>
+                                <div t-if="payee.street2" t-out="payee.street2"/>
+                                <div t-if="payee.city or payee.zip">
+                                    <t t-out="payee.city"/><t t-if="payee.city and (payee.state_id or payee.zip)">, </t>
+                                    <t t-out="payee.state_id.code"/> <t t-out="payee.zip"/>
+                                </div>
+                                <div t-if="payee.country_id and payee.country_id != company.country_id" t-out="payee.country_id.name"/>
+                            </div>
+                            <div class="hf_field" style="left: 0.55in; top: 2.92in;" t-out="page['memo']"/>
+                            <t t-call="horizonforge_accounting.check_qb_voucher_stub">
+                                <t t-set="top" t-value="3.75"/>
+                            </t>
+                            <t t-call="horizonforge_accounting.check_qb_voucher_stub">
+                                <t t-set="top" t-value="7.42"/>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

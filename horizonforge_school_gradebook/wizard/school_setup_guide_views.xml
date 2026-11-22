@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_setup_guide_view_form" model="ir.ui.view">
+        <field name="name">school.setup.guide.view.form.inherit.gradebook</field>
+        <field name="model">school.setup.guide</field>
+        <field name="inherit_id" ref="horizonforge_school_core.school_setup_guide_view_form"/>
+        <field name="arch" type="xml">
+            <tr name="step_sections" position="after">
+                <tr name="step_grading">
+                    <td><i class="fa fa-sliders text-muted" title="Review"/></td>
+                    <td>
+                        <strong>8. Grading rules</strong>
+                        <div class="text-muted">Entry mode, missing work, rounding and year grade in the settings; category weights; grading scales (the lower grades can have their own).</div>
+                    </td>
+                    <td/>
+                    <td class="text-end text-nowrap">
+                        <button name="action_grading_settings" type="object" string="Settings" class="btn-secondary me-1"/>
+                        <button name="action_weight_schemes" type="object" string="Weights" class="btn-secondary me-1"/>
+                        <button name="action_grading_scales" type="object" string="Scales" class="btn-secondary"/>
+                    </td>
+                </tr>
+                <tr name="step_templates">
+                    <td>
+                        <i class="fa fa-check-circle text-success" invisible="not template_count" title="Done"/>
+                        <i class="fa fa-circle-o text-muted" invisible="template_count" title="To do"/>
+                    </td>
+                    <td>
+                        <strong>9. Assignment schedules</strong>
+                        <div class="text-muted">What each course has every week, for example a Math lesson every day and a Spelling test on Friday. Teachers can change their own.</div>
+                    </td>
+                    <td class="text-nowrap"><field name="template_count" class="oe_inline"/> schedules</td>
+                    <td class="text-end">
+                        <button name="action_templates" type="object" string="Open" class="btn-secondary"/>
+                    </td>
+                </tr>
+                <tr name="step_assignments">
+                    <td>
+                        <i class="fa fa-check-circle text-success" invisible="not assignment_count" title="Done"/>
+                        <i class="fa fa-circle-o text-muted" invisible="assignment_count" title="To do"/>
+                    </td>
+                    <td>
+                        <strong>10. Assignments</strong>
+                        <div class="text-muted">Create a grading period's assignments from the schedules, skipping the calendar's days off. Run it again after the calendar changes.</div>
+                    </td>
+                    <td class="text-nowrap"><field name="assignment_count" class="oe_inline"/> assignments</td>
+                    <td class="text-end text-nowrap">
+                        <button name="action_generate_assignments" type="object" string="Generate" class="btn-primary me-1"/>
+                        <button name="action_assignments" type="object" string="Open" class="btn-secondary"/>
+                    </td>
+                </tr>
+            </tr>
+        </field>
+    </record>
+</odoo>

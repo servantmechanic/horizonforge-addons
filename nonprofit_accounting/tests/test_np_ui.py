@@ -89,7 +89,70 @@ class TestNpUi(HttpCase):
                 if (!link) { await new Promise((r) => setTimeout(r, 100)); }
             }
             if (!link) { throw new Error("No drill-down link in report"); }
-            link.click();
+            // The click handler is attached once the iframe has loaded: the
+            // link can show up before it, so click until the list opens.
+            for (let i = 0; i < 50 && !document.querySelector(".o_list_view"); i++) {
+                link.click();
+                await new Promise((r) => setTimeout(r, 200));
+            }
             (await waitFor(".o_list_view .o_data_row .o_data_cell")).click();
             await waitFor(".o_form_view .o_field_widget[name='item_line_ids']");
+        """)
+
+    def test_bill_tab_order(self):
+        """A new bill starts on Paid To, then tabs through the bill date,
+        bill number and memo before Pay From."""
+        self._run("/odoo/action-nonprofit_accounting.np_move_action_bill/new", """
+            const form = await waitFor(".o_form_view .o_form_editable");
+            await waitFor(".o_field_widget[name='partner_id'] input");
+            // Dates are buttons in Odoo 19.
+            const names = [...form.querySelectorAll(".o_form_sheet .o_field_widget")]
+                .filter((el) => el.offsetParent !== null && el.querySelector("input, select, textarea, button"))
+                .map((el) => el.getAttribute("name"));
+            const order = names.slice(0, 5).join(",");
+            if (order !== "partner_id,bill_date,ref,memo,bank_account_id") {
+                throw new Error("tab order: " + names.join(","));
+            }
+            await new Promise((r) => setTimeout(r, 300));
+            const focused = document.activeElement.closest(".o_field_widget");
+            if (!focused || focused.getAttribute("name") !== "partner_id") {
+                throw new Error("focus starts on " + (focused && focused.getAttribute("name")));
+            }
+            // + and - on a date field move it a day (it is a text box once focused).
+            const dateInput = () => form.querySelector(".o_field_widget[name='bill_date'] .o_input");
+            const fmt = (days) => luxon.DateTime.local().plus({ days }).toFormat("MM/dd/yyyy");
+            const waitDate = async (days, what) => {
+                for (let i = 0; i < 30 && dateInput().value !== fmt(days); i++) {
+                    await new Promise((r) => setTimeout(r, 100));
+                }
+                if (dateInput().value !== fmt(days)) { throw new Error(what + " gave " + dateInput().value); }
+            };
+            dateInput().focus();
+            await new Promise((r) => setTimeout(r, 100));
+            const key = (k) => dateInput().dispatchEvent(new KeyboardEvent("keydown", { key: k, bubbles: true, cancelable: true }));
+            key("+");
+            await waitDate(1, "+");
+            key("-");
+            await new Promise((r) => setTimeout(r, 100));
+            key("-");
+            await waitDate(-1, "-");
+            // Still yesterday after leaving the field.
+            form.querySelector(".o_field_widget[name='ref'] input").focus();
+            await new Promise((r) => setTimeout(r, 300));
+            await waitDate(-1, "after leaving");
+            // Tabbing out of the header (focus moves to the notebook tabs)
+            // opens a new line instead.
+            form.querySelector(".o_field_widget[name='check_number'] input").focus();
+            form.querySelector(".o_notebook_headers .nav-link").focus();
+            await waitFor(".o_field_widget[name='item_line_ids'] .o_data_row");
+            for (let i = 0; i < 50 && !document.activeElement.closest(".o_data_row"); i++) {
+                await new Promise((r) => setTimeout(r, 100));
+            }
+            if (!document.activeElement.closest(".o_data_row")) {
+                throw new Error("new line not focused");
+            }
+            (await waitFor(".o_form_button_cancel")).click();
+            for (let i = 0; i < 50 && document.querySelector(".o_form_view .o_data_row"); i++) {
+                await new Promise((r) => setTimeout(r, 100));
+            }
         """)

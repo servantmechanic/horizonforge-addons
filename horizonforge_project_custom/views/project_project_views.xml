@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="edit_project_hf" model="ir.ui.view">
+        <field name="name">project.project.form.inherit.horizonforge.project.custom</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="account_id" invisible="1"/>
+                <field name="hf_job_code" invisible="is_template or not account_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_project_hf" model="ir.ui.view">
+        <field name="name">project.project.list.inherit.horizonforge.project.custom</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="before">
+                <field name="hf_job_code" optional="show" invisible="is_template"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_project_project_filter_hf" model="ir.ui.view">
+        <field name="name">project.project.select.inherit.horizonforge.project.custom</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_project_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="hf_job_code"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_backfill_task_followers" model="ir.actions.server">
+        <field name="name">Add Followers to Tasks</field>
+        <field name="model_id" ref="project.model_project_project"/>
+        <field name="binding_model_id" ref="project.model_project_project"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="group_ids" eval="[(4, ref('project.group_project_manager'))]"/>
+        <field name="state">code</field>
+        <field name="code">records.action_hf_backfill_task_followers()</field>
+    </record>
+</odoo>

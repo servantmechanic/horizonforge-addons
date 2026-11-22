@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_assignment_view_list" model="ir.ui.view">
+        <field name="name">school.assignment.view.list</field>
+        <field name="model">school.assignment</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" default_order="date desc, sequence">
+                <field name="year_id" column_invisible="1"/>
+                <field name="section_id" options="{'no_create': True}"/>
+                <field name="grade_level_ids" widget="many2many_tags" optional="hide"/>
+                <field name="date"/>
+                <field name="name"/>
+                <field name="category_id" options="{'no_create': True}"/>
+                <field name="max_points"/>
+                <field name="entry_mode"/>
+                <field name="period_id" options="{'no_create': True}" optional="show"/>
+                <field name="unscored_count" optional="show" decoration-warning="unscored_count"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Also the grid's quick form (Ctrl+Shift+A, or a click on a column header). -->
+    <record id="school_assignment_view_form" model="ir.ui.view">
+        <field name="name">school.assignment.view.form</field>
+        <field name="model">school.assignment</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="year_id" invisible="1"/>
+                            <field name="course_id" invisible="1"/>
+                            <field name="template_id" string="From Schedule" placeholder="None: type the details"
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <field name="name" placeholder="e.g. Lesson 12" default_focus="1"/>
+                            <field name="category_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="date"/>
+                        </group>
+                        <group>
+                            <field name="max_points"/>
+                            <field name="entry_mode"/>
+                            <field name="section_id" options="{'no_create': True, 'no_open': True}"
+                                   readonly="id" invisible="context.get('school_gradebook_dialog')"/>
+                            <field name="period_id" options="{'no_create': True, 'no_open': True}"
+                                   invisible="context.get('school_gradebook_dialog')"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="school_assignment_view_search" model="ir.ui.view">
+        <field name="name">school.assignment.view.search</field>
+        <field name="model">school.assignment</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="section_id"/>
+                <field name="course_id"/>
+                <field name="grade_level_ids"/>
+                <field name="homeroom_id"/>
+                <field name="category_id"/>
+                <field name="period_id"/>
+                <filter name="my_classes" string="My Classes"
+                        domain="['|', ('section_id.teacher_id', '=', uid), ('section_id.co_teacher_ids', 'in', uid)]"/>
+                <separator/>
+                <filter name="current_year" string="Current Year" domain="[('section_id.year_id.is_current', '=', True)]"/>
+                <filter name="current_period" string="Current Grading Period" domain="[('period_id.is_current', '=', True)]"/>
+                <filter name="previous_period" string="Previous Grading Period" domain="[('period_id.is_previous', '=', True)]"/>
+                <separator/>
+                <filter name="unscored" string="Not Fully Scored" domain="[('is_unscored', '=', True)]"/>
+                <separator/>
+                <filter name="today" string="Today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="this_week" string="This Week"
+                        domain="[('date', '&gt;=', (context_today() - relativedelta(days=context_today().weekday())).strftime('%Y-%m-%d')),
+                                 ('date', '&lt;=', (context_today() + relativedelta(days=6 - context_today().weekday())).strftime('%Y-%m-%d'))]"/>
+                <filter name="upcoming" string="Upcoming" domain="[('date', '&gt;', context_today().strftime('%Y-%m-%d'))]"/>
+                <group>
+                    <filter name="group_section" string="Class" context="{'group_by': 'section_id'}"/>
+                    <filter name="group_grade_level" string="Grade Level" context="{'group_by': 'grade_level_ids'}"/>
+                    <filter name="group_course" string="Course" context="{'group_by': 'course_id'}"/>
+                    <filter name="group_homeroom" string="Homeroom" context="{'group_by': 'homeroom_id'}"/>
+                    <filter name="group_period" string="Grading Period" context="{'group_by': 'period_id'}"/>
+                    <filter name="group_category" string="Category" context="{'group_by': 'category_id'}"/>
+                </group>
+                <searchpanel>
+                    <field name="period_id" string="Grading Period" icon="fa-calendar"/>
+                    <field name="grade_level_ids" string="Grade Level" select="multi" icon="fa-signal" enable_counters="1"/>
+                    <field name="category_id" string="Category" select="multi" icon="fa-tags" enable_counters="1"/>
+                </searchpanel>
+            </search>
+        </field>
+    </record>
+
+    <record id="school_assignment_action" model="ir.actions.act_window">
+        <field name="name">Assignments</field>
+        <field name="res_model">school.assignment</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_current_year': 1, 'search_default_group_section': 1}</field>
+    </record>
+
+    <!-- The menu's way in: on the current grading period, My Classes for teachers. -->
+    <record id="school_assignment_server_action" model="ir.actions.server">
+        <field name="name">Assignments</field>
+        <field name="model_id" ref="model_school_assignment"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_list()</field>
+    </record>
+
+    <record id="school_gradebook_action" model="ir.actions.client">
+        <field name="name">Gradebook</field>
+        <field name="tag">school_gradebook_grid</field>
+    </record>
+</odoo>

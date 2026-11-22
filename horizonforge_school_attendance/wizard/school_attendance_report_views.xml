@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_attendance_report_view_form" model="ir.ui.view">
+        <field name="name">school.attendance.report.view.form</field>
+        <field name="model">school.attendance.report</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group string="Dates">
+                        <field name="year_id" options="{'no_create': True, 'no_open': True}"/>
+                        <field name="period_id" options="{'no_create': True, 'no_open': True}" placeholder="Own dates"/>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group string="For">
+                        <field name="homeroom_id" options="{'no_create': True, 'no_open': True}" placeholder="All homerooms"/>
+                        <field name="grade_level_id" options="{'no_create': True, 'no_open': True}" placeholder="All grade levels"/>
+                        <field name="student_ids" widget="many2many_tags" options="{'no_create': True}" placeholder="All students"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_print" type="object" string="Print" class="btn-primary"/>
+                    <button name="action_export_csv" type="object" string="Export CSV" class="btn-secondary"/>
+                    <button string="Close" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="school_attendance_report_action" model="ir.actions.act_window">
+        <field name="name">Attendance Summary</field>
+        <field name="res_model">school.attendance.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

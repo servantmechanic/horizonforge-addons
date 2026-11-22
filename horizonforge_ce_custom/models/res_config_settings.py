@@ -18,3 +18,17 @@ class ResConfigSettings(models.TransientModel):
              "instead of saving a bare product. Users in \"Quick-create Contacts "
              "and Products\" are not affected.",
     )
+    hf_simple_interface = fields.Boolean(
+        string="Simple interface",
+        config_parameter="horizonforge_ce_custom.simple_interface",
+        help="Users who are not administrators don't see the Discuss, Contacts "
+             "and Apps menus, the chat and activity icons, or OdooBot's welcome chat.",
+    )
+
+    def set_values(self):
+        param = "horizonforge_ce_custom.simple_interface"
+        before = self.env["ir.config_parameter"].sudo().get_param(param, "False")
+        super().set_values()
+        if self.env["ir.config_parameter"].sudo().get_param(param, "False") != before:
+            # The menus are cached per user.
+            self.env.registry.clear_cache()

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Paying by check: print now, or queue the check for a batch print. -->
+    <record id="view_account_payment_register_form" model="ir.ui.view">
+        <field name="name">account.payment.register.form.horizonforge</field>
+        <field name="model">account.payment.register</field>
+        <field name="inherit_id" ref="account.view_account_payment_register_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//footer" position="before">
+                <field name="payment_method_code" invisible="1"/>
+            </xpath>
+            <xpath expr="//footer/button[@name='action_create_payments'][1]" position="attributes">
+                <attribute name="invisible">total_payments_amount == 1 or payment_method_code == 'check_printing'</attribute>
+            </xpath>
+            <xpath expr="//footer/button[@name='action_create_payments'][2]" position="attributes">
+                <attribute name="invisible">total_payments_amount != 1 or payment_method_code == 'check_printing'</attribute>
+            </xpath>
+            <xpath expr="//footer/button[@special='cancel']" position="before">
+                <button string="Pay and Print" name="action_create_payments" type="object" class="oe_highlight"
+                        data-hotkey="q" invisible="payment_method_code != 'check_printing'"/>
+                <button string="Pay, Print Later" name="action_hf_pay_print_later" type="object"
+                        class="btn-secondary" data-hotkey="w" invisible="payment_method_code != 'check_printing'"
+                        help="Record the payment and queue the check. Print the queue from the bank journal on the Accounting dashboard."/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

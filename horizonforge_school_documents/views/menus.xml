@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_school_documents_root" name="Documents"
+              parent="horizonforge_school_core.menu_school_root" sequence="47"/>
+    <menuitem id="menu_school_documents" name="Browse" parent="menu_school_documents_root"
+              action="school_document_action" sequence="10"/>
+    <menuitem id="menu_school_document_upload" parent="menu_school_documents_root"
+              action="school_document_upload_action" sequence="20"/>
+    <menuitem id="menu_school_document_folders" parent="menu_school_documents_root"
+              action="school_document_folder_action" sequence="30"/>
+    <menuitem id="menu_school_document_trash" parent="menu_school_documents_root"
+              action="school_document_trash_action" sequence="40"/>
+</odoo>

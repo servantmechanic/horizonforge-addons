@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_assignment_template_view_list" model="ir.ui.view">
+        <field name="name">school.assignment.template.view.list</field>
+        <field name="model">school.assignment.template</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="course_id" options="{'no_create': True}"/>
+                <field name="name" placeholder="e.g. Lesson"/>
+                <field name="category_id" options="{'no_create': True}"/>
+                <field name="monday" widget="boolean_toggle"/>
+                <field name="tuesday" widget="boolean_toggle"/>
+                <field name="wednesday" widget="boolean_toggle"/>
+                <field name="thursday" widget="boolean_toggle"/>
+                <field name="friday" widget="boolean_toggle"/>
+                <field name="is_scheduled" column_invisible="1"/>
+                <field name="week_interval" invisible="not is_scheduled"/>
+                <field name="first_week" invisible="week_interval == 1 or not is_scheduled" optional="show"/>
+                <field name="move_on_day_off" invisible="not is_scheduled" optional="show"/>
+                <field name="numbered" optional="show"/>
+                <field name="max_points" optional="show"/>
+                <field name="entry_mode" optional="show" placeholder="Class default"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="school_assignment_template_view_search" model="ir.ui.view">
+        <field name="name">school.assignment.template.view.search</field>
+        <field name="model">school.assignment.template</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="course_id"/>
+                <field name="name"/>
+                <field name="category_id"/>
+                <filter name="my_courses" string="My Courses"
+                        domain="['|', ('course_id.section_ids.teacher_id', '=', uid), ('course_id.section_ids.co_teacher_ids', 'in', uid)]"/>
+                <separator/>
+                <filter name="by_hand" string="Placed by Hand" domain="[('is_scheduled', '=', False)]"/>
+                <separator/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_course" string="Course" context="{'group_by': 'course_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="school_assignment_template_action" model="ir.actions.act_window">
+        <field name="name">Assignment Schedules</field>
+        <field name="res_model">school.assignment.template</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_group_course': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add an assignment schedule</p>
+            <p>Say which assignments a course has each week, for example a Math Lesson every day
+               and a Spelling Test on Friday. Generate Assignments then creates a whole grading
+               period of gradebook columns at once; one that falls on a day off moves to the next school day.
+               Leave every weekday off for assignments you place by hand, such as tests:
+               pick the schedule when adding the assignment.</p>
+        </field>
+    </record>
+</odoo>

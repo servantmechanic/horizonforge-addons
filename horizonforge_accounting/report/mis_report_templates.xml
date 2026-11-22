@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Compact statement layout: company top left, title and period top
+         right, no shading, rules only at totals. -->
+    <template id="report_mis_report_instance" inherit_id="mis_builder.report_mis_report_instance">
+        <xpath expr="//div[hasclass('page')]" position="attributes">
+            <attribute name="class" add="hf_compact" separator=" "/>
+        </xpath>
+        <xpath expr="//div[hasclass('page')]/h3" position="replace">
+            <t t-set="hf_periods" t-value="o.period_ids.filtered('date_to')"/>
+            <div class="hf_header">
+                <div class="hf_company">
+                    <t t-foreach="o.query_company_ids" t-as="company">
+                        <div t-field="company.name"/>
+                    </t>
+                </div>
+                <div class="hf_title">
+                    <div class="hf_name" t-field="o.name"/>
+                    <div t-if="hf_periods and o.report_id.id == o.env.ref('horizonforge_accounting.mis_report_bs').id">
+                        As of <span t-esc="max(hf_periods.mapped('date_to'))" t-options="{'widget': 'date'}"/>
+                    </div>
+                    <div t-elif="hf_periods">
+                        <span t-esc="min(hf_periods.mapped('date_from'))" t-options="{'widget': 'date'}"/>
+                        to <span t-esc="max(hf_periods.mapped('date_to'))" t-options="{'widget': 'date'}"/>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>

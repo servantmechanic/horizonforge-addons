@@ -58,3 +58,10 @@ class TestTweaks(TransactionCase):
         settings = self.env["res.config.settings"].create({})
         self.assertTrue(settings.hf_block_quick_create_partner)
         self.assertTrue(settings.hf_block_quick_create_product)
+
+    def test_no_public_signup(self):
+        """Accounts are on invitation only: no sign-up link on the login page."""
+        self.assertEqual(
+            self.env["ir.config_parameter"].sudo().get_param("auth_signup.invitation_scope"), "b2b")
+        self.assertEqual(self.env["res.users"]._get_signup_invitation_scope(), "b2b")
+

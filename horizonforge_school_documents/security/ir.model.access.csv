@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_school_document_folder_teacher,school.document.folder teacher,model_school_document_folder,horizonforge_school_core.group_school_teacher,1,1,1,0
+access_school_document_folder_office,school.document.folder office,model_school_document_folder,horizonforge_school_core.group_school_office,1,1,1,1
+access_school_document_teacher,school.document teacher,model_school_document,horizonforge_school_core.group_school_teacher,1,1,1,0
+access_school_document_office,school.document office,model_school_document,horizonforge_school_core.group_school_office,1,1,1,1
+access_school_document_upload_teacher,school.document.upload teacher,model_school_document_upload,horizonforge_school_core.group_school_teacher,1,1,1,1

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_homeroom_view_list" model="ir.ui.view">
+        <field name="name">school.homeroom.view.list</field>
+        <field name="model">school.homeroom</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="teacher_id" widget="many2one_avatar" options="{'no_create': True}"/>
+                <field name="grade_level_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                <field name="student_count" string="Students"/>
+                <field name="capacity" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="school_homeroom_view_search" model="ir.ui.view">
+        <field name="name">school.homeroom.view.search</field>
+        <field name="model">school.homeroom</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="teacher_id"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="school_homeroom_action" model="ir.actions.act_window">
+        <field name="name">Homerooms</field>
+        <field name="res_model">school.homeroom</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add a homeroom</p>
+            <p>A homeroom is a room with its teacher and the grade levels taught there, for example Lower Room and Upper Room.
+               The year's classes are generated from the homerooms: one per course of each grade level.</p>
+        </field>
+    </record>
+</odoo>

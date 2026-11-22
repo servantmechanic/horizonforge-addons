@@ -1,13 +1,17 @@
 {
     "name": "HorizonForge CE Customizations",
-    "version": "19.0.1.0.1",
+    "version": "19.0.1.3.0",
     "category": "Hidden/Tools",
     "summary": "Small, safe usability tweaks for Odoo Community: home action, "
                "no quick-create of contacts/products, duplicate contact warning, "
-               "no odoo.com phone-home",
+               "no odoo.com phone-home, no public sign-up, optional simple interface for non-admins, "
+               "+/- keys on date fields",
+    # Set, or Odoo parses README.md as reStructuredText and logs errors.
+    "description": "Usability tweaks for Odoo Community. See README.md.",
     "author": "Ozark AG LLC",
     "license": "AGPL-3",
-    "depends": ["base_setup", "mail", "web"],
+    # auth_signup: installed first, so its free sign-up default is turned off after it.
+    "depends": ["auth_signup", "base_setup", "mail", "web"],
     "data": [
         "security/hf_security.xml",
         "data/ir_config_parameter_data.xml",
@@ -17,6 +21,9 @@
     "assets": {
         "web.assets_backend": [
             "horizonforge_ce_custom/static/src/js/user_menu.js",
+            "horizonforge_ce_custom/static/src/js/simple_interface.js",
+            "horizonforge_ce_custom/static/src/js/date_keys.js",
+            "horizonforge_ce_custom/static/src/xml/navbar.xml",
             "horizonforge_ce_custom/static/src/scss/chat_window.scss",
         ],
     },

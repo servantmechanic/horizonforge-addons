@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_project" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.horizonforge.project.custom</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="project.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='project']" position="inside">
+                <block title="Customer Portal" name="hf_customer_portal_setting_container">
+                    <setting id="hf_portal_hide_timesheets" help="No Time Spent, hours or timesheet lists on portal pages">
+                        <field name="hf_portal_hide_timesheets"/>
+                    </setting>
+                    <setting id="hf_portal_hide_sales_orders" help="No Sales Orders or Quotations; emailed links and invoices keep working">
+                        <field name="hf_portal_hide_sales_orders"/>
+                    </setting>
+                    <setting id="hf_auto_follow_tasks" help="A customer following a project also follows its tasks, old and new">
+                        <field name="hf_auto_follow_tasks"/>
+                    </setting>
+                </block>
+                <block title="Timesheet Payroll" name="hf_payroll_setting_container">
+                    <setting id="hf_overtime" help="Used by the Payroll report">
+                        <div class="content-group">
+                            <div class="row mt8">
+                                <label for="hf_ot_threshold" class="col-lg-5 o_light_label"/>
+                                <field name="hf_ot_threshold"/>
+                            </div>
+                            <div class="row">
+                                <label for="hf_ot_multiplier" class="col-lg-5 o_light_label"/>
+                                <field name="hf_ot_multiplier"/>
+                            </div>
+                            <div class="row">
+                                <label for="hf_week_start" class="col-lg-5 o_light_label"/>
+                                <field name="hf_week_start"/>
+                            </div>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- No app switcher for a user with a single app: it would only list
+         the app they are already in. -->
+    <t t-inherit="web.NavBar.AppsMenu" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('o_navbar_apps_menu')]" position="attributes">
+            <attribute name="t-if">!isScopedApp and apps.length &gt; 1</attribute>
+        </xpath>
+    </t>
+</templates>

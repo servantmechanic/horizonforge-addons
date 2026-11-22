@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hf_check_handwritten_view_form" model="ir.ui.view">
+        <field name="name">hf.check.handwritten.form</field>
+        <field name="model">hf.check.handwritten</field>
+        <field name="arch" type="xml">
+            <form string="Record Handwritten Checks">
+                <p>
+                    Enter the number written on each check. They leave the print queue
+                    and are marked sent, as if printed.
+                </p>
+                <field name="line_ids" nolabel="1">
+                    <list editable="bottom" create="false" delete="false">
+                        <field name="currency_id" column_invisible="1"/>
+                        <field name="date"/>
+                        <field name="partner_id"/>
+                        <field name="journal_id" optional="hide"/>
+                        <field name="amount"/>
+                        <field name="check_number"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_record" type="object" string="Record" class="btn-primary"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_hf_record_handwritten_checks" model="ir.actions.server">
+        <field name="name">Record Handwritten Check</field>
+        <field name="model_id" ref="account.model_account_payment"/>
+        <field name="binding_model_id" ref="account.model_account_payment"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="group_ids" eval="[(4, ref('account.group_account_user'))]"/>
+        <field name="state">code</field>
+        <field name="code">action = records.action_hf_record_handwritten_checks()</field>
+    </record>
+</odoo>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_section_view_list" model="ir.ui.view">
+        <field name="name">school.section.view.list</field>
+        <field name="model">school.section</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="course_id"/>
+                <field name="name" optional="hide"/>
+                <field name="year_id"/>
+                <field name="teacher_id" widget="many2one_avatar"/>
+                <field name="homeroom_id" optional="show"/>
+                <field name="student_count"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="school_section_view_form" model="ir.ui.view">
+        <field name="name">school.section.view.form</field>
+        <field name="model">school.section</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_enroll_grade_levels" type="object" string="Enroll Students"
+                            groups="horizonforge_school_core.group_school_office"
+                            invisible="not id"
+                            help="Enroll every student of the course's grade levels (in this homeroom, when set) who isn't in the class yet."/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <group>
+                        <group>
+                            <field name="active" invisible="1"/>
+                            <field name="course_id" options="{'no_create': True}"/>
+                            <field name="year_id" options="{'no_create': True}"/>
+                            <field name="name" placeholder="e.g. A"/>
+                        </group>
+                        <group>
+                            <field name="teacher_id" widget="many2one_avatar" options="{'no_create': True}"/>
+                            <field name="co_teacher_ids" widget="many2many_tags_avatar" options="{'no_create': True}"/>
+                            <field name="homeroom_id" options="{'no_create': True}"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Students" name="students">
+                            <field name="enrollment_ids">
+                                <list editable="bottom">
+                                    <field name="student_id" options="{'no_create': True}"/>
+                                    <field name="date_start"/>
+                                    <field name="date_end"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="school_section_view_search" model="ir.ui.view">
+        <field name="name">school.section.view.search</field>
+        <field name="model">school.section</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="course_id"/>
+                <field name="teacher_id"/>
+                <field name="homeroom_id"/>
+                <field name="year_id"/>
+                <filter name="current_year" string="Current Year" domain="[('year_id.is_current', '=', True)]"/>
+                <filter name="my_classes" string="My Classes"
+                        domain="['|', ('teacher_id', '=', uid), ('co_teacher_ids', 'in', uid)]"/>
+                <separator/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_teacher" string="Teacher" context="{'group_by': 'teacher_id'}"/>
+                    <filter name="group_homeroom" string="Homeroom" context="{'group_by': 'homeroom_id'}"/>
+                    <filter name="group_year" string="School Year" context="{'group_by': 'year_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="school_section_action" model="ir.actions.act_window">
+        <field name="name">Classes</field>
+        <field name="res_model">school.section</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_current_year': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add a class</p>
+            <p>A class is a course taught by a teacher in one school year. Students are enrolled in classes.</p>
+        </field>
+    </record>
+</odoo>

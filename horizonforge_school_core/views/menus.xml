@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- First app (before Discuss, at 5): Odoo opens the first app a user
+         can see after login, so school users land here. -->
+    <menuitem id="menu_school_root" name="School" sequence="3"
+              web_icon="horizonforge_school_core,static/description/icon.png"
+              groups="group_school_teacher"/>
+
+    <menuitem id="menu_school_classes" parent="menu_school_root" action="school_section_action" sequence="10"/>
+    <menuitem id="menu_school_students" parent="menu_school_root" action="school_student_action" sequence="20"/>
+    <menuitem id="menu_school_patrons" parent="menu_school_root" action="school_patron_action" sequence="30"/>
+    <menuitem id="menu_school_enrollments" parent="menu_school_root" action="school_enrollment_action" sequence="40"
+              groups="group_school_office"/>
+
+    <menuitem id="menu_school_config" name="Configuration" parent="menu_school_root" sequence="90"
+              groups="group_school_admin"/>
+    <menuitem id="menu_school_settings" parent="menu_school_config" action="school_settings_action" sequence="5"
+              groups="base.group_system"/>
+    <menuitem id="menu_school_years" parent="menu_school_config" action="school_year_action" sequence="10"/>
+    <menuitem id="menu_school_grade_levels" parent="menu_school_config" action="school_grade_level_action" sequence="20"/>
+    <menuitem id="menu_school_homerooms" parent="menu_school_config" action="school_homeroom_action" sequence="35"/>
+    <menuitem id="menu_school_setup_guide" parent="menu_school_config" action="school_setup_guide_action" sequence="1"/>
+    <menuitem id="menu_school_calendar" parent="menu_school_root" action="school_calendar_day_action" sequence="45"
+              groups="group_school_office"/>
+    <menuitem id="menu_school_year_setup" parent="menu_school_config" action="school_year_setup_action" sequence="15"/>
+    <menuitem id="menu_school_courses" parent="menu_school_config" action="school_course_action" sequence="40"/>
+</odoo>

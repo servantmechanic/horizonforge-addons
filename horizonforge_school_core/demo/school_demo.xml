@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- The reference school is built in Python (60 students, 40 classes):
+         see models/school_demo.py. -->
+    <function model="school.year" name="_load_school_demo"/>
+
+    <!-- Demo databases use the simple interface of horizonforge_ce_custom
+         (no Discuss, Contacts or Apps for teachers and office staff). Only a
+         setting: it does nothing unless that module is installed. -->
+    <function model="ir.config_parameter" name="set_param"
+              eval="['horizonforge_ce_custom.simple_interface', 'True']"/>
+</odoo>

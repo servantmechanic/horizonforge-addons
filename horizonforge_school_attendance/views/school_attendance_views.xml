@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_attendance_code_view_list" model="ir.ui.view">
+        <field name="name">school.attendance.code.view.list</field>
+        <field name="model">school.attendance.code</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="kind"/>
+                <field name="absence_days" invisible="kind != 'absent'"/>
+                <field name="excused" invisible="kind != 'absent'"/>
+                <field name="color" widget="color"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="school_attendance_code_action" model="ir.actions.act_window">
+        <field name="name">Attendance Codes</field>
+        <field name="res_model">school.attendance.code</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add an attendance code</p>
+            <p>Students are present unless something is recorded. Each code's letter is its key in the attendance grid.</p>
+        </field>
+    </record>
+
+    <record id="school_attendance_view_list" model="ir.ui.view">
+        <field name="name">school.attendance.view.list</field>
+        <field name="model">school.attendance</field>
+        <field name="arch" type="xml">
+            <list editable="top">
+                <field name="date"/>
+                <field name="student_id" options="{'no_create': True}"/>
+                <field name="homeroom_id" optional="show"/>
+                <field name="grade_level_id" optional="show"/>
+                <field name="period_id" optional="hide" context="{'school_period_short_name': True}"/>
+                <field name="code_id" options="{'no_create': True, 'no_open': True}"/>
+                <field name="note"/>
+                <field name="recorded_by" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="school_attendance_view_search" model="ir.ui.view">
+        <field name="name">school.attendance.view.search</field>
+        <field name="model">school.attendance</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="student_id"/>
+                <field name="homeroom_id"/>
+                <field name="grade_level_id"/>
+                <field name="period_id"/>
+                <field name="code_id"/>
+                <filter name="my_homeroom" string="My Homeroom" domain="[('student_id.homeroom_id.teacher_id', '=', uid)]"/>
+                <separator/>
+                <filter name="today" string="Today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="this_week" string="This Week"
+                        domain="[('date', '&gt;=', (context_today() - relativedelta(days=context_today().weekday())).strftime('%Y-%m-%d')),
+                                 ('date', '&lt;=', (context_today() + relativedelta(days=6 - context_today().weekday())).strftime('%Y-%m-%d'))]"/>
+                <filter name="current_period" string="Current Grading Period" domain="[('period_id.is_current', '=', True)]"/>
+                <filter name="previous_period" string="Previous Grading Period" domain="[('period_id.is_previous', '=', True)]"/>
+                <filter name="current_year" string="Current Year" domain="[('period_id.year_id.is_current', '=', True)]"/>
+                <separator/>
+                <filter name="absent" string="Absences" domain="[('kind', '=', 'absent')]"/>
+                <filter name="unexcused" string="Unexcused" domain="[('kind', '=', 'absent'), ('excused', '=', False)]"/>
+                <filter name="tardy" string="Tardies" domain="[('kind', '=', 'tardy')]"/>
+                <group>
+                    <filter name="group_student" string="Student" context="{'group_by': 'student_id'}"/>
+                    <filter name="group_homeroom" string="Homeroom" context="{'group_by': 'homeroom_id'}"/>
+                    <filter name="group_grade_level" string="Grade Level" context="{'group_by': 'grade_level_id'}"/>
+                    <filter name="group_period" string="Grading Period" context="{'group_by': 'period_id'}"/>
+                    <filter name="group_code" string="Code" context="{'group_by': 'code_id'}"/>
+                </group>
+                <searchpanel>
+                    <field name="period_id" string="Grading Period" icon="fa-calendar"/>
+                    <field name="grade_level_id" string="Grade Level" select="multi" icon="fa-signal" enable_counters="1"/>
+                    <field name="homeroom_id" string="Homeroom" select="multi" icon="fa-home" enable_counters="1"/>
+                    <field name="code_id" string="Code" select="multi" icon="fa-tag" enable_counters="1"/>
+                </searchpanel>
+            </search>
+        </field>
+    </record>
+
+    <record id="school_attendance_action" model="ir.actions.act_window">
+        <field name="name">Absences &amp; Tardies</field>
+        <field name="res_model">school.attendance</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_current_year': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Nothing recorded</p>
+            <p>Every absence, part day and tardy is listed here. Students without a line were present.</p>
+        </field>
+    </record>
+
+    <!-- The menu's way in: on the current grading period, My Homeroom for teachers. -->
+    <record id="school_attendance_server_action" model="ir.actions.server">
+        <field name="name">Absences &amp; Tardies</field>
+        <field name="model_id" ref="model_school_attendance"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_list()</field>
+    </record>
+
+    <record id="school_attendance_grid_action" model="ir.actions.client">
+        <field name="name">Attendance</field>
+        <field name="tag">school_attendance_grid</field>
+    </record>
+</odoo>

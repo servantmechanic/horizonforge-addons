@@ -253,3 +253,26 @@ class TestNpDashboard(TestNpMove):
         self.assertEqual(action["context"]["default_bank_account_id"], self.checking.id)
         self.assertEqual(self.checking.action_open_entries()["domain"],
                          [("account_id", "=", self.checking.id)])
+
+
+@tagged("post_install", "-at_install")
+class TestNpDemo(TransactionCase):
+
+    def test_demo_loader(self):
+        Move = self.env["np.move"]
+        Move.search([("state", "=", "draft")]).unlink()
+        if Move.search_count([]):
+            self.skipTest("entries already exist")
+        Move._load_np_demo(months=3)
+        posted = Move.search([("state", "=", "posted")])
+        self.assertGreater(len(posted), 40)
+        self.assertEqual(set(Move.search([("state", "=", "draft")]).mapped("move_type")), {"payment", "deposit"})
+        recs = self.env["np.reconciliation"].search([])
+        self.assertEqual(len(recs), 2)
+        self.assertEqual(set(recs.mapped("state")), {"done"})
+        self.assertTrue(all(rec.currency_id.is_zero(rec.difference) for rec in recs))
+        checking = self.env.ref("nonprofit_accounting.np_account_1000")
+        self.assertGreater(checking.balance, 0)
+        # Loading again adds nothing.
+        Move._load_np_demo(months=3)
+        self.assertEqual(Move.search_count([("state", "=", "posted")]), len(posted))

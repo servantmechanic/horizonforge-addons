@@ -1,0 +1,48 @@
+// Compact statements, in the style of a spreadsheet report.
+.hf_compact {
+    font-size: 11px;
+
+    .hf_header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+
+        .hf_company {
+            font-weight: bold;
+        }
+
+        .hf_title {
+            text-align: right;
+
+            .hf_name {
+                font-size: 14px;
+                font-weight: bold;
+            }
+        }
+    }
+
+    .mis_table {
+        width: auto;
+        min-width: 60%;
+        table-layout: auto;
+
+        .mis_row {
+            border-bottom: 0;
+        }
+
+        .mis_cell {
+            padding: 1px 6px;
+
+            &.mis_collabel {
+                background-color: transparent;
+                text-align: right;
+                border-bottom: 1px solid #000;
+            }
+
+            &.mis_rowlabel {
+                padding-right: 24px;
+            }
+        }
+    }
+}

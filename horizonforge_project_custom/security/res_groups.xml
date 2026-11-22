@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- A function, not a record: base.group_user is noupdate, so a record here
+         would apply on install but not on an update of an existing database. -->
+    <function model="res.users" name="_hf_enable_analytic_accounting"/>
+</odoo>

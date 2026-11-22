@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_section_view_form" model="ir.ui.view">
+        <field name="name">school.section.view.form.inherit.gradebook</field>
+        <field name="model">school.section</field>
+        <field name="inherit_id" ref="horizonforge_school_core.school_section_view_form"/>
+        <field name="arch" type="xml">
+            <header position="inside">
+                <field name="grading_type" invisible="1"/>
+                <button name="action_open_gradebook" type="object" string="Gradebook"
+                        class="btn-primary" invisible="not id or grading_type != 'percent'"/>
+                <button name="action_open_period_marks" type="object" string="Letter Grades &amp; Comments"
+                        invisible="not id"
+                        help="A letter or a comment per student for each grading period. Comments print on the report card."/>
+            </header>
+            <field name="name" position="after">
+                <field name="entry_mode" placeholder="Course or school default" invisible="grading_type != 'percent'"/>
+                <field name="weight_scheme_id" options="{'no_create': True}" placeholder="Course or school default"
+                       invisible="grading_type != 'percent'"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="school_section_view_list" model="ir.ui.view">
+        <field name="name">school.section.view.list.inherit.gradebook</field>
+        <field name="model">school.section</field>
+        <field name="inherit_id" ref="horizonforge_school_core.school_section_view_list"/>
+        <field name="arch" type="xml">
+            <field name="student_count" position="after">
+                <field name="grading_type" column_invisible="1"/>
+                <button name="action_open_gradebook" type="object" string="Gradebook" class="btn-link"
+                        invisible="grading_type != 'percent'"/>
+                <button name="action_open_period_marks" type="object" string="Letters &amp; Comments" class="btn-link"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="school_course_view_list" model="ir.ui.view">
+        <field name="name">school.course.view.list.inherit.gradebook</field>
+        <field name="model">school.course</field>
+        <field name="inherit_id" ref="horizonforge_school_core.school_course_view_list"/>
+        <field name="arch" type="xml">
+            <field name="teacher_id" position="after">
+                <field name="grading_type" optional="show"/>
+                <field name="entry_mode" optional="show" placeholder="School default"
+                       invisible="grading_type != 'percent'"/>
+                <field name="weight_scheme_id" options="{'no_create': True}" optional="hide"/>
+                <field name="grading_scale_id" options="{'no_create': True}" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="school_grade_level_view_list" model="ir.ui.view">
+        <field name="name">school.grade.level.view.list.inherit.gradebook</field>
+        <field name="model">school.grade.level</field>
+        <field name="inherit_id" ref="horizonforge_school_core.school_grade_level_view_list"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="grading_scale_id" options="{'no_create': True}" optional="show"/>
+            </field>
+        </field>
+    </record>
+</odoo>

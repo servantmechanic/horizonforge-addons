@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- The folded report card: Letter landscape, folded in half. -->
+    <record id="paperformat_report_card" model="report.paperformat">
+        <field name="name">School Report Card (Letter, landscape)</field>
+        <field name="format">Letter</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">8</field>
+        <field name="margin_bottom">8</field>
+        <field name="margin_left">8</field>
+        <field name="margin_right">8</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+        <field name="disable_shrinking" eval="True"/>
+    </record>
+
+    <record id="action_report_card" model="ir.actions.report">
+        <field name="name">Report Card</field>
+        <field name="model">school.grade.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">horizonforge_school_gradebook.report_card</field>
+        <field name="report_file">horizonforge_school_gradebook.report_card</field>
+        <field name="print_report_name">'Report Cards %s' % (object.period_id.name or '')</field>
+        <field name="paperformat_id" ref="paperformat_report_card"/>
+    </record>
+    <record id="action_report_card_reference" model="ir.actions.report">
+        <field name="name">Report Card Reference</field>
+        <field name="model">school.grade.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">horizonforge_school_gradebook.report_card_reference</field>
+        <field name="report_file">horizonforge_school_gradebook.report_card_reference</field>
+        <field name="print_report_name">'Report Card Reference %s' % (object.period_id.name or '')</field>
+        <field name="paperformat_id" ref="paperformat_report_card"/>
+    </record>
+    <record id="action_report_class_sheet" model="ir.actions.report">
+        <field name="name">Class Grade Sheet</field>
+        <field name="model">school.grade.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">horizonforge_school_gradebook.report_class_sheet</field>
+        <field name="report_file">horizonforge_school_gradebook.report_class_sheet</field>
+        <field name="print_report_name">'Class Grade Sheet %s' % (object.period_id.name or '')</field>
+    </record>
+    <record id="action_report_progress" model="ir.actions.report">
+        <field name="name">Progress Report</field>
+        <field name="model">school.grade.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">horizonforge_school_gradebook.report_progress</field>
+        <field name="report_file">horizonforge_school_gradebook.report_progress</field>
+        <field name="print_report_name">'Progress Reports %s' % (object.period_id.name or '')</field>
+    </record>
+    <record id="action_report_missing" model="ir.actions.report">
+        <field name="name">Missing Work</field>
+        <field name="model">school.grade.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">horizonforge_school_gradebook.report_missing</field>
+        <field name="report_file">horizonforge_school_gradebook.report_missing</field>
+        <field name="print_report_name">'Missing Work %s' % (object.period_id.name or object.year_id.name)</field>
+    </record>
+</odoo>

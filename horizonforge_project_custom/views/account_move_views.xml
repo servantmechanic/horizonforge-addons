@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_move_form_hf" model="ir.ui.view">
+        <field name="name">account.move.form.inherit.horizonforge.project.custom</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@id='header_left_group']" position="inside">
+                <field name="hf_project_id"
+                       context="{'hf_show_job_code': True}"
+                       options="{'no_create': True}"
+                       invisible="move_type not in ('in_invoice', 'in_refund', 'in_receipt')"
+                       readonly="state != 'draft'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_in_invoice_tree_hf" model="ir.ui.view">
+        <field name="name">account.move.bill.list.inherit.horizonforge.project.custom</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_invoice_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_partner_display_name']" position="after">
+                <field name="hf_project_id" optional="hide" column_invisible="context.get('default_move_type') not in ('in_invoice', 'in_refund', 'in_receipt')"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_account_invoice_filter_hf" model="ir.ui.view">
+        <field name="name">account.move.search.inherit.horizonforge.project.custom</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <field name="hf_project_id"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

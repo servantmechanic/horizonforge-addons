@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="horizonforge_school_gradebook.GradebookGrid">
+        <div class="o_school_gradebook o_action d-flex flex-column h-100" t-ref="root"
+             t-att-style="rootStyle" t-on-keydown="onKeydown" t-on-paste="onPaste">
+            <div class="o_gradebook_bar d-flex flex-wrap align-items-center gap-2 px-3 py-2 border-bottom bg-view">
+                <t t-if="state.sections.length">
+                    <select class="form-select w-auto o_gradebook_section" aria-label="Class"
+                            t-on-change="onSectionChange">
+                        <t t-foreach="state.sections" t-as="section" t-key="section.id">
+                            <option t-att-value="section.id" t-att-selected="section.id === state.sectionId"
+                                    t-esc="section.name"/>
+                        </t>
+                    </select>
+                    <select class="form-select w-auto o_gradebook_period" aria-label="Grading period"
+                            t-on-change="onPeriodChange">
+                        <t t-foreach="state.periods" t-as="period" t-key="period.id">
+                            <option t-att-value="period.id" t-att-selected="period.id === state.periodId">
+                                <t t-esc="period.name"/><t t-if="period.locked"> (locked)</t>
+                            </option>
+                        </t>
+                    </select>
+                    <t t-if="state.canEdit">
+                        <button class="btn btn-primary o_gradebook_new" t-on-click="() => this.openAssignment(false)"
+                                title="Ctrl+Shift+A">New assignment</button>
+                        <button t-if="state.hasSchedule" class="btn btn-secondary o_gradebook_generate"
+                                t-on-click="generateAssignments"
+                                title="Create this grading period's assignments from the course's schedule">
+                            Generate from schedule
+                        </button>
+                    </t>
+                    <span t-if="state.locked" class="badge text-bg-warning">
+                        <i class="fa fa-lock me-1"/>Locked
+                    </span>
+                    <span t-elif="!state.canEdit" class="badge text-bg-secondary">Read only</span>
+                    <div class="ms-auto d-flex align-items-center gap-3">
+                        <button t-if="state.categoryColumns.length" class="btn btn-link p-0 o_gradebook_categories"
+                                t-on-click="toggleCategories" title="Show or hide the category averages">
+                            <i t-attf-class="fa me-1 {{ state.showCategories ? 'fa-toggle-on' : 'fa-toggle-off' }}"/>Category averages
+                        </button>
+                        <button class="btn btn-link p-0 o_gradebook_name_order" t-on-click="toggleNameOrder"
+                                title="Sort students by last name or by first name">
+                            <i class="fa fa-sort-alpha-asc me-1"/>
+                            <t t-if="state.nameOrder === 'last_first'">Last, First</t>
+                            <t t-else="">First Last</t>
+                        </button>
+                        <button class="btn btn-link p-0 o_gradebook_enter" t-on-click="toggleEnterDirection"
+                                title="Change where Enter moves">
+                            Enter moves
+                            <t t-if="state.enterDirection === 'down'">down <i class="fa fa-arrow-down"/></t>
+                            <t t-else="">right <i class="fa fa-arrow-right"/></t>
+                        </button>
+                        <button class="btn btn-link p-0" t-on-click="showHelp" title="Shortcuts (?)">
+                            <i class="fa fa-keyboard-o me-1"/>Shortcuts
+                        </button>
+                        <span class="o_gradebook_status" t-att-class="'o_status_' + state.saveStatus"
+                              t-att-data-status="state.saveStatus">
+                            <i t-if="state.saveStatus === 'saved'" class="fa fa-check me-1"/>
+                            <i t-elif="state.saveStatus === 'saving'" class="fa fa-circle-o-notch fa-spin me-1"/>
+                            <i t-else="" class="fa fa-exclamation-triangle me-1"/>
+                            <t t-esc="saveStatusLabel"/>
+                        </span>
+                    </div>
+                </t>
+            </div>
+
+            <div t-if="!state.sections.length" class="o_gradebook_empty m-auto text-center text-muted p-4">
+                <h3>No classes yet</h3>
+                <p>The gradebook shows the classes you teach in the current school year.<br/>
+                   Ask a school administrator to set you as the teacher of your classes.</p>
+            </div>
+            <div t-elif="!state.periods.length" class="o_gradebook_empty m-auto text-center text-muted p-4">
+                <h3>No grading periods</h3>
+                <p>Add grading periods to the school year first (Configuration, School Years).</p>
+            </div>
+            <div t-elif="!state.students.length" class="o_gradebook_empty m-auto text-center text-muted p-4">
+                <h3>No students in this class</h3>
+                <p>Enroll students from the class form (Classes, then Enroll Students).</p>
+            </div>
+            <div t-else="" class="o_gradebook_scroll flex-grow-1 overflow-auto" tabindex="0">
+                <table class="o_gradebook_table" t-on-click="onCellClick" t-on-dblclick="onCellDblClick">
+                    <thead>
+                        <tr>
+                            <th class="o_gradebook_corner">
+                                <t t-esc="state.students.length"/> students
+                            </th>
+                            <th class="o_gradebook_grade o_gradebook_grade_head"
+                                title="Period grade. Below: the class average">
+                                <div class="o_gradebook_assignment_name">Grade</div>
+                                <div class="o_gradebook_assignment_meta">Class avg</div>
+                                <div class="o_gradebook_class_average" t-esc="state.classAverage or '-'"/>
+                            </th>
+                            <t t-foreach="shownCategories" t-as="category" t-key="category.id">
+                                <th class="o_gradebook_category_average o_gradebook_grade_head"
+                                    t-att-style="categoryStyle(category_index)" t-att-title="category.name + ' average'">
+                                    <span class="o_gradebook_category" t-att-style="'margin-left:0;background-color:' + (category.color || '#868e96')"
+                                          t-esc="category.code"/>
+                                    <div class="o_gradebook_assignment_meta">avg</div>
+                                </th>
+                            </t>
+                            <t t-foreach="state.assignments" t-as="assignment" t-key="assignment.id">
+                                <th class="o_gradebook_assignment"
+                                    t-att-class="{ o_selected_col: assignment_index === state.col, o_today: assignment.date === state.today }"
+                                    t-att-data-assignment="assignment.id"
+                                    t-att-title="assignment.name"
+                                    t-on-click.stop="() => this.openAssignment(assignment.id)">
+                                    <div class="o_gradebook_assignment_name" t-esc="assignment.name"/>
+                                    <div class="o_gradebook_assignment_meta">
+                                        <span t-esc="shortDate(assignment.date)"/>
+                                        <span class="o_gradebook_category"
+                                              t-att-style="'background-color:' + (state.categories[assignment.category_id]?.color || '#868e96')"
+                                              t-att-title="state.categories[assignment.category_id]?.name"
+                                              t-esc="state.categories[assignment.category_id]?.code"/>
+                                    </div>
+                                    <div class="o_gradebook_assignment_mode" t-esc="headerInfo(assignment)"/>
+                                </th>
+                            </t>
+                            <th class="o_gradebook_filler">
+                                <t t-if="!state.assignments.length">
+                                    No assignments in this grading period yet.
+                                    <t t-if="state.canEdit">
+                                        Press Ctrl+Shift+A to add one<t t-if="state.hasSchedule">, or use Generate from schedule</t>.
+                                    </t>
+                                </t>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="state.students" t-as="student" t-key="student.id">
+                            <tr t-att-class="{ o_selected_row: student_index === state.row }">
+                                <th class="o_gradebook_student" t-esc="student.name"/>
+                                <t t-set="grade" t-value="state.grades[student.id]"/>
+                                <td class="o_gradebook_grade" t-att-data-student="student.id" t-att-title="gradeTitle(student)">
+                                    <span class="o_gradebook_grade_value" t-esc="grade ? grade.grade : ''"/>
+                                    <span class="o_gradebook_letter" t-esc="grade ? grade.letter : ''"/>
+                                </td>
+                                <t t-foreach="shownCategories" t-as="category" t-key="category.id">
+                                    <td class="o_gradebook_category_average" t-att-style="categoryStyle(category_index)"
+                                        t-esc="grade ? (grade.categories[category.id] || '') : ''"/>
+                                </t>
+                                <t t-foreach="state.assignments" t-as="assignment" t-key="assignment.id">
+                                    <t t-set="cell" t-value="getCell(assignment, student)"/>
+                                    <td t-att-class="cellClass(assignment, student, student_index, assignment_index)"
+                                        t-att-data-row="student_index" t-att-data-col="assignment_index"
+                                        t-att-title="cellTitle(cell)">
+                                        <input t-if="state.editing and student_index === state.row and assignment_index === state.col"
+                                               t-ref="editor" type="text" class="o_gradebook_editor" autocomplete="off"
+                                               t-on-blur="onEditorBlur"/>
+                                        <t t-else="" t-esc="cellText(cell)"/>
+                                    </td>
+                                </t>
+                                <td class="o_gradebook_filler"/>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </t>
+</templates>

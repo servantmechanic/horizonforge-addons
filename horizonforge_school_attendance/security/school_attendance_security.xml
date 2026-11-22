@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Teachers: the students of their own homeroom. Office and up: everyone. -->
+    <record id="rule_school_attendance_teacher" model="ir.rule">
+        <field name="name">Attendance: teacher's own homeroom</field>
+        <field name="model_id" ref="model_school_attendance"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_teacher'))]"/>
+        <field name="domain_force">[('student_id.homeroom_id.teacher_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_school_attendance_office" model="ir.rule">
+        <field name="name">Attendance: office manages all</field>
+        <field name="model_id" ref="model_school_attendance"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_office'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+</odoo>

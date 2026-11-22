@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hf_timesheet_payroll_wizard,hf.timesheet.payroll.wizard,model_hf_timesheet_payroll_wizard,hr_timesheet.group_timesheet_manager,1,1,1,1
+access_hf_job_cost_line,hf.job.cost.line,model_hf_job_cost_line,hr_timesheet.group_timesheet_manager,1,1,1,1
