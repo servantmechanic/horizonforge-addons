@@ -3,6 +3,8 @@
     "version": "19.0.2.1.0",
     "category": "Human Resources",
     "summary": "Printable timecard: attendance hours, weekly overtime, pay, and time off",
+    # Set, or Odoo parses README.md as reStructuredText and logs errors.
+    "description": "Printable timecards from Attendances. See README.md.",
     "author": "Ozark AG LLC",
     "license": "AGPL-3",
     "depends": ["hr_attendance", "hr_holidays"],

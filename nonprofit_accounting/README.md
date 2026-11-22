@@ -10,8 +10,8 @@ expenses, ending balance).
 
 ## Status
 
-Testing. Milestones M0–M4 and report click-through are built. See
-[PLAN.md](PLAN.md) for scope and milestones.
+In production since November 2026. See [PLAN.md](PLAN.md) for scope and
+milestones.
 
 ## Entering bills
 

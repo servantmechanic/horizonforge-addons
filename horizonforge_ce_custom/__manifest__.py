@@ -6,6 +6,8 @@
                "no quick-create of contacts/products, duplicate contact warning, "
                "no odoo.com phone-home, no public sign-up, optional simple interface for non-admins, "
                "+/- keys on date fields",
+    # Set, or Odoo parses README.md as reStructuredText and logs errors.
+    "description": "Usability tweaks for Odoo Community. See README.md.",
     "author": "Ozark AG LLC",
     "license": "AGPL-3",
     # auth_signup: installed first, so its free sign-up default is turned off after it.
