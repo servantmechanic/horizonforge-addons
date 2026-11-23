@@ -15,6 +15,7 @@
                 <field name="entry_mode"/>
                 <field name="period_id" options="{'no_create': True}" optional="show"/>
                 <field name="unscored_count" optional="show" decoration-warning="unscored_count"/>
+                <field name="attachment_count" optional="hide" string="Files"/>
             </list>
         </field>
     </record>
@@ -45,6 +46,10 @@
                                    invisible="context.get('school_gradebook_dialog')"/>
                         </group>
                     </group>
+                    <field name="note" placeholder="Notes: pages, what it covers, answers..." nolabel="1"/>
+                    <div class="mt-2">
+                        <field name="attachment_ids" widget="many2many_binary" string="Add a file" nolabel="1"/>
+                    </div>
                 </sheet>
             </form>
         </field>
@@ -70,6 +75,7 @@
                 <filter name="previous_period" string="Previous Grading Period" domain="[('period_id.is_previous', '=', True)]"/>
                 <separator/>
                 <filter name="unscored" string="Not Fully Scored" domain="[('is_unscored', '=', True)]"/>
+                <filter name="with_files" string="With Files" domain="[('attachment_ids', '!=', False)]"/>
                 <separator/>
                 <filter name="today" string="Today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter name="this_week" string="This Week"

@@ -33,6 +33,16 @@
                         <i class="fa fa-lock me-1"/>Locked
                     </span>
                     <span t-elif="!state.canEdit" class="badge text-bg-secondary">Read only</span>
+                    <div t-if="shortcutCategories.length" class="o_gradebook_legend d-flex align-items-center gap-2 small text-muted"
+                         title="Press a key on a column to make it that category">
+                        <t t-foreach="shortcutCategories" t-as="category" t-key="category.id">
+                            <span class="text-nowrap">
+                                <span class="o_gradebook_category me-1" t-att-style="'margin-left:0;background-color:' + (category.color || '#868e96')"
+                                      t-esc="category.code"/>
+                                <t t-esc="category.name"/> <kbd class="ms-1" t-esc="category.shortcut"/>
+                            </span>
+                        </t>
+                    </div>
                     <div class="ms-auto d-flex align-items-center gap-3">
                         <button t-if="state.categoryColumns.length" class="btn btn-link p-0 o_gradebook_categories"
                                 t-on-click="toggleCategories" title="Show or hide the category averages">
@@ -136,14 +146,25 @@
                                               t-att-title="state.categories[assignment.category_id]?.name"
                                               t-esc="state.categories[assignment.category_id]?.code"/>
                                     </div>
-                                    <div class="o_gradebook_assignment_mode" t-esc="headerInfo(assignment)"/>
+                                    <div class="o_gradebook_assignment_mode">
+                                        <t t-esc="headerInfo(assignment)"/>
+                                        <i t-if="assignment.note" class="fa fa-sticky-note-o ms-1" t-att-title="assignment.note"/>
+                                        <i t-if="assignment.attachment_count" class="fa fa-paperclip ms-1"
+                                           t-att-title="assignment.attachment_count === 1 ? '1 file' : assignment.attachment_count + ' files'"/>
+                                    </div>
                                 </th>
                             </t>
+                            <th t-if="state.canEdit" class="o_gradebook_add"
+                                title="Add the next assignment (or Tab past the last column)"
+                                t-on-click.stop="() => this.addAssignment({ after: lastAssignment })">
+                                <i class="fa fa-plus"/>
+                            </th>
                             <th class="o_gradebook_filler">
                                 <t t-if="!state.assignments.length">
                                     No assignments in this grading period yet.
                                     <t t-if="state.canEdit">
-                                        Press Ctrl+Shift+A to add one<t t-if="state.hasSchedule">, or use Generate from schedule</t>.
+                                        <br/>Click + or press Tab to start<t t-if="shortcutCategories.length"> (<t t-foreach="shortcutCategories" t-as="c" t-key="c.id"><kbd t-esc="c.shortcut"/> <t t-esc="c.name"/><t t-if="!c_last">, </t></t>)</t>,
+                                        Ctrl+Shift+A for the details<t t-if="state.hasSchedule">, or Generate from schedule</t>.
                                     </t>
                                 </t>
                             </th>
@@ -191,6 +212,7 @@
                                         </t>
                                     </td>
                                 </t>
+                                <td t-if="state.canEdit" class="o_gradebook_add"/>
                                 <td class="o_gradebook_filler"/>
                             </tr>
                         </t>
@@ -203,7 +225,10 @@
                     <i t-attf-class="fa me-1 {{ state.showChart ? 'fa-chevron-down' : 'fa-chevron-right' }}"/>
                     <t t-if="state.showChart">Hide graph</t><t t-else="">Show graph</t>
                 </button>
-                <GradebookChart t-if="state.showChart and activeStudent"
+                <div t-if="state.showChart and !chartAverages.some((v) => v !== null)" class="text-muted small py-2">
+                    The graph of each student beside the class average shows once scores are entered.
+                </div>
+                <GradebookChart t-elif="state.showChart and activeStudent"
                                 assignments="state.assignments" averages="chartAverages" points="chartPoints"
                                 studentName="activeStudent.name"/>
             </div>

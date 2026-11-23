@@ -168,6 +168,23 @@
         font-weight: 600;
     }
 
+    // The + column: adds the next assignment, as in Candle.
+    .o_gradebook_add {
+        min-width: 36px;
+        max-width: 36px;
+        text-align: center;
+        vertical-align: middle;
+        color: $o-success;
+
+        &:is(th) {
+            cursor: pointer;
+
+            &:hover {
+                background-color: $o-gray-200;
+            }
+        }
+    }
+
     .o_gradebook_filler {
         width: 100%;
         min-width: 24px;

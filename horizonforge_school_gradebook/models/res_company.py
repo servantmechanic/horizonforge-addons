@@ -54,6 +54,12 @@ class ResCompany(models.Model):
         help="The default for new users. Each teacher can change their own "
         "in My Preferences, or in the gradebook's top bar.",
     )
+    school_tab_adds_column = fields.Boolean(
+        string="Gradebook: Tab Adds an Assignment",
+        default=True,
+        help="The default for new users. Each teacher can change their own "
+        "in My Preferences.",
+    )
     school_cell_letters = fields.Boolean(
         string="Gradebook: Letter in Every Cell",
         help="The default for new users. Each teacher can change their own "

@@ -7,11 +7,11 @@ top of `horizonforge_school_core`.
 
 | Record | Notes |
 |---|---|
-| Score categories | Name, short code and color. Ships with Lesson/Homework (HW) and Test (T) |
+| Score categories | Name, short code, color and shortcut key. Ships with Lesson/Homework (HW, `/`) and Test (T, `-`) |
 | Weight schemes | Category weights that total 100, and the calculation method |
 | Grading scales | Letter, lowest percent, value when entered and GPA points. Several scales are allowed |
 | Assignment schedules | Per course: which assignments fall on which weekdays |
-| Assignments | A gradebook column: class, date, category, max points, entry mode |
+| Assignments | A gradebook column: class, date, category, max points, entry mode, notes and files |
 | Scores | What the teacher typed (a number or a letter), the percent, and a status (scored, excused, missing) |
 | Report card comments | Per student, class and grading period: the comment printed on the report card |
 
@@ -52,7 +52,8 @@ leave it. Press `?` in the grid for the full shortcut list.
 |---|---|
 | Type a number | Enter a score, replacing what is there |
 | Enter / Shift+Enter | Save and move to the next / previous student |
-| Tab / Shift+Tab | Save and move right / left |
+| Tab / Shift+Tab | Save and move right / left. Past the last column, once it has a score: the next assignment |
+| `/`, `-` (a category's key) | Make the column that category; in an empty period, start with one |
 | F2 | Edit the cell, keeping its value |
 | x, m, Delete | Excused, missing, clear |
 | n, or double-click a score | The score's note (n, as in the attendance grid) |
@@ -62,6 +63,30 @@ leave it. Press `?` in the grid for the full shortcut list.
 | Ctrl+Shift+A | New assignment |
 | Ctrl+Shift+F | Fill the column's empty cells |
 | Ctrl+V | Paste a column or block from a spreadsheet |
+
+**Adding assignments as you go** (as in Candle): Tab past the last column,
+once it has a score, adds the next assignment on the next school day: same
+category, points and entry mode as the last of its kind, named after it
+(Lesson 13 after Lesson 12). Press a category's key (`/` lesson, `-` test,
+set under Configuration, Score Categories) to make the column you're on that
+category; a name the grid gave it follows (Lesson 13 becomes Test 5). The top
+bar shows the keys. Turn it off in My Preferences (Gradebook: Tab Adds an
+Assignment). Tests can come whenever a section ends: nothing has to be
+scheduled.
+
+The **+** column at the end adds the next assignment too, with or without
+scores. An empty grading period starts from the keyboard: a category's key
+(`/`, `-`) adds a first assignment of that category, Tab or Enter one of the
+class's usual category, and typing a score adds one and enters it. The first
+assignment of a period goes on its first school day (or the next school day
+from today, once it has started), and its name goes on from the period
+before (Lesson 41 after Lesson 40). A class with no schedule and no pacing
+needs nothing set up: it starts with Lesson 1.
+
+**Notes and files**: an assignment's form (click its column header) holds
+notes and files, such as the quiz to print or its answer key. The header
+shows a note or paperclip mark; Assignments, With Files finds them all.
+Whoever can see the assignment can open its files.
 
 When the grading period on screen isn't the current one, a banner says so,
 with a button back to the current period. It shows once, never per entry.

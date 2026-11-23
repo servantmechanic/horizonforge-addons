@@ -7,3 +7,4 @@ from . import test_gradebook_security
 from . import test_gradebook_ui
 from . import test_homeroom_access
 from . import test_class_performance
+from . import test_candle_entry

@@ -129,13 +129,12 @@ class TestGradebookUi(HttpCase, SchoolCoreCase):
             await press("Tab");
             expect(selected(), "0,1", "after Tab");
             await type("15");
-            await press("Tab");
+            await press("Enter");  // (Tab here, the last column, would add the next one)
             await saved();
             expect(cell(0, 1).textContent.trim(), "75", "points shown as a percent");
             expect(cell(0, 1).title, "15 of 20 points - 75%", "points typed, in the tooltip");
 
             // m marks missing, x excused, Delete clears, Ctrl+Z undoes.
-            await press("ArrowDown");
             expect(selected(), "1,1", "second student, quiz");
             await press("m");
             expect(cell(1, 1).textContent.trim(), "M", "missing");
@@ -404,4 +403,56 @@ class TestGradebookUi(HttpCase, SchoolCoreCase):
             await waitFor(() => !document.querySelector(".o_gradebook_chart"), "hidden");
             expect(localStorage.getItem("school_gradebook.hide_chart"), "1", "remembered");
             localStorage.removeItem("school_gradebook.hide_chart");
+        """)
+
+    def test_tab_adds_assignment_and_category_keys(self):
+        self._run("""
+            await waitFor("td.o_selected");
+            // The last column (the quiz): score it, then Tab past it.
+            cell(0, 1).click();
+            await type("18");
+            await press("Tab");
+            await waitFor(() => document.querySelectorAll("th.o_gradebook_assignment").length === 3, "new column");
+            await waitFor(() => selected() === "0,2", "on the new column, same student");
+            expect(document.querySelectorAll("th.o_gradebook_assignment")[2].textContent.includes("Quiz 2"), true, "named after the quiz");
+            // - makes it a test, and its grid name follows.
+            await press("-");
+            await waitFor(() => document.querySelectorAll("th.o_gradebook_assignment")[2].textContent.includes("Test 1"), "renamed");
+            // Tab on the empty new column moves nowhere new.
+            await press("Tab");
+            await sleep(300);
+            expect(document.querySelectorAll("th.o_gradebook_assignment").length, 3, "no column for an empty one");
+            expect(document.querySelector(".o_gradebook_legend").textContent.includes("/"), true, "legend");
+        """)
+        new = self.section_5.assignment_ids.filtered(lambda a: a.name == "Test 1")
+        self.assertEqual(new.category_id, self.env.ref("horizonforge_school_gradebook.score_category_test"))
+        self.assertEqual((new.entry_mode, new.max_points), ("points", 20))
+
+    def test_empty_period_and_plus_column(self):
+        (self.lesson | self.quiz).unlink()
+        self._run("""
+            await waitFor(".o_gradebook_scroll");
+            await waitFor(() => document.activeElement.classList.contains("o_gradebook_scroll"), "grid focused");
+            expect(document.querySelector("th.o_gradebook_filler").textContent.includes("Click +"), true, "how to start");
+            // - starts the empty period with a test.
+            await press("-");
+            await waitFor(() => document.querySelectorAll("th.o_gradebook_assignment").length === 1, "first column");
+            expect(document.querySelector("th.o_gradebook_assignment").textContent.includes("Test 1"), true, "a test");
+            await waitFor("td.o_selected");
+            // The + column adds the next one, scored or not.
+            document.querySelector("th.o_gradebook_add").click();
+            await waitFor(() => document.querySelectorAll("th.o_gradebook_assignment").length === 2, "second column");
+            await waitFor(() => selected() === "0,1", "on it");
+        """)
+        self.assertEqual(self.section_5.assignment_ids.mapped("name"), ["Test 1", "Test 2"])
+
+    def test_enter_right_adds_assignment(self):
+        self.ui_teacher.school_enter_direction = "right"
+        self._run("""
+            await waitFor("td.o_selected");
+            cell(0, 1).click();
+            await type("18");
+            await press("Enter");
+            await waitFor(() => document.querySelectorAll("th.o_gradebook_assignment").length === 3, "new column");
+            await waitFor(() => selected() === "0,2", "on it");
         """)

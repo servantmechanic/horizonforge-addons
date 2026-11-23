@@ -23,7 +23,8 @@
                 <tbody>
                     <tr><th>Type a number</th><td>Enter a score, replacing what is there</td></tr>
                     <tr><th>Enter / Shift+Enter</th><td>Save and move to the next / previous student</td></tr>
-                    <tr><th>Tab / Shift+Tab</th><td>Save and move right / left</td></tr>
+                    <tr><th>Tab / Shift+Tab</th><td>Save and move right / left. Past the last column, once it has a score: the next assignment</td></tr>
+                    <tr><th>/ - (a category's key)</th><td>Make the column that category (set under Configuration, Score Categories)</td></tr>
                     <tr><th>Arrow keys</th><td>Move (saves the cell being typed)</td></tr>
                     <tr><th>F2</th><td>Edit the cell, keeping its value</td></tr>
                     <tr><th>Esc</th><td>Cancel the edit</td></tr>

@@ -181,6 +181,7 @@ class SchoolSection(models.Model):
             "enter_direction": self.env.user.school_enter_direction,
             "name_order": self.env.user.school_name_order,
             "cell_letters": self.env.user.school_cell_letters,
+            "tab_adds_column": self.env.user.school_tab_adds_column,
             "section_id": section.id,
         }
         if not section:
@@ -209,7 +210,7 @@ class SchoolSection(models.Model):
             "locked": period.locked,
             "has_schedule": bool(section.course_id.assignment_template_ids.filtered("is_scheduled")),
             "categories": [
-                {"id": c.id, "name": c.name, "code": c.code, "color": c.color}
+                {"id": c.id, "name": c.name, "code": c.code, "color": c.color, "shortcut": c.shortcut or ""}
                 for c in self.env["school.score.category"].with_context(active_test=False).search([])
             ],
             "assignments": [],
@@ -229,6 +230,8 @@ class SchoolSection(models.Model):
                 "category_id": a.category_id.id,
                 "max_points": a.max_points,
                 "entry_mode": a.entry_mode,
+                "note": a.note or "",
+                "attachment_count": a.attachment_count,
             }
             for a in assignments
         ]
@@ -309,6 +312,71 @@ class SchoolSection(models.Model):
                 if weights is not None and weights.get(category.id)
             },
         }
+
+    def gradebook_add_assignment(self, period_id, after_id=False, category_id=False):
+        """The next assignment, from the grid: Tab past the last column,
+        the + column, or a key in an empty grading period.
+
+        After ``after_id``: on the next school day of the grading period
+        (the same day at its end). Without one (nothing in the period
+        yet): on the period's first school day, or the next school day
+        from today when the period has started. The category is
+        ``category_id``, else that of the assignment before (or the class's
+        last one, or the first category); points and entry mode as the
+        last of that category; named after it (Lesson 13), so numbering
+        runs on through the year."""
+        self.ensure_one()
+        period = self.env["school.period"].browse(period_id)
+        if not self._gradebook_can_edit(period):
+            raise AccessError(_("You can't add assignments to this class for %(period)s.", period=period.name))
+        Assignment = self.env["school.assignment"]
+        after = Assignment.browse(after_id).exists() if after_id else Assignment
+        if after_id and (after.section_id != self or after.period_id != period):
+            raise UserError(_("The grid changed meanwhile: reload it and try again."))
+        last = Assignment.search([("section_id", "=", self.id)], order="date desc, sequence desc, id desc", limit=1)
+        category = (
+            self.env["school.score.category"].browse(category_id)
+            if category_id else (after or last).category_id
+        ) or self.env["school.score.category"].search([], limit=1)
+        if not category:
+            raise UserError(_("Add a score category first (Configuration, Score Categories)."))
+        like = Assignment.search([
+            ("section_id", "=", self.id), ("category_id", "=", category.id),
+        ], order="date desc, sequence desc, id desc", limit=1)
+        if after:
+            days = self.year_id._get_school_days(after.date + timedelta(days=1), period.date_end)
+            date = days[0] if days else after.date
+        else:
+            today = fields.Date.context_today(self)
+            start = today if period.date_start <= today <= period.date_end else period.date_start
+            days = self.year_id._get_school_days(start, period.date_end)
+            date = days[0] if days else start
+        assignment = Assignment.create({
+            "section_id": self.id,
+            "name": Assignment._suggest_name(self, category),
+            "date": date,
+            "period_id": period.id,
+            "category_id": category.id,
+            "max_points": like.max_points if like else 100.0,
+            "entry_mode": like.entry_mode if like else self._get_entry_mode(),
+            "sequence": after.sequence + 1 if after else 10,
+        })
+        return assignment.id
+
+    def gradebook_set_category(self, assignment_id, category_id):
+        """A category's shortcut key on a column: the assignment becomes
+        that category. A name the grid gave it (Lesson 13) follows: Test 5."""
+        self.ensure_one()
+        assignment = self.env["school.assignment"].browse(assignment_id)
+        category = self.env["school.score.category"].browse(category_id)
+        if assignment.section_id != self or assignment.category_id == category:
+            return assignment.name
+        Assignment = self.env["school.assignment"]
+        vals = {"category_id": category.id}
+        if assignment.name == Assignment._suggest_name(self, assignment.category_id, exclude=assignment):
+            vals["name"] = Assignment._suggest_name(self, category, exclude=assignment)
+        assignment.write(vals)
+        return assignment.name
 
     def gradebook_set_comment(self, period_id, student_id, comment):
         """Save a student's report card comment for the grading period,

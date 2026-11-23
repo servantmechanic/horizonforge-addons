@@ -13,6 +13,18 @@ Each release is tagged in git as `school-<version>`, for example `school-0.7.0`.
 
 ## Unreleased
 
+- **Add assignments as you go.** In the gradebook, Tab past the last column
+  (once it has a score) adds the next assignment on the next school day,
+  named after the last of its kind (Lesson 13), as in Candle. A score
+  category's shortcut key (`/` lesson, `-` test) makes the column you're on
+  that category; the keys show in the top bar. A preference turns Tab's
+  new column off. A + column at the end adds the next assignment, and an
+  empty grading period starts with a key (`/`, `-`, Tab, Enter or a score),
+  numbering on from the period before: no schedule needed.
+- **Notes and files on assignments.** An assignment holds notes and files
+  (the quiz to print); the column header marks them, and Assignments, With
+  Files lists them.
+
 - **Student vs class average graph.** Under the gradebook grid, a graph of
   the selected student's score on each assignment beside the class average,
   with the values on hover; it follows the selected row and updates as you

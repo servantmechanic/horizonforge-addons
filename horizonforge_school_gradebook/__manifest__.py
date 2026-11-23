@@ -13,6 +13,7 @@
         "security/school_gradebook_security.xml",
         "security/ir.model.access.csv",
         "data/school_gradebook_data.xml",
+        "data/school_gradebook_defaults.xml",
         "views/school_score_category_views.xml",
         "views/school_weight_scheme_views.xml",
         "views/school_grading_scale_views.xml",

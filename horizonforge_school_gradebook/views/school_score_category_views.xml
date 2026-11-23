@@ -9,6 +9,7 @@
                 <field name="name"/>
                 <field name="code"/>
                 <field name="color" widget="color"/>
+                <field name="shortcut" width="80px" placeholder="e.g. /"/>
             </list>
         </field>
     </record>

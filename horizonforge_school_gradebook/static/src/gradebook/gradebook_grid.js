@@ -73,6 +73,7 @@ export class GradebookGrid extends Component {
             showChart: browser.localStorage.getItem(HIDE_CHART_KEY) !== "1",
             missingAsZero: true,
             cellLetters: false,
+            tabAddsColumn: true,
             letterOnly: false,
             gradeDecimals: 0,
             scales: {}, // scale id -> [{ letter, min, value }], highest first
@@ -151,6 +152,7 @@ export class GradebookGrid extends Component {
         state.enterDirection = data.enter_direction;
         state.nameOrder = data.name_order || "last_first";
         state.cellLetters = Boolean(data.cell_letters);
+        state.tabAddsColumn = data.tab_adds_column !== false;
         state.letterOnly = Boolean(data.letter_only);
         state.gradeDecimals = data.grade_decimals || 0;
         state.missingAsZero = data.missing_as_zero !== false;
@@ -549,10 +551,90 @@ export class GradebookGrid extends Component {
     moveEnter(backwards) {
         const step = backwards ? -1 : 1;
         if (this.state.enterDirection === "right") {
-            this.move(0, step);
+            if (backwards) {
+                this.move(0, -1);
+            } else {
+                this.moveRight();
+            }
         } else {
             this.move(step, 0);
         }
+    }
+
+    /**
+     * Right, as Tab moves. Past the last column, once it has a score, the
+     * next assignment is added (as in Candle), unless the teacher turned
+     * that off.
+     */
+    moveRight() {
+        const { col, assignments } = this.state;
+        const last = assignments[assignments.length - 1];
+        if (
+            col === assignments.length - 1 &&
+            this.state.canEdit &&
+            this.state.tabAddsColumn &&
+            last &&
+            this.state.students.some((student) => this.getCell(last, student))
+        ) {
+            this.addAssignment({ after: last });
+            return;
+        }
+        this.move(0, 1);
+    }
+
+    get lastAssignment() {
+        return this.state.assignments[this.state.assignments.length - 1] || null;
+    }
+
+    /**
+     * Add the next assignment and go to it, on the same student: Tab past
+     * the last column, the + column, or a key in an empty grading period.
+     * `category` overrides the category; `typed` starts typing a score.
+     */
+    async addAssignment({ after = null, category = null, typed = null } = {}) {
+        if (this.adding || !this.state.canEdit) {
+            return;
+        }
+        this.adding = true;
+        const row = this.state.row;
+        try {
+            await this.flushAll();
+            const id = await this.orm.call("school.section", "gradebook_add_assignment", [
+                [this.state.sectionId],
+                this.state.periodId,
+                after ? after.id : false,
+                category ? category.id : false,
+            ]);
+            await this.load(this.state.sectionId, this.state.periodId, { keepSelection: true });
+            const col = this.state.assignments.findIndex((a) => a.id === id);
+            this.select(row, col >= 0 ? col : this.state.col);
+            this.focusGrid();
+            if (typed) {
+                this.startEdit(typed);
+            }
+        } finally {
+            this.adding = false;
+        }
+    }
+
+    /** A category's shortcut key: the column becomes that category. */
+    async setCategory(category) {
+        const assignment = this.activeAssignment;
+        if (!this.state.canEdit || !assignment || assignment.category_id === category.id) {
+            return;
+        }
+        const name = await this.orm.call("school.section", "gradebook_set_category", [
+            [this.state.sectionId],
+            assignment.id,
+            category.id,
+        ]);
+        assignment.category_id = category.id;
+        assignment.name = name;
+    }
+
+    /** Categories with a shortcut key, for the legend in the top bar. */
+    get shortcutCategories() {
+        return Object.values(this.state.categories).filter((c) => c.shortcut);
     }
 
     startEdit(initial) {
@@ -1180,7 +1262,11 @@ export class GradebookGrid extends Component {
         }
         if (key === "Tab") {
             if (this.commitEdit()) {
-                this.move(0, ev.shiftKey ? -1 : 1);
+                if (ev.shiftKey) {
+                    this.move(0, -1);
+                } else {
+                    this.moveRight();
+                }
             }
             return true;
         }
@@ -1230,6 +1316,29 @@ export class GradebookGrid extends Component {
         if (ev.altKey) {
             return false;
         }
+        const category = key.length === 1 && this.shortcutCategories.find((c) => c.shortcut === key);
+        // An empty grading period: a key starts it with a first assignment.
+        if (!this.state.assignments.length) {
+            if (!this.state.canEdit || !this.state.students.length) {
+                return false;
+            }
+            if (category) {
+                this.addAssignment({ category });
+                return true;
+            }
+            if (key === "Tab" || key === "Enter") {
+                this.addAssignment();
+                return true;
+            }
+            if (/^[0-9]$/.test(key)) {
+                this.addAssignment({ typed: key });
+                return true;
+            }
+        }
+        if (category) {
+            this.setCategory(category);
+            return true;
+        }
         // In a letter column a letter key starts a grade, before any
         // shortcut (as absence codes do in the attendance grid): on the
         // E/S/N/U scale N is a grade there, and a double-click the note.
@@ -1259,7 +1368,11 @@ export class GradebookGrid extends Component {
                 this.moveEnter(ev.shiftKey);
                 return true;
             case "Tab":
-                this.move(0, ev.shiftKey ? -1 : 1);
+                if (ev.shiftKey) {
+                    this.move(0, -1);
+                } else {
+                    this.moveRight();
+                }
                 return true;
             case "Home":
                 this.select(this.state.row, 0);

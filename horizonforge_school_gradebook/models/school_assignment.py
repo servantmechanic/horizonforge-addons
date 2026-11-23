@@ -1,3 +1,5 @@
+import re
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
@@ -105,6 +107,23 @@ class SchoolAssignment(models.Model):
         "assignment_id",
         string="Scores",
     )
+    note = fields.Text(
+        string="Notes",
+        help="For the teacher: what the assignment covers, pages, answers.",
+    )
+    attachment_ids = fields.Many2many(
+        "ir.attachment",
+        "school_assignment_attachment_rel",
+        "assignment_id",
+        "attachment_id",
+        string="Files",
+        help="The worksheet, quiz or answer key to print. Whoever can see the "
+        "assignment can open them.",
+    )
+    attachment_count = fields.Integer(
+        string="Number of Files",
+        compute="_compute_attachment_count",
+    )
 
     _max_points_positive = models.Constraint(
         "CHECK(max_points > 0)",
@@ -122,6 +141,45 @@ class SchoolAssignment(models.Model):
             self.entry_mode = template.entry_mode or self.section_id._get_entry_mode()
         if not self._origin.id:
             self.name = template._next_name(self.section_id, self.date)
+
+    @api.depends("attachment_ids")
+    def _compute_attachment_count(self):
+        for assignment in self:
+            assignment.attachment_count = len(assignment.attachment_ids)
+
+    def _link_files(self):
+        """Tie the uploaded files to the assignment, so that who may open
+        them follows who may see it."""
+        for assignment in self:
+            loose = assignment.attachment_ids.sudo().filtered(
+                lambda a: a.res_model != self._name or a.res_id != assignment.id
+            )
+            loose.write({"res_model": self._name, "res_id": assignment.id})
+
+    @api.model
+    def _suggest_name(self, section, category, exclude=None):
+        """The name of the next assignment of a category in a class, going
+        on from the last one: Lesson 12 after Lesson 11. Without one yet,
+        the course's schedule name for the category (Lesson 1), else the
+        category's name."""
+        domain = [("section_id", "=", section.id), ("category_id", "=", category.id)]
+        if exclude:
+            domain.append(("id", "not in", exclude.ids))
+        last = self.search(domain, order="date desc, sequence desc, id desc", limit=1)
+        match = re.match(r"^(.*\S)\s+(\d+)$", last.name or "")
+        if match:
+            return f"{match.group(1)} {int(match.group(2)) + 1}"
+        if last:
+            base = last.name
+        else:
+            template = section.course_id.assignment_template_ids.filtered(
+                lambda t: t.category_id == category
+            )[:1]
+            # Lesson/Homework: Lesson 1.
+            base = template.name or category.name.split("/")[0].strip() or category.name
+        # Numbered among the ones of that name: Quiz 2 after Quiz.
+        same = self.search_count(domain + ["|", ("name", "=", base), ("name", "=like", f"{base} %")])
+        return f"{base} {same + 1}"
 
     def _unscored_counts(self, ids=None):
         """{assignment id: students without a score}, for the assignments
@@ -229,6 +287,7 @@ class SchoolAssignment(models.Model):
                     ))
         assignments = super().create(vals_list)
         assignments._check_unlocked()
+        assignments.filtered("attachment_ids")._link_files()
         return assignments
 
     def write(self, vals):
@@ -238,6 +297,8 @@ class SchoolAssignment(models.Model):
             if any(not assignment.period_id for assignment in self):
                 raise UserError(_("That date isn't in any grading period of the school year."))
             self._check_unlocked()
+        if "attachment_ids" in vals:
+            self._link_files()
         return res
 
     def unlink(self):

@@ -1,4 +1,5 @@
-from odoo import fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class SchoolScoreCategory(models.Model):
@@ -18,6 +19,12 @@ class SchoolScoreCategory(models.Model):
         default="#4c6ef5",
         help="Color of the code in the gradebook.",
     )
+    shortcut = fields.Char(
+        size=1,
+        help="A key that makes the gradebook column you're on this category, "
+        "for example / for lessons and - for tests (as in Candle). Not a "
+        "letter or a number: those type scores.",
+    )
     sequence = fields.Integer(default=10)
     active = fields.Boolean(default=True)
 
@@ -25,3 +32,29 @@ class SchoolScoreCategory(models.Model):
         "UNIQUE(code)",
         "Score category codes must be unique.",
     )
+    _shortcut_unique = models.Constraint(
+        "UNIQUE(shortcut)",
+        "Two score categories can't have the same shortcut key.",
+    )
+
+    @api.constrains("shortcut")
+    def _check_shortcut(self):
+        for category in self:
+            key = category.shortcut
+            if key and (key.isalnum() or key in ".,? "):
+                raise ValidationError(_(
+                    "%(key)s can't be a shortcut: letters, numbers, the decimal "
+                    "point and ? already do something in the gradebook. Try / - * or +.",
+                    key=key,
+                ))
+
+    @api.model
+    def _set_default_shortcuts(self):
+        """/ for lessons and - for tests, the first time only: once any
+        category has a shortcut, the school's choice stands."""
+        if self.with_context(active_test=False).search_count([("shortcut", "!=", False)], limit=1):
+            return
+        for xmlid, key in (("score_category_homework", "/"), ("score_category_test", "-")):
+            category = self.env.ref(f"horizonforge_school_gradebook.{xmlid}", raise_if_not_found=False)
+            if category:
+                category.shortcut = key
