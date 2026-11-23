@@ -25,6 +25,7 @@
         "views/school_settings_views.xml",
         "wizard/school_year_setup_views.xml",
         "wizard/school_setup_guide_views.xml",
+        "wizard/school_staff_views.xml",
         "views/menus.xml",
         "report/school_calendar_report.xml",
     ],

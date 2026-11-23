@@ -34,6 +34,20 @@ addons: the gradebook and attendance addons install on top of it.
   Odoo's own settings (users, apps, email): those stay with the system
   administrator, who also has the school settings in Odoo's Settings.
 
+## Staff
+
+Configuration, **Staff** (for the principal) lists everyone with school
+access and their level. **Add Staff** makes a login: name, login (usually
+their email), school access (Teacher, Office or Principal) and a password
+they can change after signing in. **Edit** changes someone's name, login,
+level or password, or clears Can Sign In for someone who left (their
+classes, grades and notes stay).
+
+Logins made here get Odoo's basic access and a school level, nothing more.
+A principal can't change a system administrator's account (they manage
+Odoo's users and access rights in Odoo's Settings, Users), nor take away
+their own principal access.
+
 ## Setup order
 
 Configuration, **Setup Guide** lists the steps with what is done so far; each

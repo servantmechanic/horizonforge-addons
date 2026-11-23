@@ -13,6 +13,12 @@ Each release is tagged in git as `school-<version>`, for example `school-0.7.0`.
 
 ## Unreleased
 
+- **Staff.** Configuration, Staff lets the principal add school logins
+  (Teacher, Office or Principal, with a password), change their level or
+  password, and archive someone who left, without Odoo's user settings:
+  logins get school access only, and system administrators' accounts stay
+  out of reach.
+
 - **Principal.** The school's top access level, Administrator, is now
   Principal: everything school (students, patrons, classes, grading weights
   and scales, locked grades), exporting data, and a School Settings screen

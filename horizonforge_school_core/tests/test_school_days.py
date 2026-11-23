@@ -1,7 +1,7 @@
 from datetime import date
 
 from odoo import Command
-from odoo.exceptions import AccessError, ValidationError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import new_test_user, tagged
 
 from .common import SchoolCoreCase
@@ -223,3 +223,83 @@ class TestPrincipal(SchoolCoreCase):
         self.assertNotIn(menu.id, self.env["ir.ui.menu"].with_user(self.teacher)._visible_menu_ids())
         views = self.env["school.settings"].with_user(self.admin).get_views([(False, "form")])
         self.assertIn("school_principal_name", views["views"]["form"]["arch"])
+
+
+@tagged("post_install", "-at_install")
+class TestStaff(SchoolCoreCase):
+    """Configuration, Staff: the principal adds and changes school logins,
+    with school access only."""
+
+    def _form(self, user=None, **vals):
+        Staff = self.env["school.staff"].with_user(self.admin)
+        if user:
+            Staff = Staff.with_context(school_staff_user_id=user.id)
+        form = Staff.create(dict(Staff.default_get(list(Staff._fields)), **vals))
+        return form
+
+    def test_add_teacher(self):
+        form = self._form(name="Mary Smith", login="mary@school.test", password="Secret-pass-1", level="teacher")
+        form.action_apply()
+        mary = self.env["res.users"].search([("login", "=", "mary@school.test")])
+        self.assertEqual(mary.school_level, "teacher")
+        self.assertTrue(mary.has_group("base.group_user"))
+        for xmlid in ("base.group_system", "base.group_erp_manager", "base.group_allow_export",
+                      "horizonforge_school_core.group_school_office"):
+            self.assertFalse(mary.has_group(xmlid), xmlid)
+        self.assertFalse(form.password, "the password isn't kept")
+        # She can sign in with it.
+        mary.with_user(mary)._check_credentials({"type": "password", "password": "Secret-pass-1"}, {"interactive": False})
+        # She shows in the Staff list.
+        action = self.env["res.users"].with_user(self.admin).action_school_staff()
+        self.assertIn(mary.id, self.env["res.users"].with_context(active_test=False).search(action["domain"]).ids)
+
+    def test_change_level_and_archive(self):
+        teacher = self.teacher
+        self._form(teacher, level="principal").action_apply()
+        self.assertEqual(teacher.school_level, "principal")
+        self.assertTrue(teacher.has_group("base.group_allow_export"))
+        self._form(teacher, level="office").action_apply()
+        self.assertEqual(teacher.school_level, "office")
+        self.assertFalse(teacher.has_group("base.group_allow_export"))
+        self.assertFalse(teacher.has_group("horizonforge_school_core.group_school_admin"))
+        # Leaving: archived, classes kept.
+        self._form(teacher, active=False).action_apply()
+        self.assertFalse(teacher.active)
+        self.assertEqual(self.section_5.teacher_id, teacher)
+        # A new password.
+        self._form(teacher, active=True, password="Another-pass-2").action_apply()
+        teacher.with_user(teacher)._check_credentials({"type": "password", "password": "Another-pass-2"}, {"interactive": False})
+
+    def test_limits(self):
+        # Not a system administrator's account.
+        it_admin = self.env.ref("base.user_admin")
+        with self.assertRaises(UserError):
+            self._form(it_admin, level="teacher").action_apply()
+        # Not their own principal access.
+        with self.assertRaises(UserError):
+            self._form(self.admin, level="office").action_apply()
+        with self.assertRaises(UserError):
+            self._form(self.admin, active=False).action_apply()
+        # Only the principal.
+        with self.assertRaises(AccessError):
+            self.env["res.users"].with_user(self.office).action_school_staff()
+        with self.assertRaises(AccessError):
+            Staff = self.env["school.staff"].with_user(self.office)
+            Staff.create({"name": "X", "login": "x@school.test", "password": "pw", "level": "principal"}).action_apply()
+        # A new login needs a password.
+        with self.assertRaises(UserError):
+            self._form(name="No Pass", login="nopass@school.test").action_apply()
+
+    def test_staff_screens(self):
+        views = self.env["res.users"].with_user(self.admin).get_views(
+            [(self.env.ref("horizonforge_school_core.school_staff_view_list").id, "list")],
+            {"search_view_id": self.env.ref("horizonforge_school_core.school_staff_view_search").id},
+        )
+        self.assertIn("school_level", views["views"]["list"]["arch"])
+        self.env["school.staff"].with_user(self.admin).get_views([(False, "form")])
+        menu = self.env.ref("horizonforge_school_core.menu_school_staff")
+        self.assertIn(menu.id, self.env["ir.ui.menu"].with_user(self.admin)._visible_menu_ids())
+        self.assertNotIn(menu.id, self.env["ir.ui.menu"].with_user(self.office)._visible_menu_ids())
+        rows = self.env["res.users"].with_user(self.admin).search_read(
+            [("id", "in", (self.teacher | self.admin).ids)], ["name", "login", "school_level", "school_it_admin"])
+        self.assertEqual({r["school_level"] for r in rows}, {"teacher", "principal"})

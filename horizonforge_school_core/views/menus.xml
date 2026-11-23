@@ -32,4 +32,6 @@
               groups="-group_school_office"/>
     <menuitem id="menu_school_year_setup" parent="menu_school_config" action="school_year_setup_action" sequence="15"/>
     <menuitem id="menu_school_courses" parent="menu_school_config" action="school_course_action" sequence="40"/>
+    <menuitem id="menu_school_staff" parent="menu_school_config" action="school_staff_server_action" sequence="7"
+              groups="group_school_admin"/>
 </odoo>

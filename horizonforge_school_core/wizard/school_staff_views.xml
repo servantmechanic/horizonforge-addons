@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Configuration, Staff: everyone with school access. Read-only rows
+         (no user form): Edit and Add Staff open the staff form. -->
+    <record id="school_staff_view_list" model="ir.ui.view">
+        <field name="name">res.users.view.list.school.staff</field>
+        <field name="model">res.users</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <list create="0" delete="0" editable="bottom" decoration-muted="not active">
+                <header>
+                    <button name="action_school_staff_add" type="object" string="Add Staff"
+                            class="btn-primary" display="always"/>
+                </header>
+                <field name="name" readonly="1"/>
+                <field name="login" readonly="1"/>
+                <field name="email" readonly="1" optional="show"/>
+                <field name="school_level" readonly="1"/>
+                <field name="school_it_admin" readonly="1" optional="show" widget="boolean"/>
+                <field name="active" column_invisible="1"/>
+                <button name="action_school_staff_edit" type="object" string="Edit" class="btn-link"
+                        invisible="school_it_admin"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="school_staff_view_search" model="ir.ui.view">
+        <field name="name">res.users.view.search.school.staff</field>
+        <field name="model">res.users</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="login"/>
+                <filter name="archived" string="Archived (can't sign in)" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="school_staff_view_form" model="ir.ui.view">
+        <field name="name">school.staff.view.form</field>
+        <field name="model">school.staff</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group>
+                        <field name="user_id" invisible="1"/>
+                        <field name="name" placeholder="e.g. Mary Smith"/>
+                        <field name="login" placeholder="e.g. mary@school.org"/>
+                        <field name="email" placeholder="If not the login"/>
+                    </group>
+                    <group>
+                        <field name="level" widget="radio"/>
+                        <field name="password" password="True"
+                               placeholder="New password" required="not user_id"/>
+                        <field name="active" invisible="not user_id"/>
+                    </group>
+                </group>
+                <p class="text-muted">
+                    Teacher: their own classes and homeroom. Office: every class, and students, patrons
+                    and enrollments. Principal: everything school, School Settings and Staff.
+                    Logins made here have school access only; Odoo's own users and access rights stay with
+                    the system administrator.
+                </p>
+                <footer>
+                    <button name="action_apply" type="object" string="Save" class="btn-primary"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="school_staff_server_action" model="ir.actions.server">
+        <field name="name">Staff</field>
+        <field name="model_id" ref="base.model_res_users"/>
+        <field name="group_ids" eval="[(4, ref('group_school_admin'))]"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_school_staff()</field>
+    </record>
+</odoo>
