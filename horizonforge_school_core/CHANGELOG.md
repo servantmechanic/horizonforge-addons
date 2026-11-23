@@ -11,7 +11,7 @@ has no changes. The version is shown at the foot of the School sidebar.
 
 Each release is tagged in git as `school-<version>`, for example `school-0.7.0`.
 
-## Unreleased
+## 0.8.0 (2026-11-23)
 
 - **Staff.** Configuration, Staff lets the principal add school logins
   (Teacher, Office or Principal, with a password), change their level or

@@ -1,6 +1,6 @@
 {
     "name": "School Gradebook",
-    "version": "19.0.0.7.0",
+    "version": "19.0.0.8.0",
     "category": "School",
     "summary": "Keyboard-driven gradebook for small schools: score categories, "
                "weights, grading scales, assignment schedules and a spreadsheet-style grid",

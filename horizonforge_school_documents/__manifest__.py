@@ -1,6 +1,6 @@
 {
     "name": "School Documents",
-    "version": "19.0.0.7.0",
+    "version": "19.0.0.8.0",
     "category": "School",
     "summary": "Shared files for a small school: schoolwide reference folders, "
                "a folder per school year and homeroom, and files on the student record",

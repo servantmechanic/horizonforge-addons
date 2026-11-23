@@ -1,6 +1,6 @@
 {
     "name": "School Planner",
-    "version": "19.0.0.7.0",
+    "version": "19.0.0.8.0",
     "category": "School",
     "summary": "Pacing guides per course, laid over the school calendar: "
                "progress, plans that move with the class, weekly plans",
