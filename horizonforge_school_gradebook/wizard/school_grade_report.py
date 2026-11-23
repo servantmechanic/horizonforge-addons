@@ -5,12 +5,15 @@ import io
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
+from ..models.school_chart import performance_svg
+
 REPORTS = {
     "report_card": "horizonforge_school_gradebook.action_report_card",
     "reference": "horizonforge_school_gradebook.action_report_card_reference",
     "class_sheet": "horizonforge_school_gradebook.action_report_class_sheet",
     "progress": "horizonforge_school_gradebook.action_report_progress",
     "missing": "horizonforge_school_gradebook.action_report_missing",
+    "performance": "horizonforge_school_gradebook.action_report_performance",
 }
 
 
@@ -28,6 +31,7 @@ class SchoolGradeReport(models.TransientModel):
             ("class_sheet", "Class grade sheet"),
             ("progress", "Progress report"),
             ("missing", "Missing work"),
+            ("performance", "Class performance"),
         ],
         string="Report",
         default="report_card",
@@ -63,6 +67,17 @@ class SchoolGradeReport(models.TransientModel):
         "school.grade.level",
         string="Grade Level",
     )
+    grade_level_ids = fields.Many2many(
+        "school.grade.level",
+        string="Grade Levels",
+        help="Leave empty for every grade level.",
+    )
+    course_ids = fields.Many2many(
+        "school.course",
+        string="Subjects",
+        domain="[('grading_type', '!=', 'comment')]",
+        help="Leave empty for every subject.",
+    )
     student_ids = fields.Many2many(
         "school.student",
         string="Students",
@@ -89,6 +104,8 @@ class SchoolGradeReport(models.TransientModel):
         sections = self.section_ids or self.env["school.section"].search(
             [("year_id", "=", self.year_id.id)]
         )
+        if self.report_type == "performance" and self.course_ids:
+            sections = sections.filtered(lambda s: s.course_id in self.course_ids)
         return sections.sorted(
             lambda s: (s.course_id.sequence, s.course_id.name or "", s.name or "", s.id)
         )
@@ -380,7 +397,7 @@ class SchoolGradeReport(models.TransientModel):
             and (not e.date_end or e.date_end >= period.date_start)
         )
         students = enrollments.student_id.with_context(active_test=False)
-        if self.student_ids:
+        if self.student_ids and not self.env.context.get("school_all_students"):
             students &= self.student_ids
         return students.sorted(
             lambda s: ((s.last_name or "").lower(), (s.first_name or "").lower(), s.id)
@@ -444,6 +461,69 @@ class SchoolGradeReport(models.TransientModel):
         ))
         return pages
 
+    def _get_performance(self):
+        """Per class, a chart per student: their score on each assignment
+        of the period beside the class average."""
+        self._require_period()
+        Engine = self.env["school.grade.engine"]
+        missing_as_zero = Engine._settings()["missing_as_zero"]
+        decimals = self.env.company.school_display_decimals
+        pages = []
+        for section in self._get_sections().filtered(lambda s: s.grading_type != "comment"):
+            # The class average is over the whole class, whoever is printed.
+            enrolled = self.with_context(school_all_students=True)._gradebook_students(section)
+            students = self._gradebook_students(section)
+            if self.grade_level_ids:
+                students = students.filtered(lambda s: s.grade_level_id in self.grade_level_ids)
+            if not students:
+                continue
+            assignments = self.env["school.assignment"].search([
+                ("section_id", "=", section.id), ("period_id", "=", self.period_id.id),
+            ])
+            averages = Engine._assignment_averages(assignments, enrolled)
+            # Not scored yet at the end of the period: left off, so the
+            # numbers still match the grid's columns.
+            while assignments and averages[assignments[-1].id] is None:
+                assignments = assignments[:-1]
+            if not assignments:
+                continue
+            average_list = [averages[a.id] for a in assignments]
+            scores = {
+                (score.assignment_id.id, score.student_id.id): score
+                for score in self.env["school.score"].search([
+                    ("assignment_id", "in", assignments.ids), ("student_id", "in", students.ids),
+                ])
+            }
+            grades = Engine._section_grades(section, self.period_id, students)
+            class_grades = Engine._section_grades(section, self.period_id, enrolled)
+            rows = []
+            for student in students:
+                points = []
+                for assignment in assignments:
+                    score = scores.get((assignment.id, student.id))
+                    points.append(
+                        Engine._score_point(score.status, score.percent, missing_as_zero) if score else None
+                    )
+                grade = grades[student.id]
+                rows.append({
+                    "student": student,
+                    "grade": Engine._format(grade["grade"]),
+                    "letter": grade["letter"],
+                    "points": points,
+                    "chart": performance_svg(average_list, points),
+                })
+            pages.append({
+                "section": section,
+                "assignments": assignments,
+                "averages": average_list,
+                "average": Engine._format(Engine._class_average(class_grades), decimals),
+                "letter_only": section.grading_type == "letter",
+                "rows": rows,
+                # Two charts a row, in tables: the PDF builder has no flexbox.
+                "pairs": [rows[i:i + 2] for i in range(0, len(rows), 2)],
+            })
+        return pages
+
     def _get_missing_work(self):
         """Per class, the students with scores marked missing and which
         assignments. Without a period: the whole year."""
@@ -487,6 +567,7 @@ class SchoolGradeReport(models.TransientModel):
             "class_sheet": self._get_class_sheets,
             "progress": self._get_progress_reports,
             "missing": self._get_missing_work,
+            "performance": self._get_performance,
         }[self.report_type]
         if not getter():
             raise UserError(
@@ -552,6 +633,24 @@ class SchoolGradeReport(models.TransientModel):
                         page["section"].display_name, fields.Date.to_string(row["date"]),
                         row["name"], row["category"], row["score"], row["percent"], row["comment"],
                     ])
+            return header, rows
+        if self.report_type == "performance":
+            Engine = self.env["school.grade.engine"]
+            decimals = self.env.company.school_display_decimals
+            header = [_("Class"), _("Student ID"), _("Last Name"), _("First Name"), _("Number"), _("Date"),
+                      _("Assignment"), _("Percent"), _("Class Average")]
+            rows = []
+            for page in self._get_performance():
+                for row in page["rows"]:
+                    student = row["student"]
+                    for number, (assignment, point, average) in enumerate(
+                        zip(page["assignments"], row["points"], page["averages"]), start=1
+                    ):
+                        rows.append([
+                            page["section"].display_name, student.student_code or "", student.last_name,
+                            student.first_name, number, fields.Date.to_string(assignment.date), assignment.name,
+                            Engine._format(point, decimals), Engine._format(average, decimals),
+                        ])
             return header, rows
         header = [_("Class"), _("Student ID"), _("Last Name"), _("First Name"), _("Date"), _("Assignment")]
         rows = []

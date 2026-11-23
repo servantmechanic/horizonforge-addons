@@ -376,6 +376,58 @@
         </t>
     </template>
 
+    <!-- A page per class: a small chart per student, two to a row. -->
+    <template id="report_performance">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="wizard">
+                <t t-foreach="wizard._get_performance()" t-as="page">
+                    <t t-call="web.external_layout">
+                        <t t-set="o" t-value="wizard"/>
+                        <div class="page o_school_report">
+                            <t t-call="horizonforge_school_gradebook.report_styles"/>
+                            <style>
+                                .o_school_report table.o_perf, .o_school_report table.o_perf tr,
+                                .o_school_report table.o_perf td { border: 0 !important; background: none; }
+                                .o_school_report table.o_perf { table-layout: fixed; }
+                                .o_school_report table.o_perf td { width: 50%; padding: 6px 14px 12px 0; vertical-align: top; }
+                                .o_school_report .o_perf_name { font-size: 12px; margin-bottom: 2px; }
+                                .o_school_report .o_perf_grade { margin-left: 8px; color: #52514e; }
+                                .o_school_report .o_perf_legend { font-size: 11px; color: #52514e; margin-bottom: 8px; }
+                                .o_school_report .o_perf_key { display: inline-block; width: 18px; vertical-align: middle; margin-right: 4px; }
+                            </style>
+                            <h2>Class Performance</h2>
+                            <div class="o_school_sub">
+                                <strong t-out="page['section'].display_name"/>
+                                · <t t-out="wizard.period_id.name"/>
+                                <t t-if="page['section'].teacher_id"> · <t t-out="page['section'].teacher_id.name"/></t>
+                                <t t-if="page['average'] and not page['letter_only']"> · Class average <t t-out="page['average']"/></t>
+                            </div>
+                            <div class="o_perf_legend">
+                                <span class="o_perf_key" style="border-top: 2px solid #2a78d6;"/>Student
+                                <span class="o_perf_key" style="height: 8px; margin-left: 16px; border-top: 2px solid #7a7974; background-color: rgba(122, 121, 116, 0.2);"/>Class average
+                                <span style="margin-left: 16px;">Assignments 1 to <t t-out="len(page['assignments'])"/>, in order, percent up the side.</span>
+                            </div>
+                            <table class="o_perf">
+                                <tr t-foreach="page['pairs']" t-as="pair">
+                                    <td t-foreach="pair" t-as="row">
+                                        <div class="o_perf_name">
+                                            <strong t-out="row['student'].display_name"/>
+                                            <span t-if="row['letter']" class="o_perf_grade">
+                                                <t t-if="not page['letter_only']"><t t-out="row['grade']"/> </t><strong t-out="row['letter']"/>
+                                            </span>
+                                        </div>
+                                        <t t-out="row['chart']"/>
+                                    </td>
+                                    <td t-if="len(pair) == 1"/>
+                                </tr>
+                            </table>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </t>
+    </template>
+
     <template id="report_missing">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="wizard">

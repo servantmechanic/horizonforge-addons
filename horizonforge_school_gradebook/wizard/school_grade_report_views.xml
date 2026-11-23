@@ -15,11 +15,15 @@
                                required="report_type != 'missing'"
                                placeholder="Whole year"/>
                         <field name="section_ids" widget="many2many_tags" options="{'no_create': True}"
-                               placeholder="All classes"/>
+                               invisible="report_type == 'performance'" placeholder="All classes"/>
+                        <field name="grade_level_ids" widget="many2many_tags" options="{'no_create': True}"
+                               invisible="report_type != 'performance'" placeholder="All grade levels"/>
+                        <field name="course_ids" widget="many2many_tags" options="{'no_create': True}"
+                               invisible="report_type != 'performance'" placeholder="All subjects"/>
                         <field name="homeroom_id" options="{'no_create': True, 'no_open': True}"
-                               invisible="report_type == 'class_sheet'" placeholder="All homerooms"/>
+                               invisible="report_type in ('class_sheet', 'performance')" placeholder="All homerooms"/>
                         <field name="grade_level_id" options="{'no_create': True, 'no_open': True}"
-                               invisible="report_type == 'class_sheet'" placeholder="All grade levels"/>
+                               invisible="report_type in ('class_sheet', 'performance')" placeholder="All grade levels"/>
                         <field name="student_ids" widget="many2many_tags" options="{'no_create': True}"
                                placeholder="All students"/>
                     </group>
@@ -39,6 +43,11 @@
                 </p>
                 <p class="text-muted" invisible="report_type != 'progress'">
                     One page per student and class: every assignment of the grading period with its score.
+                </p>
+                <p class="text-muted" invisible="report_type != 'performance'">
+                    One page per class: a chart per student of their score on each assignment of the grading period
+                    (blue) beside the class average (gray), with their period grade. Choose one or several grade
+                    levels and subjects, or leave them empty for all.
                 </p>
                 <p class="text-muted" invisible="report_type != 'missing'">
                     Students with work marked missing (M), by class. Leave the grading period empty for the whole year.

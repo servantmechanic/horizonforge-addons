@@ -13,6 +13,12 @@ Each release is tagged in git as `school-<version>`, for example `school-0.7.0`.
 
 ## Unreleased
 
+- **Student vs class average graph.** Under the gradebook grid, a graph of
+  the selected student's score on each assignment beside the class average,
+  with the values on hover; it follows the selected row and updates as you
+  type. A new Class Performance report prints the same graph for every
+  student, one page per class, for one or several grade levels and subjects.
+
 - **Letter grades per assignment.** An assignment can be entered as letters
   (an essay graded A-): each letter counts as the grading scale's value for
   it, by default the middle of its range and 5 below the top for the lowest

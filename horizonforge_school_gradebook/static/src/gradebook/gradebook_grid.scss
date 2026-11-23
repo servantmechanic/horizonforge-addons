@@ -263,3 +263,113 @@
     width: 40%;
     white-space: nowrap;
 }
+
+// The chart under the grid: the student in blue, the class average in a
+// recessive gray (same colors as the printed Class Performance report).
+.o_gradebook_chart_panel {
+    flex: 0 0 auto;
+}
+
+.o_gradebook_chart {
+    --gb-chart-student: #2a78d6;
+    --gb-chart-average: #7a7974;
+
+    // Shrinks with the window: its width is measured, never taken from the SVG.
+    .o_gradebook_chart_plot {
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .o_gradebook_chart_legend {
+        flex: 0 0 160px;
+        padding-top: 8px;
+        color: $o-gray-700;
+        line-height: 1.8;
+    }
+
+    svg {
+        overflow: visible;
+    }
+
+    .o_grid {
+        stroke: #e3e2de;
+        stroke-width: 1;
+    }
+
+    .o_axis {
+        font-size: 10px;
+        fill: #52514e;
+    }
+
+    .o_average_area {
+        fill: var(--gb-chart-average);
+        fill-opacity: 0.12;
+    }
+
+    .o_average_line,
+    .o_student_line {
+        fill: none;
+        stroke-width: 2;
+        stroke-linejoin: round;
+        stroke-linecap: round;
+    }
+
+    .o_average_line {
+        stroke: var(--gb-chart-average);
+    }
+
+    .o_student_line {
+        stroke: var(--gb-chart-student);
+    }
+
+    .o_student_dot,
+    .o_average_dot {
+        stroke: #ffffff;
+        stroke-width: 2;
+    }
+
+    .o_student_dot {
+        fill: var(--gb-chart-student);
+    }
+
+    .o_average_dot {
+        fill: var(--gb-chart-average);
+    }
+
+    .o_crosshair {
+        stroke: #b9b8b2;
+        stroke-width: 1;
+    }
+}
+
+.o_gradebook_chart_key {
+    display: inline-block;
+    width: 16px;
+    margin-right: 6px;
+    vertical-align: middle;
+    border-top: 2px solid;
+
+    &.o_student {
+        border-color: #2a78d6;
+    }
+
+    &.o_average {
+        height: 8px;
+        border-color: #7a7974;
+        background-color: rgba(122, 121, 116, 0.2);
+    }
+}
+
+.o_gradebook_chart_tip {
+    position: absolute;
+    top: 4px;
+    z-index: 5;
+    padding: 6px 10px;
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+    background-color: $o-view-background-color;
+    border: 1px solid $border-color;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}

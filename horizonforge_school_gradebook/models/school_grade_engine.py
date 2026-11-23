@@ -195,6 +195,31 @@ class SchoolGradeEngine(models.AbstractModel):
         return result
 
     @api.model
+    def _score_point(self, status, percent, missing_as_zero=True):
+        """One score as a chart point: its percent, 0 for missing work
+        when it counts as 0, None when it doesn't count (excused)."""
+        if status == "excused" or (status == "missing" and not missing_as_zero):
+            return None
+        return 0.0 if status == "missing" else percent
+
+    @api.model
+    def _assignment_averages(self, assignments, students=None):
+        """The class average of each assignment, the mean of its scores
+        counted as the averages count them: ``{assignment_id: average or
+        None}``."""
+        settings = self._settings()
+        domain = [("assignment_id", "in", assignments.ids)]
+        if students is not None:
+            domain.append(("student_id", "in", students.ids))
+        entries = {assignment.id: [] for assignment in assignments}
+        for score in self.env["school.score"].search(domain):
+            entries[score.assignment_id.id].append((score.status, score.percent, score.assignment_id.max_points))
+        return {
+            assignment_id: self._category_average(assignment_entries, "average", settings["missing_as_zero"])
+            for assignment_id, assignment_entries in entries.items()
+        }
+
+    @api.model
     def _class_average(self, grades):
         """Average of the students' (rounded) grades, None without any."""
         values = [grade["grade"] for grade in grades.values() if grade["grade"] is not None]

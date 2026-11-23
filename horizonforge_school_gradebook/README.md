@@ -76,6 +76,14 @@ its percent beside it. **Letters** in the top bar (or My Preferences) adds the
 letter beside every score. A ⚠ beside a name means a score marked missing in
 the grading period.
 
+Under the grid, a **graph** shows the selected student's score on each
+assignment (blue) beside the class average (gray), numbered as the columns;
+hover for the values. It follows the row you're on and changes as you type.
+**Hide graph** folds it away (remembered on that computer). Scores count as in
+the averages: excused work is left out, missing work counts 0 when the school
+counts it so. The printed Class Performance report draws the same chart for
+every student.
+
 ## Assignment schedules
 
 Under Gradebook, Assignment Schedules, say what each course has every
@@ -154,6 +162,7 @@ School, Reports prints a PDF or exports the same data as CSV.
 | Class grade sheet | One page per class: each student's category averages, period grade and letter, and the class average |
 | Progress report | One page per student and class: every assignment with its score, then the averages |
 | Missing work | Students with work marked missing, by class, for a period or the whole year |
+| Class performance | One page per class: a chart per student of their score on each assignment of the period (blue) beside the class average (gray), with their period grade. Choose one or several grade levels and subjects, or all |
 
 Teachers get their own classes; the office and administrators every class.
 The header uses the company's name, address and logo, and the principal's

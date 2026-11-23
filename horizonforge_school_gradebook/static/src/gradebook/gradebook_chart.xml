@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="horizonforge_school_gradebook.GradebookChart">
+        <div class="o_gradebook_chart d-flex gap-3 align-items-start">
+            <div class="o_gradebook_chart_legend small">
+                <div class="text-nowrap"><span class="o_gradebook_chart_key o_student"/><t t-esc="props.studentName"/></div>
+                <div class="text-nowrap"><span class="o_gradebook_chart_key o_average"/>Class average</div>
+            </div>
+            <div class="o_gradebook_chart_plot flex-grow-1 position-relative" t-ref="root">
+                <svg t-att-width="state.width" t-att-height="height" class="d-block"
+                     role="img" t-att-aria-label="props.studentName + ' and the class average, by assignment'"
+                     t-on-mousemove="onMove" t-on-mouseleave="onLeave">
+                    <t t-foreach="gridlines" t-as="line" t-key="line.value">
+                        <line class="o_grid" t-att-x1="30" t-att-x2="state.width - 12" t-att-y1="line.y" t-att-y2="line.y"/>
+                        <text class="o_axis" x="26" t-att-y="line.y + 3" text-anchor="end" t-esc="line.value"/>
+                    </t>
+                    <t t-foreach="xLabels" t-as="label" t-key="label.label">
+                        <text class="o_axis" t-att-x="label.x" t-att-y="height - 5" text-anchor="middle" t-esc="label.label"/>
+                    </t>
+                    <t t-foreach="averageAreas" t-as="avg" t-key="avg_index">
+                        <polygon class="o_average_area" t-att-points="avg.area"/>
+                        <polyline t-if="avg.line" class="o_average_line" t-att-points="avg.line"/>
+                        <circle t-if="avg.dot" class="o_average_dot" t-att-cx="avg.dot.cx" t-att-cy="avg.dot.cy" r="3"/>
+                    </t>
+                    <t t-foreach="studentLines" t-as="points" t-key="points_index">
+                        <polyline class="o_student_line" t-att-points="points"/>
+                    </t>
+                    <t t-foreach="studentDots" t-as="dot" t-key="dot.key">
+                        <circle class="o_student_dot" t-att-cx="dot.cx" t-att-cy="dot.cy" r="4"/>
+                    </t>
+                    <t t-set="tip" t-value="hover"/>
+                    <t t-if="tip">
+                        <line class="o_crosshair" t-att-x1="tip.x" t-att-x2="tip.x" y1="10" t-att-y2="height - 20"/>
+                        <circle t-if="tip.avgY !== null" class="o_average_dot" t-att-cx="tip.x" t-att-cy="tip.avgY" r="4"/>
+                        <circle t-if="tip.pointY !== null" class="o_student_dot" t-att-cx="tip.x" t-att-cy="tip.pointY" r="5"/>
+                    </t>
+                    <!-- The whole plot catches the mouse: a target bigger than the marks. -->
+                    <rect x="0" y="0" t-att-width="state.width" t-att-height="height" fill="transparent"/>
+                </svg>
+                <div t-if="tip" class="o_gradebook_chart_tip" t-att-style="tip.style">
+                    <div class="fw-bold"><t t-esc="tip.number"/>. <t t-esc="tip.name"/></div>
+                    <div><span class="o_gradebook_chart_key o_student"/><t t-esc="props.studentName"/>: <strong t-esc="tip.point"/></div>
+                    <div><span class="o_gradebook_chart_key o_average"/>Class average: <strong t-esc="tip.average"/></div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -371,3 +371,37 @@ class TestGradebookUi(HttpCase, SchoolCoreCase):
         mark = self.env["school.period.mark"].search([("section_id", "=", self.section_5.id)])
         self.assertEqual(mark.comment, "Writes with care.")
         self.assertTrue(self.ui_teacher.school_cell_letters)
+
+    def test_chart(self):
+        self.env["school.score"].create([
+            {"assignment_id": self.lesson.id, "student_id": self.anna.id, "value_entered": 90},
+            {"assignment_id": self.lesson.id, "student_id": self.ben.id, "value_entered": 70},
+        ])
+        self._run("""
+            await waitFor("td.o_selected");
+            // Under the grid: the first student and the class average.
+            await waitFor(".o_gradebook_chart polygon.o_average_area");
+            expect(document.querySelector(".o_gradebook_chart_legend").textContent.includes("Example, Anna"), true, "legend");
+            expect(document.querySelectorAll(".o_gradebook_chart circle.o_student_dot").length, 1, "Anna's one score");
+            // A score typed shows at once.
+            cell(0, 1).click();
+            await type("15");
+            await press("Enter");  // moves down to Ben: back to Anna
+            cell(0, 1).click();
+            await waitFor(() => document.querySelectorAll(".o_gradebook_chart circle.o_student_dot").length === 2, "second point");
+            // Hover: the values of the assignment under the mouse.
+            const svg = document.querySelector(".o_gradebook_chart svg");
+            const box = svg.getBoundingClientRect();
+            svg.dispatchEvent(new MouseEvent("mousemove", { clientX: box.left + 31, clientY: box.top + 50, bubbles: true }));
+            const tip = await waitFor(".o_gradebook_chart_tip");
+            expect(tip.textContent.includes("Lesson 1"), true, "tooltip names the assignment");
+            expect(tip.textContent.includes("80"), true, "class average of 90 and 70");
+            // The selected student's line follows the selection.
+            cell(1, 0).click();
+            await waitFor(() => document.querySelector(".o_gradebook_chart_legend").textContent.includes("Example, Ben"), "Ben");
+            // Hide, and it stays hidden.
+            document.querySelector(".o_gradebook_chart_toggle").click();
+            await waitFor(() => !document.querySelector(".o_gradebook_chart"), "hidden");
+            expect(localStorage.getItem("school_gradebook.hide_chart"), "1", "remembered");
+            localStorage.removeItem("school_gradebook.hide_chart");
+        """)

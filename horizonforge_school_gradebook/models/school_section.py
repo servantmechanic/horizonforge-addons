@@ -204,6 +204,7 @@ class SchoolSection(models.Model):
             "entry_mode": section._get_entry_mode(),
             "letter_only": section.grading_type == "letter",
             "grade_decimals": self.env.company.school_grade_decimals,
+            "missing_as_zero": self.env.company.school_missing_work == "zero",
             "can_edit": bool(period) and section._gradebook_can_edit(period),
             "locked": period.locked,
             "has_schedule": bool(section.course_id.assignment_template_ids.filtered("is_scheduled")),

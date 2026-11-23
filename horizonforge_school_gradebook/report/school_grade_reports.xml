@@ -49,6 +49,14 @@
         <field name="report_file">horizonforge_school_gradebook.report_progress</field>
         <field name="print_report_name">'Progress Reports %s' % (object.period_id.name or '')</field>
     </record>
+    <record id="action_report_performance" model="ir.actions.report">
+        <field name="name">Class Performance</field>
+        <field name="model">school.grade.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">horizonforge_school_gradebook.report_performance</field>
+        <field name="report_file">horizonforge_school_gradebook.report_performance</field>
+        <field name="print_report_name">'Class Performance %s' % (object.period_id.name or '')</field>
+    </record>
     <record id="action_report_missing" model="ir.actions.report">
         <field name="name">Missing Work</field>
         <field name="model">school.grade.report</field>

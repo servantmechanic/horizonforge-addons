@@ -7,6 +7,7 @@ import { useService } from "@web/core/utils/hooks";
 import { useSetupAction } from "@web/search/action_hook";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 import { standardActionServiceProps } from "@web/webclient/actions/action_service";
+import { GradebookChart } from "./gradebook_chart";
 import { GradebookHelpDialog, GradebookPromptDialog } from "./gradebook_dialogs";
 
 const SAVE_DELAY = 500; // ms: cells are sent in batches, at most this often
@@ -15,6 +16,7 @@ const CATEGORY_WIDTH = 64; // px, each sticky category average column
 const COMMENT_WIDTH = 200; // px, the sticky report card comment column
 const SHOW_CATEGORIES_KEY = "school_gradebook.show_categories";
 const SHOW_COMMENTS_KEY = "school_gradebook.show_comments";
+const HIDE_CHART_KEY = "school_gradebook.hide_chart";
 const RETRY_DELAY = 4000; // ms: wait before retrying after a failed save
 const MAX_UNDO = 200;
 const MODE_LABELS = { percent: "%", points: _t("pts"), wrong: _t("wrong"), letter: _t("letter") };
@@ -42,6 +44,7 @@ function roundHalfUp(value, digits) {
  */
 export class GradebookGrid extends Component {
     static template = "horizonforge_school_gradebook.GradebookGrid";
+    static components = { GradebookChart };
     static props = { ...standardActionServiceProps };
 
     setup() {
@@ -67,6 +70,8 @@ export class GradebookGrid extends Component {
             categoryColumns: [], // weighted categories, for the average columns
             showCategories: browser.localStorage.getItem(SHOW_CATEGORIES_KEY) === "1",
             showComments: browser.localStorage.getItem(SHOW_COMMENTS_KEY) === "1",
+            showChart: browser.localStorage.getItem(HIDE_CHART_KEY) !== "1",
+            missingAsZero: true,
             cellLetters: false,
             letterOnly: false,
             gradeDecimals: 0,
@@ -148,6 +153,7 @@ export class GradebookGrid extends Component {
         state.cellLetters = Boolean(data.cell_letters);
         state.letterOnly = Boolean(data.letter_only);
         state.gradeDecimals = data.grade_decimals || 0;
+        state.missingAsZero = data.missing_as_zero !== false;
         state.scales = data.scales || {};
         state.comments = data.comments || {};
         state.periods = data.periods || [];
@@ -437,6 +443,40 @@ export class GradebookGrid extends Component {
             classes.push(`o_unsaved_${this.state.unsaved[key]}`);
         }
         return classes.join(" ");
+    }
+
+    // The chart under the grid: counted as the grade engine counts scores.
+
+    chartValue(cell) {
+        if (!cell || cell.status === "excused") {
+            return null;
+        }
+        if (cell.status === "missing") {
+            return this.state.missingAsZero ? 0 : null;
+        }
+        return cell.percent;
+    }
+
+    get chartAverages() {
+        return this.state.assignments.map((assignment) => {
+            const values = this.state.students
+                .map((student) => this.chartValue(this.getCell(assignment, student)))
+                .filter((value) => value !== null && value !== undefined);
+            return values.length ? values.reduce((a, b) => a + b, 0) / values.length : null;
+        });
+    }
+
+    get chartPoints() {
+        const student = this.activeStudent;
+        return this.state.assignments.map((assignment) =>
+            student ? this.chartValue(this.getCell(assignment, student)) ?? null : null
+        );
+    }
+
+    toggleChart() {
+        this.state.showChart = !this.state.showChart;
+        browser.localStorage.setItem(HIDE_CHART_KEY, this.state.showChart ? "0" : "1");
+        this.focusGrid();
     }
 
     /** Scores marked missing in the period, for the warning by the name. */

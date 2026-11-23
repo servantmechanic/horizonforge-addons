@@ -197,6 +197,16 @@
                     </tbody>
                 </table>
             </div>
+            <div t-if="state.students.length and state.assignments.length and state.periods.length"
+                 class="o_gradebook_chart_panel border-top bg-view px-3 py-2">
+                <button class="btn btn-link btn-sm p-0 o_gradebook_chart_toggle" t-on-click="toggleChart">
+                    <i t-attf-class="fa me-1 {{ state.showChart ? 'fa-chevron-down' : 'fa-chevron-right' }}"/>
+                    <t t-if="state.showChart">Hide graph</t><t t-else="">Show graph</t>
+                </button>
+                <GradebookChart t-if="state.showChart and activeStudent"
+                                assignments="state.assignments" averages="chartAverages" points="chartPoints"
+                                studentName="activeStudent.name"/>
+            </div>
         </div>
     </t>
 </templates>
