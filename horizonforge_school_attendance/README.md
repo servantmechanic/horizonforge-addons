@@ -41,7 +41,7 @@ whole period instead of one week.
 
 - **Teacher**: the students of the homeroom they teach.
 - **Office**: every student.
-- **Administrator**: also days in locked grading periods.
+- **Principal**: also days in locked grading periods.
 
 ## Reports
 

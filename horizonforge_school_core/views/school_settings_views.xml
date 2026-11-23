@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_settings_view_form" model="ir.ui.view">
+        <field name="name">school.settings.view.form</field>
+        <field name="model">school.settings</field>
+        <field name="arch" type="xml">
+            <form string="School Settings">
+                <header>
+                    <button name="action_save" type="object" string="Save" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <field name="company_id" invisible="1"/>
+                    <group name="school">
+                        <group string="School Year" name="school_year">
+                            <field name="school_current_year_id" options="{'no_create': True}"/>
+                        </group>
+                        <group string="Reports" name="reports">
+                            <field name="school_principal_name"
+                                   help="Printed in the report header. The school name, address and logo come from the company."/>
+                        </group>
+                    </group>
+                    <group name="defaults">
+                        <group string="Teacher Preferences" name="preferences"
+                               help="What new users start with; each teacher can change their own in My Preferences.">
+                            <field name="school_name_order" widget="radio"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="school_settings_form_action" model="ir.actions.act_window">
+        <field name="name">School Settings</field>
+        <field name="res_model">school.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+</odoo>

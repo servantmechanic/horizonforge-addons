@@ -27,8 +27,12 @@ addons: the gradebook and attendance addons install on top of it.
   someone else): they keep those students' grades there, beside the class's
   teacher, and print their report cards. Every teacher keeps the school calendar.
 - **Office**: reads every class, and manages students, patrons and enrollments.
-- **Administrator**: manages years, grading periods, grade levels, homerooms,
-  courses, classes and settings.
+- **Principal**: everything school: students and patrons, years, grading
+  periods, grade levels, homerooms, courses, classes, grading weights and
+  scales, grades in locked grading periods, **School Settings**
+  (Configuration), and exporting data (Odoo's export, on any list). Not
+  Odoo's own settings (users, apps, email): those stay with the system
+  administrator, who also has the school settings in Odoo's Settings.
 
 ## Setup order
 

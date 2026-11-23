@@ -58,7 +58,7 @@ class SchoolPeriodMark(models.Model):
         locked = self.period_id.filtered("locked")
         if locked:
             raise ValidationError(_(
-                "%(period)s is locked. Ask a school administrator to change its grades.",
+                "%(period)s is locked. Ask the principal to change its grades.",
                 period=locked[0].display_name,
             ))
 

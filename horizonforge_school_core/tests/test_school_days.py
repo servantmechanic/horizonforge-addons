@@ -1,7 +1,7 @@
 from datetime import date
 
 from odoo import Command
-from odoo.exceptions import ValidationError
+from odoo.exceptions import AccessError, ValidationError
 from odoo.tests import new_test_user, tagged
 
 from .common import SchoolCoreCase
@@ -178,3 +178,48 @@ class TestCourseCopyAndPreferences(SchoolCoreCase):
         self.assertEqual(result["res_model"], "res.users")
         self.assertEqual(result["res_id"], self.teacher.id)
         self.assertEqual(result["target"], "new")
+
+
+@tagged("post_install", "-at_install")
+class TestPrincipal(SchoolCoreCase):
+    """The principal: everything school, exports, and the school settings,
+    without being the system administrator."""
+
+    def test_principal_level(self):
+        group = self.env.ref("horizonforge_school_core.group_school_admin")
+        self.assertEqual(group.name, "Principal")
+        self.assertTrue(self.admin.has_group("base.group_allow_export"))
+        self.assertTrue(self.admin.has_group("horizonforge_school_core.group_school_office"))
+        self.assertFalse(self.admin.has_group("base.group_system"))
+        self.assertFalse(self.teacher.has_group("base.group_allow_export"))
+
+    def test_principal_saves_school_settings(self):
+        other_year = self.env["school.year"].create({
+            "name": "Test 2031-32", "date_start": "2031-08-25", "date_end": "2032-05-21",
+        })
+        settings = self.env["school.settings"].with_user(self.admin).create({
+            "school_principal_name": "Dr. Principal",
+            "school_name_order": "first_last",
+            "school_current_year_id": other_year.id,
+        })
+        settings.action_save()
+        self.assertEqual(self.env.company.school_principal_name, "Dr. Principal")
+        self.assertEqual(self.env.company.school_name_order, "first_last")
+        self.assertTrue(other_year.is_current)
+        # Odoo's own Settings stay with the system administrator.
+        with self.assertRaises(AccessError):
+            self.env["res.config.settings"].with_user(self.admin).create({})
+
+    def test_teachers_cant_change_settings(self):
+        with self.assertRaises(AccessError):
+            self.env["school.settings"].with_user(self.teacher).create({"school_principal_name": "Me"})
+        with self.assertRaises(AccessError):
+            self.env["school.settings"].with_user(self.office).create({"school_principal_name": "Me"})
+
+    def test_settings_menu(self):
+        menu = self.env.ref("horizonforge_school_core.menu_school_settings")
+        self.assertFalse(menu.group_ids)
+        self.assertIn(menu.id, self.env["ir.ui.menu"].with_user(self.admin)._visible_menu_ids())
+        self.assertNotIn(menu.id, self.env["ir.ui.menu"].with_user(self.teacher)._visible_menu_ids())
+        views = self.env["school.settings"].with_user(self.admin).get_views([(False, "form")])
+        self.assertIn("school_principal_name", views["views"]["form"]["arch"])

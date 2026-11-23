@@ -136,3 +136,22 @@ class TestCandleEntry(GradebookCase):
         self.assertTrue(data["tab_adds_column"])
         with_files = self.env["school.assignment"].search([("attachment_ids", "!=", False)])
         self.assertEqual(with_files, quiz)
+
+
+@tagged("post_install", "-at_install")
+class TestPrincipalGradebookSettings(GradebookCase):
+
+    def test_principal_changes_grading(self):
+        principal = self.admin  # School Principal, not a system administrator
+        scheme = self.env["school.weight.scheme"].with_user(principal).create({"name": "Tests count more"})
+        self.env["school.settings"].with_user(principal).create({
+            "school_weight_scheme_id": scheme.id,
+            "school_entry_mode": "points",
+            "school_card_motto": "Be kind.",
+        })
+        company = self.env.company
+        self.assertEqual(company.school_weight_scheme_id, scheme)
+        self.assertEqual(company.school_entry_mode, "points")
+        self.assertEqual(company.school_card_motto, "Be kind.")
+        arch = self.env["school.settings"].with_user(principal).get_views([(False, "form")])["views"]["form"]["arch"]
+        self.assertIn("school_weight_scheme_id", arch)

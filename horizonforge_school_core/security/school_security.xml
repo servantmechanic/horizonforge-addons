@@ -27,13 +27,16 @@
         <field name="comment">Sees every class, and manages students, patrons and enrollments.</field>
     </record>
 
+    <!-- The principal: everything school, and exporting data; not Odoo's
+         own settings (users, apps, email), which are the system
+         administrator's. (Its id stays group_school_admin.) -->
     <record id="group_school_admin" model="res.groups">
-        <field name="name">Administrator</field>
+        <field name="name">Principal</field>
         <field name="sequence">30</field>
         <field name="privilege_id" ref="res_groups_privilege_school"/>
-        <field name="implied_ids" eval="[(4, ref('group_school_office'))]"/>
+        <field name="implied_ids" eval="[(4, ref('group_school_office')), (4, ref('base.group_allow_export'))]"/>
         <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
-        <field name="comment">Full access: school years, grading periods, courses, classes and settings.</field>
+        <field name="comment">Everything school: students, patrons, years, classes, grading weights and scales, school settings, locked grades, and exporting data. Not Odoo's own settings (users, apps, email).</field>
     </record>
 
     <!-- Teachers: their own classes only. Office and up: everything (group

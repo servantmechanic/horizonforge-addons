@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- The principal's School Settings: the gradebook's part. -->
+    <record id="school_settings_view_form" model="ir.ui.view">
+        <field name="name">school.settings.view.form.inherit.gradebook</field>
+        <field name="model">school.settings</field>
+        <field name="inherit_id" ref="horizonforge_school_core.school_settings_view_form"/>
+        <field name="arch" type="xml">
+            <group name="school" position="after">
+                <group name="gradebook">
+                    <group string="Gradebook" name="grading">
+                        <field name="school_entry_mode"
+                               help="What teachers type: a percent, the points earned, the number wrong or a letter. A class or an assignment can use another."/>
+                        <field name="school_weight_scheme_id" options="{'no_create': True}"
+                               help="How much each score category counts. A course or a class can have its own."/>
+                        <field name="school_grading_scale_id" options="{'no_create': True}"
+                               help="Turns a percent into a letter. A grade level or a course can have its own."/>
+                        <field name="school_missing_work" widget="radio"/>
+                        <field name="school_year_grade" widget="radio"/>
+                        <field name="school_grade_decimals" string="Grade decimals"
+                               help="Grades are rounded half up (92.5 becomes 93 with 0 decimals) before the letter is looked up."/>
+                        <field name="school_display_decimals" string="Average decimals"/>
+                    </group>
+                    <group string="Report Card" name="report_card">
+                        <field name="school_card_motto" string="Verse or motto"/>
+                        <field name="school_card_letter" string="Letter to parents"/>
+                        <field name="school_card_letter_signature" string="Signed by"/>
+                        <field name="school_conduct_traits" string="Conduct grades"
+                               help="One line each: a heading, then its traits starting with a dash. Printed with empty boxes to fill in by hand."/>
+                    </group>
+                </group>
+            </group>
+            <group name="preferences" position="inside">
+                <field name="school_enter_direction" widget="radio"/>
+                <field name="school_tab_adds_column"/>
+                <field name="school_cell_letters"/>
+            </group>
+        </field>
+    </record>
+</odoo>

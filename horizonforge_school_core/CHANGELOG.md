@@ -13,6 +13,12 @@ Each release is tagged in git as `school-<version>`, for example `school-0.7.0`.
 
 ## Unreleased
 
+- **Principal.** The school's top access level, Administrator, is now
+  Principal: everything school (students, patrons, classes, grading weights
+  and scales, locked grades), exporting data, and a School Settings screen
+  (Configuration) with every school setting, without Odoo's own settings
+  (users, apps, email), which stay with the system administrator.
+
 - **Lesson (L).** The shipped score category Lesson/Homework (HW) is now
   Lesson (L); an upgrade renames it once, unless the school renamed it.
 - **My Courses.** Pacing Guides and Assignment Schedules open on the

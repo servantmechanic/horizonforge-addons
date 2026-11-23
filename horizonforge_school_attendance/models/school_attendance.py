@@ -121,7 +121,7 @@ class SchoolAttendance(models.Model):
             period = self.env["school.period"]._get_for_date(date)
             if period.locked:
                 raise UserError(_(
-                    "%(period)s is locked. Ask a school administrator to change its attendance.",
+                    "%(period)s is locked. Ask the principal to change its attendance.",
                     period=period.display_name,
                 ))
 

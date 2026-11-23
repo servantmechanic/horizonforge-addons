@@ -31,7 +31,7 @@ class SchoolPeriod(models.Model):
     locked = fields.Boolean(
         copy=False,
         help="Locked periods are closed: their grades can only be changed "
-        "by a school administrator.",
+        "by the principal.",
     )
 
     is_current = fields.Boolean(

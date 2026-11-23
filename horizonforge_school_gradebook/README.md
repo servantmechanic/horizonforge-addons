@@ -152,7 +152,8 @@ them without any copying. Duplicating a course copies its schedules.
   own teacher: those classes are in their gradebook, showing only their own
   students.
 - **Office**: reads every class's gradebook.
-- **Administrator**: everything, including scores in locked grading periods.
+- **Principal**: everything, including scores in locked grading periods, and
+  the grading settings (Configuration, School Settings).
 
 ## Grades
 

@@ -1,8 +1,14 @@
 from odoo import fields, models
 
 
-class ResConfigSettings(models.TransientModel):
-    _inherit = "res.config.settings"
+class SchoolGradebookSettingsMixin(models.AbstractModel):
+    """The gradebook's school settings, shared by Odoo's Settings (for the
+    system administrator) and School Settings (for the principal)."""
+
+    _name = "school.gradebook.settings.mixin"
+    _description = "Gradebook Settings"
+
+    company_id = fields.Many2one("res.company")
 
     school_card_motto = fields.Text(
         related="company_id.school_card_motto",
@@ -64,3 +70,13 @@ class ResConfigSettings(models.TransientModel):
         related="company_id.school_grading_scale_id",
         readonly=False,
     )
+
+
+class ResConfigSettings(models.TransientModel):
+    _name = "res.config.settings"
+    _inherit = ["res.config.settings", "school.gradebook.settings.mixin"]
+
+
+class SchoolSettings(models.TransientModel):
+    _name = "school.settings"
+    _inherit = ["school.settings", "school.gradebook.settings.mixin"]

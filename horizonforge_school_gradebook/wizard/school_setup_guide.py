@@ -16,7 +16,7 @@ class SchoolSetupGuide(models.TransientModel):
             ) if guide.year_id else 0
 
     def action_grading_settings(self):
-        return self._open("horizonforge_school_core.school_settings_action")
+        return self._open("horizonforge_school_core.school_settings_form_action")
 
     def action_weight_schemes(self):
         return self._open("horizonforge_school_gradebook.school_weight_scheme_action")

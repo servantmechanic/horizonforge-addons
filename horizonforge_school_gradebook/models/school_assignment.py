@@ -260,13 +260,13 @@ class SchoolAssignment(models.Model):
         self.score_ids._check_value()
 
     def _check_unlocked(self):
-        """Locked grading periods only change for school administrators."""
+        """Locked grading periods only change for the principal."""
         if self.env.su or self.env.user.has_group("horizonforge_school_core.group_school_admin"):
             return
         locked = self.period_id.filtered("locked")
         if locked:
             raise UserError(_(
-                "%(period)s is locked. Ask a school administrator to change its grades.",
+                "%(period)s is locked. Ask the principal to change its grades.",
                 period=locked[0].display_name,
             ))
 

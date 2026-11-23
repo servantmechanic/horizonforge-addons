@@ -22,6 +22,7 @@
         "views/res_partner_views.xml",
         "views/res_config_settings_views.xml",
         "views/res_users_views.xml",
+        "views/school_settings_views.xml",
         "wizard/school_year_setup_views.xml",
         "wizard/school_setup_guide_views.xml",
         "views/menus.xml",

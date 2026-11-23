@@ -71,7 +71,7 @@
             <div t-if="!state.homerooms.length" class="m-auto text-center text-muted p-4">
                 <h3>No homeroom yet</h3>
                 <p>Attendance is taken by homeroom.<br/>
-                   Ask a school administrator to set you as the teacher of your homeroom.</p>
+                   Ask the principal to set you as the teacher of your homeroom.</p>
             </div>
             <div t-elif="!state.students.length" class="m-auto text-center text-muted p-4">
                 <h3>No students in this homeroom</h3>

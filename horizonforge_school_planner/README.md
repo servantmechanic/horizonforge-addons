@@ -120,7 +120,7 @@ can print any teacher's.
 - **Teacher**: reads every guide, sets up and changes the guides of the
   courses they teach, and plans their own classes.
 - **Office**: reads every class's plan.
-- **Administrator**: everything.
+- **Principal**: everything.
 
 ## Demo data
 

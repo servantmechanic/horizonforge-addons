@@ -17,8 +17,11 @@
 
     <menuitem id="menu_school_config" name="Configuration" parent="menu_school_root" sequence="90"
               groups="group_school_admin"/>
-    <menuitem id="menu_school_settings" parent="menu_school_config" action="school_settings_action" sequence="5"
-              groups="base.group_system"/>
+    <!-- The principal's school settings (the system administrator also has
+         them in Odoo's Settings). "-": removes base.group_system, set by
+         earlier versions, on upgraded databases. -->
+    <menuitem id="menu_school_settings" parent="menu_school_config" action="school_settings_form_action" sequence="5"
+              groups="-base.group_system"/>
     <menuitem id="menu_school_years" parent="menu_school_config" action="school_year_action" sequence="10"/>
     <menuitem id="menu_school_grade_levels" parent="menu_school_config" action="school_grade_level_action" sequence="20"/>
     <menuitem id="menu_school_homerooms" parent="menu_school_config" action="school_homeroom_action" sequence="35"/>

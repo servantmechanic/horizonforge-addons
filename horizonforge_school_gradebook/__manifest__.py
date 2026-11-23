@@ -23,6 +23,7 @@
         "views/school_core_views.xml",
         "views/res_config_settings_views.xml",
         "views/res_users_views.xml",
+        "views/school_settings_views.xml",
         "wizard/school_assignment_generate_views.xml",
         "wizard/school_grade_report_views.xml",
         "wizard/school_setup_guide_views.xml",

@@ -96,7 +96,7 @@
             <div t-if="!state.sections.length" class="o_gradebook_empty m-auto text-center text-muted p-4">
                 <h3>No classes yet</h3>
                 <p>The gradebook shows the classes you teach in the current school year.<br/>
-                   Ask a school administrator to set you as the teacher of your classes.</p>
+                   Ask the principal to set you as the teacher of your classes.</p>
             </div>
             <div t-elif="!state.periods.length" class="o_gradebook_empty m-auto text-center text-muted p-4">
                 <h3>No grading periods</h3>
