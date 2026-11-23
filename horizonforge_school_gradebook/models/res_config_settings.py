@@ -25,6 +25,10 @@ class ResConfigSettings(models.TransientModel):
         related="company_id.school_enter_direction",
         readonly=False,
     )
+    school_cell_letters = fields.Boolean(
+        related="company_id.school_cell_letters",
+        readonly=False,
+    )
     school_entry_mode = fields.Selection(
         related="company_id.school_entry_mode",
         readonly=False,

@@ -8,6 +8,8 @@ from .common import GradebookCase
 
 @tagged("post_install", "-at_install")
 class TestPeriodMarks(GradebookCase):
+    """Letter courses in the gradebook, letters per assignment, and report
+    card comments."""
 
     @classmethod
     def setUpClass(cls):
@@ -41,28 +43,92 @@ class TestPeriodMarks(GradebookCase):
         self.assertEqual(self._assignment().entry_mode, "wrong")
         self.section_5.entry_mode = "points"
         self.assertEqual(self.section_5._get_entry_mode(), "points")
+        # A letter course types letters, unless it says otherwise.
+        self.assertEqual(self.pe_class._get_entry_mode(), "letter")
+        self.pe.entry_mode = "percent"
+        self.assertEqual(self.pe_class._get_entry_mode(), "percent")
 
-    def test_letter_must_be_in_scale(self):
-        mark = self._mark(self.pe_class, self.anna, letter=" b ")
-        self.assertEqual(mark.letter, "B")
+    def test_scale_values_when_entered(self):
+        letters = self.env.ref("horizonforge_school_gradebook.grading_scale_letters")
+        values = {line.letter: line.entry_percent for line in letters.line_ids}
+        # The middle of each range; F, the lowest, 5 below the top of its range.
+        self.assertEqual(values, {"A": 96.5, "B": 89, "C": 81, "D": 73.5, "F": 65})
+        esnu = self.env.ref("horizonforge_school_gradebook.grading_scale_esnu")
+        self.assertEqual(esnu._entry_percent(" s "), 85)
+        self.assertIsNone(esnu._entry_percent("B"))
+
+    def test_letter_scores(self):
+        activity = self._assignment(section=self.pe_class, name="Activity")
+        self.assertEqual(activity.entry_mode, "letter")
+        score = self._score(activity, self.anna, letter_entered=" b ")
+        self.assertEqual(score.letter_entered, "B")
+        self.assertEqual(score.percent, 89)
         with self.assertRaises(ValidationError):
-            mark.letter = "Q"
-        # The lower grades' scale has its own letters.
+            score.letter_entered = "Q"
+        # The lower grades' scale has its own letters and values.
         self.level_5.grading_scale_id = self.env.ref("horizonforge_school_gradebook.grading_scale_esnu")
         with self.assertRaises(ValidationError):
-            self._mark(self.pe_class, self.ben, letter="B")
-        self.assertEqual(self._mark(self.pe_class, self.ben, letter="s").letter, "S")
+            self._score(activity, self.ben, letter_entered="B")
+        ben = self._score(activity, self.ben, letter_entered="s")
+        self.assertEqual(ben.percent, 85)
+        # The school changes what S counts for: the score follows.
+        line = ben._get_grading_scale().line_ids.filtered(lambda l: l.letter == "S")
+        line.entry_percent = 88
+        self.assertEqual(ben.percent, 88)
+        # Excused and missing work as usual.
+        ben.write({"status": "excused", "letter_entered": False})
+        self.assertEqual(ben.percent, 0)
+
+    def test_letter_assignment_in_percent_course(self):
+        essay = self._assignment(name="Essay", entry_mode="letter")
+        quiz = self._assignment(name="Quiz", date="2030-09-04")
+        result = self.env["school.score"].with_user(self.teacher).save_batch([
+            {"assignment_id": essay.id, "student_id": self.anna.id, "status": "scored", "value": "a"},
+            {"assignment_id": essay.id, "student_id": self.ben.id, "status": "scored", "value": "Z"},
+            {"assignment_id": quiz.id, "student_id": self.anna.id, "status": "scored", "value": 81},
+        ])
+        cells = {(c["assignment_id"], c["student_id"]): c for c in result["saved"]}
+        self.assertEqual(cells[essay.id, self.anna.id]["value"], "A")
+        self.assertEqual(cells[essay.id, self.anna.id]["percent"], 96.5)
+        self.assertEqual([e["student_id"] for e in result["errors"]], self.ben.ids)
+        # (96.5 + 81) / 2 = 88.75: rounds to 89, a B.
+        grade = result["grades"][0]["grades"][self.anna.id]
+        self.assertEqual((grade["grade"], grade["letter"]), ("89", "B"))
+        # Scores typed one way can't silently become the other.
+        with self.assertRaises(ValidationError):
+            essay.entry_mode = "percent"
+        with self.assertRaises(ValidationError):
+            quiz.entry_mode = "letter"
+
+    def test_letter_courses_in_the_gradebook(self):
+        sections = self.env["school.section"].with_user(self.teacher)._gradebook_sections()
+        self.assertEqual(sections, self.section_5 | self.pe_class)
+        data = self.pe_class.with_user(self.teacher).gradebook_open(self.pe_class.id, self.semester_1.id)
+        self.assertTrue(data["letter_only"])
+        self.assertEqual(data["entry_mode"], "letter")
+        scale_id = data["students"][0]["scale_id"]
+        self.assertEqual([line["letter"] for line in data["scales"][scale_id]], ["A", "B", "C", "D", "F"])
+        self.assertFalse(self.env["school.section"].gradebook_open(self.section_5.id)["letter_only"])
+        # Schedules generate letter assignments; comment-only courses stay out.
+        self.semester_1.date_end = "2030-09-06"
+        for course in (self.pe, self.conduct):
+            self.env["school.assignment.template"].create({
+                "course_id": course.id, "name": "Activity", "category_id": self.homework.id, "monday": True,
+            })
+        created = self.pe_class._generate_assignments(self.semester_1)
+        self.assertEqual(created.mapped("entry_mode"), ["letter", "letter"])  # two Mondays
+        self.assertFalse(self.conduct_class._generate_assignments(self.semester_1))
 
     def test_open_creates_rows(self):
-        action = self.pe_class.with_user(self.teacher).action_open_period_marks()
-        marks = self.Mark.search([("section_id", "=", self.pe_class.id)])
+        action = self.conduct_class.with_user(self.teacher).action_open_period_marks()
+        marks = self.Mark.search([("section_id", "=", self.conduct_class.id)])
         # The year hasn't started: the first period only, a row per student.
         self.assertEqual(marks.mapped("period_id"), self.semester_1)
         self.assertEqual(marks.student_id, self.anna | self.ben)
-        self.assertEqual(action["domain"], [("section_id", "in", self.pe_class.ids)])
-        self.pe_class.with_user(self.teacher).action_open_period_marks()
-        self.assertEqual(self.Mark.search_count([("section_id", "=", self.pe_class.id)]), 2)
-        marks[0].with_user(self.teacher).write({"letter": "A", "comment": "Great effort"})
+        self.assertEqual(action["domain"], [("section_id", "in", self.conduct_class.ids)])
+        self.conduct_class.with_user(self.teacher).action_open_period_marks()
+        self.assertEqual(self.Mark.search_count([("section_id", "=", self.conduct_class.id)]), 2)
+        marks[0].with_user(self.teacher).comment = "Great effort"
 
     def test_menu_opens_own_classes(self):
         """From the menu: rows for the teacher's classes, shown with My Classes
@@ -80,30 +146,38 @@ class TestPeriodMarks(GradebookCase):
         self.assertNotIn("search_default_my_classes", context)
 
     def test_security_and_lock(self):
-        mark = self._mark(self.pe_class, self.anna, letter="A")
+        mark = self._mark(self.conduct_class, self.anna, comment="Kind")
         with self.assertRaises(AccessError):
-            mark.with_user(self.other_teacher).read(["letter"])
+            mark.with_user(self.other_teacher).read(["comment"])
         with self.assertRaises(AccessError):
-            mark.with_user(self.office).letter = "B"
-        self.assertEqual(mark.with_user(self.office).letter, "A")
+            mark.with_user(self.office).comment = "Changed"
+        self.assertEqual(mark.with_user(self.office).comment, "Kind")
         self.semester_1.locked = True
         with self.assertRaises(ValidationError):
-            mark.with_user(self.teacher).letter = "B"
-        mark.with_user(self.admin).letter = "B"
+            mark.with_user(self.teacher).comment = "Changed"
+        mark.with_user(self.admin).comment = "Changed"
 
-    def test_not_in_the_gradebook(self):
-        sections = self.env["school.section"].with_user(self.teacher)._gradebook_sections()
-        self.assertEqual(sections, self.section_5)
-        self.env["school.assignment.template"].create({
-            "course_id": self.pe.id, "name": "Lesson", "category_id": self.homework.id, "monday": True,
-        })
-        self.assertFalse(self.pe_class._generate_assignments(self.semester_1))
+    def test_comment_from_the_grid(self):
+        Section = self.env["school.section"].with_user(self.teacher)
+        section = Section.browse(self.section_5.id)
+        self.assertEqual(section.gradebook_set_comment(self.semester_1.id, self.anna.id, " Neat work "), "Neat work")
+        data = Section.gradebook_open(self.section_5.id, self.semester_1.id)
+        self.assertEqual(data["comments"], {self.anna.id: "Neat work"})
+        self.assertEqual(section.gradebook_set_comment(self.semester_1.id, self.anna.id, ""), "")
+        self.assertFalse(Section.gradebook_open(self.section_5.id, self.semester_1.id)["comments"])
+        # Nothing typed, nothing created.
+        section.gradebook_set_comment(self.semester_1.id, self.ben.id, "")
+        self.assertFalse(self.Mark.search([("student_id", "=", self.ben.id), ("section_id", "=", self.section_5.id)]))
+        with self.assertRaises(AccessError):
+            self.section_5.with_user(self.office).gradebook_set_comment(self.semester_1.id, self.anna.id, "No")
 
     def test_report_card(self):
         lesson = self._assignment()
         self._score(lesson, self.anna, 88)
         self._mark(self.section_5, self.anna, comment="Works carefully.")
-        self._mark(self.pe_class, self.anna, letter="A")
+        # PE by letters: A (96.5) and B (89) average 92.75, an A.
+        for name, letter in (("Run", "A"), ("Throw", "B")):
+            self._score(self._assignment(section=self.pe_class, name=name), self.anna, letter_entered=letter)
         self._mark(self.conduct_class, self.anna, comment="Kind to others.")
         wizard = self.env["school.grade.report"].create({
             "year_id": self.year.id, "period_id": self.semester_1.id, "student_ids": self.anna.ids,
@@ -113,10 +187,16 @@ class TestPeriodMarks(GradebookCase):
         self.assertEqual(list(rows), ["Test Math 5", "Test PE", "Test Conduct"])
         self.assertEqual(rows["Test Math 5"]["grades"], [{"grade": "88", "letter": "B"}])
         self.assertEqual(rows["Test Math 5"]["comment"], "Works carefully.")
-        self.assertEqual(rows["Test PE"]["grades"], [{"grade": "", "letter": "A"}])
-        self.assertEqual(rows["Test PE"]["year"], {"grade": "", "letter": ""})
+        self.assertEqual(rows["Test PE"]["grades"], [{"grade": "93", "letter": "A"}])
         self.assertEqual(rows["Test Conduct"]["grades"], [{"grade": "", "letter": ""}])
         self.assertEqual(rows["Test Conduct"]["comment"], "Kind to others.")
+        # The folded card prints the letter course as letters only.
+        page, = wizard._get_card_pages()
+        subjects = {subject["course"]: subject for subject in page["subjects"]}
+        self.assertEqual(subjects["Test PE"]["cells"][0], "A")
+        self.assertEqual(subjects["Test PE"]["average"], "A")
+        self.assertEqual(subjects["Test Math 5"]["average"], "88")
+        self.assertNotIn("Test Conduct", subjects)
         html = self.env["ir.actions.report"]._render_qweb_html(
             "horizonforge_school_gradebook.report_card", wizard.ids
         )[0].decode()
@@ -125,9 +205,15 @@ class TestPeriodMarks(GradebookCase):
         header, lines = wizard._csv_rows()
         self.assertEqual(header[-1], "Comment")
         self.assertEqual(lines[2][-1], "Kind to others.")
-        # Letter and comment courses have no class sheet or progress report.
+        # Comment-only courses have no class sheet or progress report.
         sheets = wizard.copy({"report_type": "class_sheet", "student_ids": False})._get_class_sheets()
-        self.assertEqual([sheet["section"] for sheet in sheets], [self.section_5, self.section_6])
+        self.assertEqual([sheet["section"] for sheet in sheets], [self.section_5, self.section_6, self.pe_class])
+        progress = wizard.copy({"report_type": "progress"})._get_progress_reports()
+        pe_page = next(page for page in progress if page["section"] == self.pe_class)
+        self.assertEqual([row["score"] for row in pe_page["rows"]], ["A", "B"])
+
+    def test_not_in_the_gradebook(self):
+        self.assertNotIn(self.conduct_class, self.env["school.section"].with_user(self.teacher)._gradebook_sections())
 
     def test_day_off_removes_unscored_assignments(self):
         self.semester_1.date_end = "2030-09-13"

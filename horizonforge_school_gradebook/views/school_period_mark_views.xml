@@ -9,8 +9,6 @@
                 <field name="section_id" readonly="1" optional="show"/>
                 <field name="period_id" readonly="1" optional="show"/>
                 <field name="student_id" readonly="1"/>
-                <field name="letter" readonly="grading_type != 'letter'"
-                       placeholder="Letter" width="90px"/>
                 <field name="comment" placeholder="Comment for the report card"/>
             </list>
         </field>
@@ -32,13 +30,10 @@
                 <filter name="current_period" string="Current Grading Period" domain="[('period_id.is_current', '=', True)]"/>
                 <filter name="previous_period" string="Previous Grading Period" domain="[('period_id.is_previous', '=', True)]"/>
                 <separator/>
-                <filter name="letter_courses" string="Letter Grade Courses"
-                        domain="[('section_id.course_id.grading_type', '=', 'letter')]"/>
-                <filter name="comment_courses" string="Comment Courses"
+                <filter name="comment_courses" string="Comment-Only Courses"
                         domain="[('section_id.course_id.grading_type', '=', 'comment')]"/>
                 <separator/>
-                <filter name="to_fill" string="Nothing Entered"
-                        domain="[('letter', '=', False), ('comment', '=', False)]"/>
+                <filter name="to_fill" string="No Comment Yet" domain="[('comment', '=', False)]"/>
                 <group>
                     <filter name="group_section" string="Class" context="{'group_by': 'section_id'}"/>
                     <filter name="group_grade_level" string="Grade Level" context="{'group_by': 'grade_level_ids'}"/>
@@ -55,19 +50,19 @@
     </record>
 
     <record id="school_period_mark_action" model="ir.actions.act_window">
-        <field name="name">Letter Grades &amp; Comments</field>
+        <field name="name">Report Card Comments</field>
         <field name="res_model">school.period.mark</field>
         <field name="view_mode">list</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">No students to grade here</p>
-            <p>Each student gets a line per class and grading period: a letter for the courses
-               graded by letter only, and a comment that prints on the report card.</p>
+            <p>Each student gets a line per class and grading period for the comment that prints
+               on the report card. Pick the grading period on the left; your classes are grouped.</p>
         </field>
     </record>
 
     <!-- The menu goes through code: it first adds the missing lines. -->
     <record id="school_period_mark_server_action" model="ir.actions.server">
-        <field name="name">Letter Grades &amp; Comments</field>
+        <field name="name">Report Card Comments</field>
         <field name="model_id" ref="model_school_period_mark"/>
         <field name="state">code</field>
         <field name="code">action = model.action_open_marks()</field>

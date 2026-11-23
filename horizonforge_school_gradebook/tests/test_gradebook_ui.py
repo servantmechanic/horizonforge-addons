@@ -131,7 +131,8 @@ class TestGradebookUi(HttpCase, SchoolCoreCase):
             await type("15");
             await press("Tab");
             await saved();
-            expect(cell(0, 1).title, "75%", "points as percent");
+            expect(cell(0, 1).textContent.trim(), "75", "points shown as a percent");
+            expect(cell(0, 1).title, "15 of 20 points - 75%", "points typed, in the tooltip");
 
             // m marks missing, x excused, Delete clears, Ctrl+Z undoes.
             await press("ArrowDown");
@@ -150,9 +151,9 @@ class TestGradebookUi(HttpCase, SchoolCoreCase):
             expect(cell(1, 1).textContent.trim(), "EX", "redo");
             await saved();
 
-            // c adds a comment.
+            // n adds a note.
             await press("ArrowUp");
-            await press("c");
+            await press("n");
             const prompt = await waitFor(".o_gradebook_prompt_input");
             prompt.value = "Retake";
             prompt.dispatchEvent(new Event("input", { bubbles: true }));
@@ -182,7 +183,7 @@ class TestGradebookUi(HttpCase, SchoolCoreCase):
                 new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }));
             await sleep(50);
             expect(cell(0, 0).textContent.trim(), "81", "pasted percent");
-            expect(cell(0, 1).textContent.trim(), "12", "pasted points");
+            expect(cell(0, 1).textContent.trim(), "60", "pasted points, shown as a percent");
             expect(cell(1, 0).textContent.trim(), "", "empty pasted cell left alone");
             expect(cell(1, 1).textContent.trim(), "M", "pasted missing");
 
@@ -316,3 +317,57 @@ class TestGradebookUi(HttpCase, SchoolCoreCase):
             await waitFor(() => !document.querySelector(".o_gradebook_period_warning"), "banner gone");
             expect(document.querySelector(".o_gradebook_period").selectedOptions[0].text.trim(), "All Year", "period");
         """)
+
+    def test_letters_missing_and_comments(self):
+        essay = self.env["school.assignment"].create({
+            "section_id": self.section_5.id, "name": "Essay", "date": self.lesson.date,
+            "category_id": self.lesson.category_id.id, "entry_mode": "letter", "sequence": 3,
+        })
+        self._run("""
+            await waitFor("td.o_selected");
+            // A letter column: B starts a grade, its percent shows beside it.
+            cell(0, 2).click();
+            await press("b");
+            await waitFor(".o_gradebook_editor");
+            await press("Enter");
+            await saved();
+            expect(cell(0, 2).querySelector("sup").textContent, "89", "B's value");
+            expect(cell(0, 2).textContent.trim().startsWith("B"), true, "the letter typed");
+            // C is a grade here.
+            await press("c");
+            await waitFor(".o_gradebook_editor");
+            await press("Enter");
+            await saved();
+            expect(cell(1, 2).textContent.trim().startsWith("C"), true, "C typed");
+            // A missing score warns beside the name.
+            cell(0, 0).click();
+            await press("m");
+            await waitFor(() => document.querySelectorAll(".o_gradebook_student")[0].querySelector(".o_gradebook_missing"), "warning");
+            if (document.querySelectorAll(".o_gradebook_student")[1].querySelector(".o_gradebook_missing")) {
+                throw new Error("warning on a student with nothing missing");
+            }
+            // Letters in every cell.
+            cell(1, 0).click();
+            await type("88");
+            await press("Enter");
+            await saved();
+            if (cell(1, 0).querySelector("sup")) { throw new Error("letter shown before the toggle"); }
+            document.querySelector(".o_gradebook_letters_toggle").click();
+            await waitFor(() => cell(1, 0).querySelector("sup"), "letter beside the percent");
+            expect(cell(1, 0).querySelector("sup").textContent, "B", "88 is a B");
+            // The report card comment, from the Comments column.
+            document.querySelector(".o_gradebook_comments_toggle").click();
+            await waitFor("td.o_gradebook_comment");
+            await waitFor(() => document.activeElement.classList.contains("o_gradebook_scroll"), "grid focused");
+            await press("r");
+            const area = await waitFor(".modal textarea");
+            area.value = "Writes with care.";
+            area.dispatchEvent(new Event("input"));
+            document.querySelector(".modal-footer .btn-primary").click();
+            await waitFor(() => [...document.querySelectorAll("td.o_gradebook_comment")].some((td) => td.textContent.includes("Writes with care.")), "comment shown");
+        """)
+        letters = {s.student_id.first_name: (s.letter_entered, s.percent) for s in essay.score_ids}
+        self.assertEqual(letters, {"Anna": ("B", 89), "Ben": ("C", 81)})
+        mark = self.env["school.period.mark"].search([("section_id", "=", self.section_5.id)])
+        self.assertEqual(mark.comment, "Writes with care.")
+        self.assertTrue(self.ui_teacher.school_cell_letters)

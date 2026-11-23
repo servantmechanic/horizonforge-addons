@@ -125,6 +125,8 @@ class SchoolGradeReport(models.TransientModel):
         if score.status == "missing":
             return _("M")
         assignment = score.assignment_id
+        if assignment.entry_mode == "letter":
+            return score.letter_entered or ""
         value = f"{score.value_entered:g}"
         if assignment.entry_mode == "percent":
             return f"{value}%"
@@ -150,7 +152,7 @@ class SchoolGradeReport(models.TransientModel):
             section_students = section.enrollment_ids.student_id.with_context(active_test=False) & students
             if not section_students:
                 continue
-            scored = section.grading_type == "percent"
+            scored = section.grading_type != "comment"
             by_section[section] = {
                 "periods": {
                     period: Engine._section_grades(section, period, section_students)
@@ -158,7 +160,7 @@ class SchoolGradeReport(models.TransientModel):
                 } if scored else {},
                 "year": Engine._section_year_grades(section, section_students, periods) if scored else {},
                 "students": section_students,
-                # Letters of letter-only courses, and report card comments.
+                # Report card comments.
                 "marks": {
                     (mark.student_id.id, mark.period_id.id): mark
                     for mark in self.env["school.period.mark"].search([
@@ -180,7 +182,7 @@ class SchoolGradeReport(models.TransientModel):
                 if student not in data["students"]:
                     continue
                 marks = data["marks"]
-                if section.grading_type == "percent":
+                if section.grading_type != "comment":
                     grades = [
                         {
                             "grade": Engine._format(data["periods"][period][student.id]["grade"]),
@@ -193,17 +195,8 @@ class SchoolGradeReport(models.TransientModel):
                         "letter": data["year"][student.id]["letter"],
                     }
                 else:
-                    # No percent: the teacher's letter (or nothing, for a
-                    # comment-only course), and no year grade.
-                    grades = [
-                        {
-                            "grade": "",
-                            "letter": marks[student.id, period.id].letter or ""
-                            if section.grading_type == "letter" and (student.id, period.id) in marks
-                            else "",
-                        }
-                        for period in periods
-                    ]
+                    # Comment only: no grades.
+                    grades = [{"grade": "", "letter": ""} for period in periods]
                     year = {"grade": "", "letter": ""}
                 mark = marks.get((student.id, self.period_id.id))
                 rows.append({
@@ -219,7 +212,7 @@ class SchoolGradeReport(models.TransientModel):
                 totals = [period_totals.get(student.id) for period_totals in attendance]
                 scales = self.env["school.grading.scale"]
                 for row in rows:
-                    if row["grading_type"] == "percent":
+                    if row["grading_type"] != "comment":
                         scales |= row["section"]._get_grading_scale(student)
                 cards.append({
                     "student": student,
@@ -253,7 +246,8 @@ class SchoolGradeReport(models.TransientModel):
                 subjects.append({
                     "course": row["course"],
                     "cells": cells + [""] * blank,
-                    "average": row["year"]["grade"],
+                    # Letter courses show letters only, the year's too.
+                    "average": row["year"]["grade"] if row["grading_type"] == "percent" else row["year"]["letter"],
                 })
             totals = card["attendance_totals"]
             has_attendance = any(totals)
@@ -304,7 +298,7 @@ class SchoolGradeReport(models.TransientModel):
                         percent = row["grading_type"] == "percent"
                         cells.append({
                             "grade": grade["grade"] if percent else grade["letter"],
-                            "average": row["year"]["grade"] if percent else "",
+                            "average": row["year"]["grade"] if percent else row["year"]["letter"],
                         })
                     totals = card["attendance_totals"][-1] if card["attendance_totals"] else None
                     rows.append({
@@ -348,7 +342,7 @@ class SchoolGradeReport(models.TransientModel):
         Engine = self.env["school.grade.engine"]
         decimals = self.env.company.school_display_decimals
         sheets = []
-        for section in self._get_sections().filtered(lambda s: s.grading_type == "percent"):
+        for section in self._get_sections().filtered(lambda s: s.grading_type != "comment"):
             students = self._gradebook_students(section)
             if not students:
                 continue
@@ -400,7 +394,7 @@ class SchoolGradeReport(models.TransientModel):
         decimals = self.env.company.school_display_decimals
         wanted = self._get_students()
         pages = []
-        for section in self._get_sections().filtered(lambda s: s.grading_type == "percent"):
+        for section in self._get_sections().filtered(lambda s: s.grading_type != "comment"):
             students = self._gradebook_students(section) & wanted
             if not students:
                 continue

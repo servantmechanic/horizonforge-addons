@@ -27,6 +27,7 @@
                         <list editable="bottom">
                             <field name="letter"/>
                             <field name="min_percent"/>
+                            <field name="entry_percent"/>
                             <field name="gpa"/>
                             <field name="description" placeholder="e.g. Excellent Work"/>
                         </list>

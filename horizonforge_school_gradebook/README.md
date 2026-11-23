@@ -9,23 +9,38 @@ top of `horizonforge_school_core`.
 |---|---|
 | Score categories | Name, short code and color. Ships with Lesson/Homework (HW) and Test (T) |
 | Weight schemes | Category weights that total 100, and the calculation method |
-| Grading scales | Letter, lowest percent and GPA points. Several scales are allowed |
+| Grading scales | Letter, lowest percent, value when entered and GPA points. Several scales are allowed |
 | Assignment schedules | Per course: which assignments fall on which weekdays |
 | Assignments | A gradebook column: class, date, category, max points, entry mode |
-| Scores | What the teacher typed, the percent, and a status (scored, excused, missing) |
-| Letter grades and comments | Per student, class and grading period: the letter of a letter-only course, and a comment for the report card |
+| Scores | What the teacher typed (a number or a letter), the percent, and a status (scored, excused, missing) |
+| Report card comments | Per student, class and grading period: the comment printed on the report card |
 
 Settings resolve from most specific to least: class, then course, then school
 (Configuration, Settings). Ships with a letter scale (A to F) and an example
 scale for the lower grades (E/S/N/U), to set on those grade levels.
 
-## Courses without scores
+## Letters
 
-A course is graded by scores and percent (the default), by letter only (PE,
-say) or by comment only. Letter-only and comment-only courses stay out of the
-grid: Gradebook, Letter Grades & Comments lists every student per class and
-grading period to fill in. Any course can have a comment there; comments print
-on the report card.
+Any assignment can be entered as **letters** (entry mode Letter): an essay
+graded A-, say. A letter counts as its **value when entered** on the student's
+grading scale, so a lower grade on its own scale (A from 97) counts by that
+scale. By default the value is the middle of the letter's range (A from 93 to
+100 counts 96.5, B 89); the lowest letter counts 5 below the top of its range
+(F counts 65, not 30). Change the values per scale line under Configuration,
+Grading Scales; scores already typed follow. Averages then work as usual.
+
+A course is graded by **scores and percent** (the default), by **letters**
+(PE, art) or by **comment only** (conduct). A letters course is in the grid
+like any other, its assignments typed as letters by default, and its period
+and year grades are shown and printed as a letter only. Comment-only courses
+stay out of the grid.
+
+## Report card comments
+
+Every class can have a comment per student and grading period, printed on the
+report card. Write them in the grid (the **Comments** column, or `r` on a
+student), or under Gradebook, **Report Card Comments**: one grading period,
+every class of yours grouped, a line per student.
 
 ## The grid
 
@@ -40,7 +55,9 @@ leave it. Press `?` in the grid for the full shortcut list.
 | Tab / Shift+Tab | Save and move right / left |
 | F2 | Edit the cell, keeping its value |
 | x, m, Delete | Excused, missing, clear |
-| c, or double-click a score | Comment |
+| n, or double-click a score | The score's note (n, as in the attendance grid) |
+| A, B, ... in a letter column | A letter grade. Where N is a grade (E/S/N/U), double-click for the note |
+| r | The student's report card comment |
 | Ctrl+Z / Ctrl+Y | Undo / redo |
 | Ctrl+Shift+A | New assignment |
 | Ctrl+Shift+F | Fill the column's empty cells |
@@ -49,9 +66,15 @@ leave it. Press `?` in the grid for the full shortcut list.
 When the grading period on screen isn't the current one, a banner says so,
 with a button back to the current period. It shows once, never per entry.
 
-Entry modes: percent (type 88), points (type 22 of 25) or number wrong (type 3
-of 25). The typed value is kept, so changing an assignment's max points
-recalculates the percent without retyping.
+Entry modes: percent (type 88), points (type 22 of 25), number wrong (type 3
+of 25) or letter (type B+). The typed value is kept, so changing an
+assignment's max points recalculates the percent without retyping.
+
+Cells show percents: points and number wrong show the percent they make (the
+typed value is in the tooltip, and comes back with F2). A letter shows with
+its percent beside it. **Letters** in the top bar (or My Preferences) adds the
+letter beside every score. A ⚠ beside a name means a score marked missing in
+the grading period.
 
 ## Assignment schedules
 

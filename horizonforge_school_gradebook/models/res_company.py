@@ -54,6 +54,11 @@ class ResCompany(models.Model):
         help="The default for new users. Each teacher can change their own "
         "in My Preferences, or in the gradebook's top bar.",
     )
+    school_cell_letters = fields.Boolean(
+        string="Gradebook: Letter in Every Cell",
+        help="The default for new users. Each teacher can change their own "
+        "in My Preferences, or in the gradebook's top bar.",
+    )
     school_entry_mode = fields.Selection(
         ENTRY_MODES,
         string="Entry Mode",

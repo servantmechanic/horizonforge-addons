@@ -9,15 +9,17 @@ class SchoolCourse(models.Model):
     grading_type = fields.Selection(
         [
             ("percent", "Scores and percent"),
-            ("letter", "Letter grade only"),
+            ("letter", "Letters"),
             ("comment", "Comment only"),
         ],
         string="Graded By",
         default="percent",
         required=True,
-        help="Scores and percent: graded in the gradebook. Letter grade "
-        "only: the teacher gives one letter per grading period, for example "
-        "in PE. Comment only: a written comment per grading period.",
+        help="Scores and percent: graded in the gradebook, the grade shown "
+        "as a percent and a letter. Letters: graded in the gradebook too, "
+        "assignments typed as letters by default (PE, art), and the grade "
+        "shown as a letter only. Comment only: no grades, a report card "
+        "comment per grading period.",
     )
     entry_mode = fields.Selection(
         ENTRY_MODES,

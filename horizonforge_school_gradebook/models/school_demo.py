@@ -33,6 +33,10 @@ class SchoolYear(models.Model):
                                   "monday": True, "wednesday": True, "friday": True})
                 vals_list.append({"course_id": course.id, "name": "Spelling Test", "category_id": test.id,
                                   "friday": True, "sequence": 20, "entry_mode": "wrong", "max_points": 20})
+                # A writing assignment graded by letter every other week.
+                vals_list.append({"course_id": course.id, "name": "Writing", "category_id": homework.id,
+                                  "wednesday": True, "sequence": 30, "entry_mode": "letter",
+                                  "week_interval": 2, "first_week": 1})
             elif subject == "Science":
                 vals_list.append({"course_id": course.id, "name": "Lesson", "category_id": homework.id,
                                   "tuesday": True, "thursday": True})
@@ -59,6 +63,12 @@ class SchoolYear(models.Model):
                     score_vals.append({"assignment_id": assignment.id, "student_id": student.id,
                                        "status": "missing"})
                     continue
+                if assignment.entry_mode == "letter":
+                    letters = assignment.section_id._get_grading_scale(student).line_ids.sorted(
+                        "min_percent", reverse=True).mapped("letter")
+                    score_vals.append({"assignment_id": assignment.id, "student_id": student.id,
+                                       "letter_entered": rng.choice(letters[:3]) if letters else "A"})
+                    continue
                 if assignment.entry_mode == "wrong":
                     value = rng.choice([0, 0, 1, 1, 2, 3, 4])
                 elif assignment.entry_mode == "points":
@@ -72,8 +82,8 @@ class SchoolYear(models.Model):
     @api.model
     def _load_school_gradebook_demo_extras(self, year):
         """What a trial should show beside scores: a lower-grades scale,
-        courses graded by letter or by comment, report card comments, and
-        printing that works the first time."""
+        courses graded by letters (PE, with its schedule) or by comment,
+        report card comments, and printing that works the first time."""
         env = self.env
         company = env.company
         if not company.external_report_layout_id:
@@ -93,6 +103,12 @@ class SchoolYear(models.Model):
                  "grading_type": "comment", "grade_level_ids": [(6, 0, level.ids)]},
             ])
         year.action_generate_sections()
+        homework = env.ref("horizonforge_school_gradebook.score_category_homework")
+        env["school.assignment.template"].create([
+            {"course_id": course.id, "name": "Activity", "category_id": homework.id,
+             "tuesday": True, "thursday": True}
+            for course in env["school.course"].search([("grading_type", "=", "letter")])
+        ])
 
         today = fields.Date.context_today(self)
         finished = year.period_ids.filtered(lambda p: p.date_end < today)
@@ -113,10 +129,7 @@ class SchoolYear(models.Model):
             for period in finished:
                 for student in section.enrollment_ids.student_id:
                     vals = {"section_id": section.id, "student_id": student.id, "period_id": period.id}
-                    if kind == "letter":
-                        letters = section._get_grading_scale(student).line_ids.mapped("letter")
-                        vals["letter"] = rng.choice(letters[:2]) if letters else "S"
-                    elif kind == "comment":
+                    if kind == "comment":
                         vals["comment"] = rng.choice(conduct)
                     elif subject == "Math" and rng.random() < 0.5:
                         vals["comment"] = rng.choice(math)

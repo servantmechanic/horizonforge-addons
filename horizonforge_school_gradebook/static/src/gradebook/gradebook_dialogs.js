@@ -11,6 +11,7 @@ export class GradebookPromptDialog extends Component {
         label: { type: String, optional: true },
         value: { type: String, optional: true },
         confirmLabel: { type: String, optional: true },
+        multiline: { type: Boolean, optional: true },
         onConfirm: Function,
     };
 
@@ -26,7 +27,7 @@ export class GradebookPromptDialog extends Component {
     onKeydown(ev) {
         // Keep the keys inside the dialog: the grid behind must not react.
         ev.stopPropagation();
-        if (ev.key === "Enter") {
+        if (ev.key === "Enter" && !(this.props.multiline && ev.shiftKey)) {
             ev.preventDefault();
             this.confirm();
         }

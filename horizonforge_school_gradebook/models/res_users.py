@@ -15,6 +15,11 @@ class ResUsers(models.Model):
         default="down",
         required=True,
     )
+    school_cell_letters = fields.Boolean(
+        string="Gradebook: Letter in Every Cell",
+        help="Show the letter beside every score in the gradebook, not only "
+        "for scores typed as letters.",
+    )
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -22,12 +27,13 @@ class ResUsers(models.Model):
         for vals in vals_list:
             company = self.env["res.company"].browse(vals.get("company_id")) or self.env.company
             vals.setdefault("school_enter_direction", company.school_enter_direction)
+            vals.setdefault("school_cell_letters", company.school_cell_letters)
         return super().create(vals_list)
 
     @property
     def SELF_READABLE_FIELDS(self):
-        return super().SELF_READABLE_FIELDS + ["school_enter_direction"]
+        return super().SELF_READABLE_FIELDS + ["school_enter_direction", "school_cell_letters"]
 
     @property
     def SELF_WRITEABLE_FIELDS(self):
-        return super().SELF_WRITEABLE_FIELDS + ["school_enter_direction"]
+        return super().SELF_WRITEABLE_FIELDS + ["school_enter_direction", "school_cell_letters"]

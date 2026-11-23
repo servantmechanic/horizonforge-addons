@@ -38,6 +38,14 @@
                                 t-on-click="toggleCategories" title="Show or hide the category averages">
                             <i t-attf-class="fa me-1 {{ state.showCategories ? 'fa-toggle-on' : 'fa-toggle-off' }}"/>Category averages
                         </button>
+                        <button class="btn btn-link p-0 o_gradebook_comments_toggle" t-on-click="toggleComments"
+                                title="Show or hide the report card comments (R on a student)">
+                            <i t-attf-class="fa me-1 {{ state.showComments ? 'fa-toggle-on' : 'fa-toggle-off' }}"/>Comments
+                        </button>
+                        <button class="btn btn-link p-0 o_gradebook_letters_toggle" t-on-click="toggleCellLetters"
+                                title="Show the letter beside every score">
+                            <i t-attf-class="fa me-1 {{ state.cellLetters ? 'fa-toggle-on' : 'fa-toggle-off' }}"/>Letters
+                        </button>
                         <button class="btn btn-link p-0 o_gradebook_name_order" t-on-click="toggleNameOrder"
                                 title="Sort students by last name or by first name">
                             <i class="fa fa-sort-alpha-asc me-1"/>
@@ -96,7 +104,7 @@
                                 <t t-esc="state.students.length"/> students
                             </th>
                             <th class="o_gradebook_grade o_gradebook_grade_head"
-                                title="Period grade. Below: the class average">
+                                t-att-title="state.letterOnly ? 'Period grade, shown as a letter for this course. Below: the class average' : 'Period grade. Below: the class average'">
                                 <div class="o_gradebook_assignment_name">Grade</div>
                                 <div class="o_gradebook_assignment_meta">Class avg</div>
                                 <div class="o_gradebook_class_average" t-esc="state.classAverage or '-'"/>
@@ -109,6 +117,11 @@
                                     <div class="o_gradebook_assignment_meta">avg</div>
                                 </th>
                             </t>
+                            <th t-if="state.showComments" class="o_gradebook_comment o_gradebook_grade_head"
+                                t-att-style="commentStyle" title="Report card comment for this grading period">
+                                <div class="o_gradebook_assignment_name">Comment</div>
+                                <div class="o_gradebook_assignment_meta">report card</div>
+                            </th>
                             <t t-foreach="state.assignments" t-as="assignment" t-key="assignment.id">
                                 <th class="o_gradebook_assignment"
                                     t-att-class="{ o_selected_col: assignment_index === state.col, o_today: assignment.date === state.today }"
@@ -139,25 +152,43 @@
                     <tbody>
                         <t t-foreach="state.students" t-as="student" t-key="student.id">
                             <tr t-att-class="{ o_selected_row: student_index === state.row }">
-                                <th class="o_gradebook_student" t-esc="student.name"/>
+                                <t t-set="missing" t-value="missingCount(student)"/>
+                                <th class="o_gradebook_student">
+                                    <span t-esc="student.name"/>
+                                    <i t-if="missing" class="fa fa-exclamation-triangle o_gradebook_missing ms-1"
+                                       t-att-title="missing === 1 ? '1 missing score this period' : missing + ' missing scores this period'"/>
+                                </th>
                                 <t t-set="grade" t-value="state.grades[student.id]"/>
                                 <td class="o_gradebook_grade" t-att-data-student="student.id" t-att-title="gradeTitle(student)">
-                                    <span class="o_gradebook_grade_value" t-esc="grade ? grade.grade : ''"/>
-                                    <span class="o_gradebook_letter" t-esc="grade ? grade.letter : ''"/>
+                                    <t t-if="state.letterOnly">
+                                        <span class="o_gradebook_grade_value" t-esc="grade ? grade.letter : ''"/>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="o_gradebook_grade_value" t-esc="grade ? grade.grade : ''"/>
+                                        <span class="o_gradebook_letter" t-esc="grade ? grade.letter : ''"/>
+                                    </t>
                                 </td>
                                 <t t-foreach="shownCategories" t-as="category" t-key="category.id">
                                     <td class="o_gradebook_category_average" t-att-style="categoryStyle(category_index)"
                                         t-esc="grade ? (grade.categories[category.id] || '') : ''"/>
                                 </t>
+                                <td t-if="state.showComments" class="o_gradebook_comment" t-att-style="commentStyle"
+                                    t-att-title="state.comments[student.id] or (state.canEdit ? 'Click to write the report card comment' : '')"
+                                    t-on-click.stop="() => this.editReportComment(student)"
+                                    t-esc="state.comments[student.id] or ''"/>
                                 <t t-foreach="state.assignments" t-as="assignment" t-key="assignment.id">
                                     <t t-set="cell" t-value="getCell(assignment, student)"/>
                                     <td t-att-class="cellClass(assignment, student, student_index, assignment_index)"
                                         t-att-data-row="student_index" t-att-data-col="assignment_index"
-                                        t-att-title="cellTitle(cell)">
+                                        t-att-title="cellTitle(cell, assignment)">
                                         <input t-if="state.editing and student_index === state.row and assignment_index === state.col"
                                                t-ref="editor" type="text" class="o_gradebook_editor" autocomplete="off"
                                                t-on-blur="onEditorBlur"/>
-                                        <t t-else="" t-esc="cellText(cell)"/>
+                                        <t t-else="">
+                                            <t t-esc="cellText(cell, assignment)"/>
+                                            <t t-set="sup" t-value="cellSup(cell, assignment, student)"/>
+                                            <sup t-if="sup" class="o_gradebook_sup" t-esc="sup"/>
+                                        </t>
                                     </td>
                                 </t>
                                 <td class="o_gradebook_filler"/>

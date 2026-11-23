@@ -10,6 +10,10 @@
                          help="Where Enter goes after a score, for new users. Each teacher can change it in My Preferences or in the gradebook.">
                     <field name="school_enter_direction" widget="radio"/>
                 </setting>
+                <setting string="Gradebook: Letter in Every Cell" company_dependent="1"
+                         help="Show the letter beside every score, for new users. Scores typed as letters always show their percent beside them.">
+                    <field name="school_cell_letters"/>
+                </setting>
             </block>
             <block name="school_report_setting_container" position="before">
                 <block title="Gradebook" name="school_gradebook_setting_container">

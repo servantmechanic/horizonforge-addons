@@ -5,6 +5,7 @@ ENTRY_MODES = [
     ("percent", "Percent"),
     ("points", "Points"),
     ("wrong", "Number wrong"),
+    ("letter", "Letter"),
 ]
 
 
@@ -84,8 +85,9 @@ class SchoolAssignment(models.Model):
         readonly=False,
         required=True,
         precompute=True,
-        help="What the teacher types: a percent, the points earned, or the "
-        "number of wrong answers.",
+        help="What the teacher types: a percent, the points earned, the "
+        "number of wrong answers, or a letter (A-), which counts as the "
+        "grading scale's value for that letter.",
     )
     sequence = fields.Integer(default=10)
     template_id = fields.Many2one(

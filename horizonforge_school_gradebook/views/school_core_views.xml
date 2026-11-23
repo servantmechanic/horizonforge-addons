@@ -8,15 +8,15 @@
             <header position="inside">
                 <field name="grading_type" invisible="1"/>
                 <button name="action_open_gradebook" type="object" string="Gradebook"
-                        class="btn-primary" invisible="not id or grading_type != 'percent'"/>
-                <button name="action_open_period_marks" type="object" string="Letter Grades &amp; Comments"
+                        class="btn-primary" invisible="not id or grading_type == 'comment'"/>
+                <button name="action_open_period_marks" type="object" string="Report Card Comments"
                         invisible="not id"
-                        help="A letter or a comment per student for each grading period. Comments print on the report card."/>
+                        help="A comment per student for each grading period, printed on the report card."/>
             </header>
             <field name="name" position="after">
-                <field name="entry_mode" placeholder="Course or school default" invisible="grading_type != 'percent'"/>
+                <field name="entry_mode" placeholder="Course or school default" invisible="grading_type == 'comment'"/>
                 <field name="weight_scheme_id" options="{'no_create': True}" placeholder="Course or school default"
-                       invisible="grading_type != 'percent'"/>
+                       invisible="grading_type == 'comment'"/>
             </field>
         </field>
     </record>
@@ -29,8 +29,8 @@
             <field name="student_count" position="after">
                 <field name="grading_type" column_invisible="1"/>
                 <button name="action_open_gradebook" type="object" string="Gradebook" class="btn-link"
-                        invisible="grading_type != 'percent'"/>
-                <button name="action_open_period_marks" type="object" string="Letters &amp; Comments" class="btn-link"/>
+                        invisible="grading_type == 'comment'"/>
+                <button name="action_open_period_marks" type="object" string="Comments" class="btn-link"/>
             </field>
         </field>
     </record>
@@ -43,7 +43,7 @@
             <field name="teacher_id" position="after">
                 <field name="grading_type" optional="show"/>
                 <field name="entry_mode" optional="show" placeholder="School default"
-                       invisible="grading_type != 'percent'"/>
+                       invisible="grading_type == 'comment'"/>
                 <field name="weight_scheme_id" options="{'no_create': True}" optional="hide"/>
                 <field name="grading_scale_id" options="{'no_create': True}" optional="hide"/>
             </field>

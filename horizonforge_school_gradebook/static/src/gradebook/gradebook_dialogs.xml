@@ -3,8 +3,11 @@
     <t t-name="horizonforge_school_gradebook.PromptDialog">
         <Dialog title="props.title" size="'sm'">
             <label t-if="props.label" class="form-label" t-esc="props.label"/>
-            <input type="text" class="form-control o_gradebook_prompt_input" t-ref="input"
+            <textarea t-if="props.multiline" class="form-control o_gradebook_prompt_input" rows="4" t-ref="input"
+                      t-model="state.value" t-on-keydown="onKeydown"/>
+            <input t-else="" type="text" class="form-control o_gradebook_prompt_input" t-ref="input"
                    t-model="state.value" t-on-keydown="onKeydown"/>
+            <div t-if="props.multiline" class="form-text">Enter saves; Shift+Enter starts a new line.</div>
             <t t-set-slot="footer">
                 <button class="btn btn-primary" t-on-click="confirm">
                     <t t-esc="props.confirmLabel or 'Save'"/>
@@ -27,7 +30,9 @@
                     <tr><th>x</th><td>Mark excused (EX)</td></tr>
                     <tr><th>m</th><td>Mark missing (M)</td></tr>
                     <tr><th>Delete</th><td>Clear the score</td></tr>
-                    <tr><th>c, or double-click a score</th><td>Add or edit a comment</td></tr>
+                    <tr><th>A, B, ... in a letter column</th><td>Enter a letter grade</td></tr>
+                    <tr><th>n, or double-click a score</th><td>Add or edit the score's note (where N is a grade, double-click)</td></tr>
+                    <tr><th>r</th><td>The student's report card comment for the period</td></tr>
                     <tr><th>Ctrl+Z / Ctrl+Y</th><td>Undo / redo</td></tr>
                     <tr><th>Ctrl+Shift+A</th><td>New assignment</td></tr>
                     <tr><th>Ctrl+Shift+F</th><td>Fill the column's empty cells with one value</td></tr>

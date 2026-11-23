@@ -7,6 +7,7 @@
         <field name="arch" type="xml">
             <group name="school_preferences_left" position="inside">
                 <field name="school_enter_direction" widget="radio" readonly="0"/>
+                <field name="school_cell_letters" readonly="0"/>
             </group>
         </field>
     </record>

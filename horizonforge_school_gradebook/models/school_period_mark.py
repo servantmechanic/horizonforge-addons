@@ -3,12 +3,10 @@ from odoo.exceptions import ValidationError
 
 
 class SchoolPeriodMark(models.Model):
-    """What a teacher gives a student for a whole grading period, beside
-    the scores: the letter of a course graded by letter only, and a
-    comment (any course) that prints on the report card."""
+    """A student's report card comment in one class for a grading period."""
 
     _name = "school.period.mark"
-    _description = "Letter Grade and Comment"
+    _description = "Report Card Comment"
     _order = "period_id, section_id, student_id"
 
     section_id = fields.Many2one(
@@ -38,16 +36,13 @@ class SchoolPeriodMark(models.Model):
         string="Grade Levels",
         store=True,
     )
-    letter = fields.Char(
-        string="Letter Grade",
-        help="Only for courses graded by letter only. Other courses get "
-        "their letter from the scores.",
+    comment = fields.Text(
+        help="Prints on the report card, under the class's name.",
     )
-    comment = fields.Text()
 
     _section_student_period_unique = models.Constraint(
         "UNIQUE(section_id, student_id, period_id)",
-        "A student has one letter grade and comment per class and grading period.",
+        "A student has one report card comment per class and grading period.",
     )
 
     @api.depends("student_id", "section_id", "period_id")
@@ -56,27 +51,6 @@ class SchoolPeriodMark(models.Model):
             mark.display_name = (
                 f"{mark.student_id.display_name} - {mark.section_id.display_name} - {mark.period_id.name}"
             )
-
-    @api.constrains("letter", "section_id", "student_id")
-    def _check_letter(self):
-        for mark in self:
-            if not mark.letter:
-                continue
-            scale = mark.section_id._get_grading_scale(mark.student_id)
-            letters = scale.line_ids.mapped("letter")
-            if letters and mark.letter not in letters:
-                raise ValidationError(_(
-                    "%(letter)s isn't a grade of the scale %(scale)s. Use one of: %(letters)s.",
-                    letter=mark.letter,
-                    scale=scale.name,
-                    letters=", ".join(letters),
-                ))
-
-    def _normalize(self, vals):
-        """Typed in lower case, or with spaces: match the scale's letters."""
-        if vals.get("letter"):
-            vals["letter"] = vals["letter"].strip().upper()
-        return vals
 
     def _check_unlocked(self):
         if self.env.su or self.env.user.has_group("horizonforge_school_core.group_school_admin"):
@@ -90,17 +64,17 @@ class SchoolPeriodMark(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        marks = super().create([self._normalize(vals) for vals in vals_list])
-        if any(mark.letter or mark.comment for mark in marks):
+        marks = super().create(vals_list)
+        if any(mark.comment for mark in marks):
             marks._check_unlocked()
         return marks
 
     def write(self, vals):
         self._check_unlocked()
-        return super().write(self._normalize(vals))
+        return super().write(vals)
 
     def unlink(self):
-        self.filtered(lambda mark: mark.letter or mark.comment)._check_unlocked()
+        self.filtered("comment")._check_unlocked()
         return super().unlink()
 
     @api.model

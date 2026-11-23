@@ -12,10 +12,12 @@ import { GradebookHelpDialog, GradebookPromptDialog } from "./gradebook_dialogs"
 const SAVE_DELAY = 500; // ms: cells are sent in batches, at most this often
 const GRADE_WIDTH = 84; // px, the sticky grade column
 const CATEGORY_WIDTH = 64; // px, each sticky category average column
+const COMMENT_WIDTH = 200; // px, the sticky report card comment column
 const SHOW_CATEGORIES_KEY = "school_gradebook.show_categories";
+const SHOW_COMMENTS_KEY = "school_gradebook.show_comments";
 const RETRY_DELAY = 4000; // ms: wait before retrying after a failed save
 const MAX_UNDO = 200;
-const MODE_LABELS = { percent: "%", points: _t("pts"), wrong: _t("wrong") };
+const MODE_LABELS = { percent: "%", points: _t("pts"), wrong: _t("wrong"), letter: _t("letter") };
 
 const cellKey = (assignmentId, studentId) => `${assignmentId}:${studentId}`;
 
@@ -24,12 +26,19 @@ function formatNumber(value) {
     return String(Math.round(value * 100) / 100);
 }
 
+/** Round half up, as the grade engine does: 92.5 becomes 93. */
+function roundHalfUp(value, digits) {
+    const factor = 10 ** digits;
+    return Math.round((value + Number.EPSILON) * factor) / factor;
+}
+
 /**
  * The gradebook: students down the side, assignments across the top.
  * Keyboard only, every cell saved as you leave it.
  *
  * A cell is `{ value, status, comment, percent }` with status "scored",
  * "excused" or "missing"; an empty cell has no entry in `state.cells`.
+ * `value` is what was typed: a number, or a letter (A-) in a letter column.
  */
 export class GradebookGrid extends Component {
     static template = "horizonforge_school_gradebook.GradebookGrid";
@@ -57,6 +66,12 @@ export class GradebookGrid extends Component {
             classAverage: "",
             categoryColumns: [], // weighted categories, for the average columns
             showCategories: browser.localStorage.getItem(SHOW_CATEGORIES_KEY) === "1",
+            showComments: browser.localStorage.getItem(SHOW_COMMENTS_KEY) === "1",
+            cellLetters: false,
+            letterOnly: false,
+            gradeDecimals: 0,
+            scales: {}, // scale id -> [{ letter, min, value }], highest first
+            comments: {}, // student id -> report card comment for the period
             unsaved: {}, // cell key -> "pending" | "failed"
             canEdit: false,
             locked: false,
@@ -130,6 +145,11 @@ export class GradebookGrid extends Component {
         state.sectionId = data.section_id;
         state.enterDirection = data.enter_direction;
         state.nameOrder = data.name_order || "last_first";
+        state.cellLetters = Boolean(data.cell_letters);
+        state.letterOnly = Boolean(data.letter_only);
+        state.gradeDecimals = data.grade_decimals || 0;
+        state.scales = data.scales || {};
+        state.comments = data.comments || {};
         state.periods = data.periods || [];
         state.periodId = data.period_id || false;
         state.currentPeriodId = data.current_period_id || false;
@@ -269,8 +289,16 @@ export class GradebookGrid extends Component {
 
     /** Width of the columns that stay in place, for the scroll margins. */
     get rootStyle() {
-        const extra = GRADE_WIDTH + this.shownCategories.length * CATEGORY_WIDTH;
+        const extra =
+            GRADE_WIDTH +
+            this.shownCategories.length * CATEGORY_WIDTH +
+            (this.state.showComments ? COMMENT_WIDTH : 0);
         return `--gb-grade-width: ${GRADE_WIDTH}px; --gb-fixed-extra: ${extra}px;`;
+    }
+
+    get commentStyle() {
+        const left = GRADE_WIDTH + this.shownCategories.length * CATEGORY_WIDTH;
+        return `left: calc(var(--gb-name-width) + ${left}px); min-width: ${COMMENT_WIDTH}px; max-width: ${COMMENT_WIDTH}px;`;
     }
 
     categoryStyle(index) {
@@ -300,7 +328,32 @@ export class GradebookGrid extends Component {
         return this.state.cells[cellKey(assignment.id, student.id)];
     }
 
-    cellText(cell) {
+    // Letters: each student is graded on their grade level's scale.
+
+    scaleOf(student) {
+        return (student && this.state.scales[student.scale_id]) || [];
+    }
+
+    /** The percent a typed letter counts for, undefined when not a grade. */
+    letterValue(letter, student) {
+        const line = this.scaleOf(student).find((l) => l.letter.toUpperCase() === letter.toUpperCase());
+        return line ? line.value : undefined;
+    }
+
+    letterFor(percent, student) {
+        const grade = roundHalfUp(percent, this.state.gradeDecimals);
+        const line = this.scaleOf(student).find((l) => grade >= l.min);
+        return line ? line.letter : "";
+    }
+
+    /** A key that starts one of the student's grades (A, B, ... or S, N, U). */
+    startsGrade(key, student) {
+        const upper = key.toUpperCase();
+        return this.scaleOf(student).some((l) => l.letter.toUpperCase().startsWith(upper));
+    }
+
+    /** What a cell shows: letters as typed, percents for everything else. */
+    cellText(cell, assignment) {
         if (!cell) {
             return "";
         }
@@ -310,15 +363,51 @@ export class GradebookGrid extends Component {
         if (cell.status === "missing") {
             return "M";
         }
-        return formatNumber(cell.value);
+        if (assignment.entry_mode === "letter") {
+            return cell.value;
+        }
+        if (assignment.entry_mode === "percent") {
+            return formatNumber(cell.value);
+        }
+        return formatNumber(cell.percent);
     }
 
-    cellTitle(cell) {
+    /** The small text beside a score: a letter's percent, or the letter. */
+    cellSup(cell, assignment, student) {
+        if (!cell || cell.status !== "scored") {
+            return "";
+        }
+        if (assignment.entry_mode === "letter") {
+            return formatNumber(cell.percent);
+        }
+        return this.state.cellLetters ? this.letterFor(cell.percent, student) : "";
+    }
+
+    /** The text to edit: what was typed (22 of 25 points, not 88%). */
+    editText(cell, assignment) {
+        if (!cell || cell.status !== "scored") {
+            return this.cellText(cell, assignment);
+        }
+        return assignment.entry_mode === "letter" ? cell.value : formatNumber(cell.value);
+    }
+
+    cellTitle(cell, assignment) {
         if (!cell) {
             return "";
         }
         const parts = [];
         if (cell.status === "scored" && cell.percent !== undefined) {
+            if (assignment.entry_mode === "points") {
+                parts.push(_t("%(value)s of %(max)s points", {
+                    value: formatNumber(cell.value), max: formatNumber(assignment.max_points),
+                }));
+            } else if (assignment.entry_mode === "wrong") {
+                parts.push(_t("%(value)s wrong of %(max)s", {
+                    value: formatNumber(cell.value), max: formatNumber(assignment.max_points),
+                }));
+            } else if (assignment.entry_mode === "letter") {
+                parts.push(cell.value);
+            }
             parts.push(`${formatNumber(cell.percent)}%`);
         } else if (cell.status === "excused") {
             parts.push(_t("Excused"));
@@ -350,9 +439,19 @@ export class GradebookGrid extends Component {
         return classes.join(" ");
     }
 
+    /** Scores marked missing in the period, for the warning by the name. */
+    missingCount(student) {
+        return this.state.assignments.filter(
+            (assignment) => this.getCell(assignment, student)?.status === "missing"
+        ).length;
+    }
+
     headerInfo(assignment) {
         if (assignment.entry_mode === "percent") {
             return "%";
+        }
+        if (assignment.entry_mode === "letter") {
+            return _t("letter");
         }
         return `${formatNumber(assignment.max_points)} ${MODE_LABELS[assignment.entry_mode]}`;
     }
@@ -422,7 +521,7 @@ export class GradebookGrid extends Component {
         }
         this.editStartedByTyping = initial !== undefined;
         const cell = this.getCell(this.activeAssignment, this.activeStudent);
-        this.editInitial = initial !== undefined ? initial : this.cellText(cell);
+        this.editInitial = initial !== undefined ? initial : this.editText(cell, this.activeAssignment);
         this.state.editing = true;
         this.needsEditorFocus = true;
     }
@@ -434,13 +533,21 @@ export class GradebookGrid extends Component {
 
     /**
      * Turn typed text into a cell. Returns `null` for an empty cell,
-     * `undefined` (after a warning) when the text isn't a valid score.
+     * `undefined` (after a warning, unless `quiet`) when the text isn't a
+     * valid score.
      */
-    parseEntry(text, assignment, current) {
+    parseEntry(text, assignment, current, student, { quiet = false } = {}) {
         const typed = text.trim().toLowerCase();
         const comment = current ? current.comment : "";
         if (typed === "") {
             return null;
+        }
+        if (assignment.entry_mode === "letter") {
+            // A grade of the scale first: a scale could have an M or an X.
+            const percent = this.letterValue(typed, student);
+            if (percent !== undefined) {
+                return { value: typed.toUpperCase(), status: "scored", comment, percent };
+            }
         }
         if (typed === "x" || typed === "ex") {
             return { value: false, status: "excused", comment, percent: 0 };
@@ -448,15 +555,27 @@ export class GradebookGrid extends Component {
         if (typed === "m") {
             return { value: false, status: "missing", comment, percent: 0 };
         }
+        if (assignment.entry_mode === "letter") {
+            if (!quiet) {
+                const letters = this.scaleOf(student).map((l) => l.letter).join(", ");
+                this.notification.add(
+                    _t("Enter a grade (%(letters)s), x for excused or m for missing.", { letters }),
+                    { type: "warning" }
+                );
+            }
+            return undefined;
+        }
         const value = Number(typed.replace(",", ".").replace(/%$/, ""));
         const top = assignment.entry_mode === "percent" ? 100 : assignment.max_points;
         if (!Number.isFinite(value) || value < 0 || value > top) {
-            this.notification.add(
-                _t("Enter a number from 0 to %(top)s, x for excused or m for missing.", {
-                    top: formatNumber(top),
-                }),
-                { type: "warning" }
-            );
+            if (!quiet) {
+                this.notification.add(
+                    _t("Enter a number from 0 to %(top)s, x for excused or m for missing.", {
+                        top: formatNumber(top),
+                    }),
+                    { type: "warning" }
+                );
+            }
             return undefined;
         }
         return { value, status: "scored", comment, percent: this.toPercent(value, assignment) };
@@ -481,7 +600,7 @@ export class GradebookGrid extends Component {
         const student = this.activeStudent;
         const current = this.getCell(assignment, student);
         const input = this.editor.el;
-        const cell = this.parseEntry(input ? input.value : this.editInitial, assignment, current);
+        const cell = this.parseEntry(input ? input.value : this.editInitial, assignment, current, student);
         if (cell === undefined) {
             input?.focus();
             return false;
@@ -599,13 +718,13 @@ export class GradebookGrid extends Component {
         }
         const current = this.getCell(assignment, student);
         if (!current) {
-            this.notification.add(_t("Enter a score first, then add the comment."), { type: "info" });
+            this.notification.add(_t("Enter a score first, then add the note."), { type: "info" });
             return;
         }
         this.dialog.add(
             GradebookPromptDialog,
             {
-                title: _t("Comment: %(student)s, %(assignment)s", {
+                title: _t("Note: %(student)s, %(assignment)s", {
                     student: student.name,
                     assignment: assignment.name,
                 }),
@@ -633,13 +752,19 @@ export class GradebookGrid extends Component {
                 label: _t("Score for every student without one"),
                 confirmLabel: _t("Fill"),
                 onConfirm: (text) => {
-                    const cell = this.parseEntry(text, assignment, null);
-                    if (!cell) {
+                    const empty = this.state.students.filter((student) => !this.getCell(assignment, student));
+                    // Checked on the first student, with a warning; a letter
+                    // counts by each student's own scale.
+                    if (!empty.length || !this.parseEntry(text, assignment, null, empty[0])) {
                         return;
                     }
-                    const changes = this.state.students
-                        .filter((student) => !this.getCell(assignment, student))
-                        .map((student) => ({ assignment, student, cell: { ...cell } }));
+                    const changes = [];
+                    for (const student of empty) {
+                        const cell = this.parseEntry(text, assignment, null, student, { quiet: true });
+                        if (cell) {
+                            changes.push({ assignment, student, cell });
+                        }
+                    }
                     this.changeCells(changes);
                 },
             },
@@ -668,28 +793,14 @@ export class GradebookGrid extends Component {
                     skipped++;
                     return;
                 }
-                const current = this.getCell(assignment, student);
-                const typed = text.trim().toLowerCase();
-                let cell;
-                if (typed === "") {
+                if (text.trim() === "") {
                     return; // an empty pasted cell leaves the score alone
-                } else if (typed === "x" || typed === "ex") {
-                    cell = { value: false, status: "excused", comment: current?.comment || "", percent: 0 };
-                } else if (typed === "m") {
-                    cell = { value: false, status: "missing", comment: current?.comment || "", percent: 0 };
-                } else {
-                    const value = Number(typed.replace(",", ".").replace(/%$/, ""));
-                    const top = assignment.entry_mode === "percent" ? 100 : assignment.max_points;
-                    if (!Number.isFinite(value) || value < 0 || value > top) {
-                        skipped++;
-                        return;
-                    }
-                    cell = {
-                        value,
-                        status: "scored",
-                        comment: current?.comment || "",
-                        percent: this.toPercent(value, assignment),
-                    };
+                }
+                const current = this.getCell(assignment, student);
+                const cell = this.parseEntry(text, assignment, current, student, { quiet: true });
+                if (!cell) {
+                    skipped++;
+                    return;
                 }
                 changes.push({ assignment, student, cell });
             });
@@ -880,6 +991,58 @@ export class GradebookGrid extends Component {
         await this.reload();
     }
 
+    toggleComments() {
+        this.state.showComments = !this.state.showComments;
+        browser.localStorage.setItem(SHOW_COMMENTS_KEY, this.state.showComments ? "1" : "0");
+        this.needsScroll = true;
+        this.focusGrid();
+    }
+
+    async toggleCellLetters() {
+        this.state.cellLetters = !this.state.cellLetters;
+        this.focusGrid();
+        await this.orm.call("school.section", "gradebook_set_cell_letters", [this.state.cellLetters]);
+    }
+
+    /** The student's report card comment for this class and period. */
+    editReportComment(student) {
+        if (!student) {
+            return;
+        }
+        if (!this.state.canEdit) {
+            if (this.state.comments[student.id]) {
+                this.notification.add(this.state.comments[student.id], { title: student.name });
+            }
+            return;
+        }
+        const period = this.state.periods.find((p) => p.id === this.state.periodId);
+        this.dialog.add(
+            GradebookPromptDialog,
+            {
+                title: _t("Report card comment: %(student)s, %(period)s", {
+                    student: student.name,
+                    period: period ? period.name : "",
+                }),
+                value: this.state.comments[student.id] || "",
+                multiline: true,
+                onConfirm: async (comment) => {
+                    const saved = await this.orm.call("school.section", "gradebook_set_comment", [
+                        [this.state.sectionId],
+                        this.state.periodId,
+                        student.id,
+                        comment,
+                    ]);
+                    if (saved) {
+                        this.state.comments[student.id] = saved;
+                    } else {
+                        delete this.state.comments[student.id];
+                    }
+                },
+            },
+            { onClose: () => this.focusGrid() }
+        );
+    }
+
     async toggleEnterDirection() {
         const direction = this.state.enterDirection === "down" ? "right" : "down";
         this.state.enterDirection = direction;
@@ -944,14 +1107,10 @@ export class GradebookGrid extends Component {
         }
         const assignment = this.activeAssignment;
         const student = this.activeStudent;
-        const typed = ev.target.value.trim().toLowerCase();
-        const value = Number(typed.replace(",", ".").replace(/%$/, ""));
-        const top = assignment.entry_mode === "percent" ? 100 : assignment.max_points;
-        const valid =
-            ["", "x", "ex", "m"].includes(typed) || (Number.isFinite(value) && value >= 0 && value <= top);
+        const current = this.getCell(assignment, student);
+        const cell = this.parseEntry(ev.target.value, assignment, current, student, { quiet: true });
         this.state.editing = false;
-        if (valid) {
-            const cell = this.parseEntry(typed, assignment, this.getCell(assignment, student));
+        if (cell !== undefined) {
             this.changeCells([{ assignment, student, cell }]);
         }
     }
@@ -1031,6 +1190,18 @@ export class GradebookGrid extends Component {
         if (ev.altKey) {
             return false;
         }
+        // In a letter column a letter key starts a grade, before any
+        // shortcut (as absence codes do in the attendance grid): on the
+        // E/S/N/U scale N is a grade there, and a double-click the note.
+        if (
+            this.activeAssignment?.entry_mode === "letter" &&
+            this.state.canEdit &&
+            /^[a-z]$/i.test(key) &&
+            this.startsGrade(key, this.activeStudent)
+        ) {
+            this.startEdit(key.toUpperCase());
+            return true;
+        }
         switch (key) {
             case "ArrowUp":
                 this.move(-1, 0);
@@ -1077,9 +1248,13 @@ export class GradebookGrid extends Component {
             case "M":
                 this.setStatus("missing");
                 return true;
-            case "c":
-            case "C":
-                this.editComment();
+            case "n":
+            case "N":
+                this.editComment(); // a note, as in the attendance grid
+                return true;
+            case "r":
+            case "R":
+                this.editReportComment(this.activeStudent);
                 return true;
             case "?":
                 this.showHelp();

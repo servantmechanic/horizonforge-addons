@@ -13,6 +13,26 @@ Each release is tagged in git as `school-<version>`, for example `school-0.7.0`.
 
 ## Unreleased
 
+- **Letter grades per assignment.** An assignment can be entered as letters
+  (an essay graded A-): each letter counts as the grading scale's value for
+  it, by default the middle of its range and 5 below the top for the lowest
+  letter (F counts 65), editable per scale line. The student's own scale
+  applies, so the lower grades' scale gives its own values.
+- **Letter courses in the gradebook.** Courses graded by letters (PE) now use
+  the grid like any other, typed as letters by default; their period and year
+  grades show and print as a letter only, averaged from the scores. The
+  period letter typed once per grading period is gone (existing ones are not
+  carried over).
+- **n for a note.** In the gradebook, `n` (not `c`) adds a note to a score,
+  as in the attendance grid; double-click still works.
+- **Report card comments in the grid.** A Comments column (or `r` on a
+  student) writes the report card comment. Letter Grades & Comments is now
+  Report Card Comments, comments only.
+- **Cells show percents.** Points and number-wrong scores show the percent
+  (what was typed is in the tooltip and on F2); letters show their percent
+  beside them; a Letters switch (and preference) adds the letter beside every
+  score. A ⚠ beside a student flags a missing score in the period.
+
 - **Teachers keep the calendar.** Every teacher sees School, Calendar and can
   add, change or remove entries (a snow day, a field trip). An entry shown
   only can be for everyone or only for some grade levels, homerooms or

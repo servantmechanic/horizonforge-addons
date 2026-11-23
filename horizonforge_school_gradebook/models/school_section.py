@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 
 from .school_assignment import ENTRY_MODES
 
@@ -34,6 +34,7 @@ class SchoolSection(models.Model):
         return (
             self.entry_mode
             or self.course_id.entry_mode
+            or ("letter" if self.grading_type == "letter" else False)
             or self.env.company.school_entry_mode
         )
 
@@ -65,7 +66,7 @@ class SchoolSection(models.Model):
         Assignment = self.env["school.assignment"]
         vals_list = []
         for section in self:
-            if section.year_id != period.year_id or section.grading_type != "percent":
+            if section.year_id != period.year_id or section.grading_type == "comment":
                 continue
             days = section.year_id._get_school_days(period.date_start, period.date_end)
             # A day that became a day off: its scheduled assignments go,
@@ -161,7 +162,7 @@ class SchoolSection(models.Model):
         """Classes the user picks from: their own (with their homeroom's
         classes), or all for the office, in the current school year."""
         user = self.env.user
-        domain = [("year_id.is_current", "=", True), ("course_id.grading_type", "=", "percent")]
+        domain = [("year_id.is_current", "=", True), ("course_id.grading_type", "!=", "comment")]
         if not user.has_group("horizonforge_school_core.group_school_office"):
             domain += self._my_classes_domain(user)
         own = lambda s: not s._is_my_class(user)  # noqa: E731
@@ -179,6 +180,7 @@ class SchoolSection(models.Model):
             "sections": [{"id": s.id, "name": s.display_name} for s in sections | section],
             "enter_direction": self.env.user.school_enter_direction,
             "name_order": self.env.user.school_name_order,
+            "cell_letters": self.env.user.school_cell_letters,
             "section_id": section.id,
         }
         if not section:
@@ -200,6 +202,8 @@ class SchoolSection(models.Model):
             "current_period_id": current.id,
             "today": fields.Date.to_string(today),
             "entry_mode": section._get_entry_mode(),
+            "letter_only": section.grading_type == "letter",
+            "grade_decimals": self.env.company.school_grade_decimals,
             "can_edit": bool(period) and section._gradebook_can_edit(period),
             "locked": period.locked,
             "has_schedule": bool(section.course_id.assignment_template_ids.filtered("is_scheduled")),
@@ -236,7 +240,25 @@ class SchoolSection(models.Model):
         students = section._gradebook_visible_students(
             enrollments.student_id.with_context(active_test=False)
         )
-        result["students"] = students._grid_rows()
+        rows = students._grid_rows()
+        scales = {}
+        for row in rows:
+            scale = section._get_grading_scale(students.browse(row["id"]))
+            row["scale_id"] = scale.id
+            if scale and scale.id not in scales:
+                scales[scale.id] = [
+                    {"letter": line.letter, "min": line.min_percent, "value": line.entry_percent}
+                    for line in scale.line_ids.sorted("min_percent", reverse=True)
+                ]
+        result["students"] = rows
+        result["scales"] = scales
+        result["comments"] = {
+            mark.student_id.id: mark.comment
+            for mark in self.env["school.period.mark"].search([
+                ("section_id", "=", section.id), ("period_id", "=", period.id),
+                ("student_id", "in", students.ids), ("comment", "!=", False),
+            ])
+        }
         result["scores"] = [
             score._cell()
             for score in self.env["school.score"].search([("assignment_id", "in", assignments.ids)])
@@ -286,6 +308,31 @@ class SchoolSection(models.Model):
                 if weights is not None and weights.get(category.id)
             },
         }
+
+    def gradebook_set_comment(self, period_id, student_id, comment):
+        """Save a student's report card comment for the grading period,
+        from the grid's Comments column."""
+        self.ensure_one()
+        period = self.env["school.period"].browse(period_id)
+        if not self._gradebook_can_edit(period):
+            raise AccessError(_("You can't change this class's comments for %(period)s.", period=period.name))
+        Mark = self.env["school.period.mark"]
+        mark = Mark.search([
+            ("section_id", "=", self.id), ("period_id", "=", period.id), ("student_id", "=", student_id),
+        ], limit=1)
+        comment = (comment or "").strip() or False
+        if mark:
+            mark.comment = comment
+        elif comment:
+            Mark.create({
+                "section_id": self.id, "period_id": period.id, "student_id": student_id, "comment": comment,
+            })
+        return comment or ""
+
+    @api.model
+    def gradebook_set_cell_letters(self, show):
+        self.env.user.school_cell_letters = bool(show)
+        return True
 
     @api.model
     def gradebook_set_enter_direction(self, direction):

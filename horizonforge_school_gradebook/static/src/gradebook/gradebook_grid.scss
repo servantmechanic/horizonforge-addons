@@ -93,6 +93,40 @@
         font-weight: 600;
     }
 
+    // Report card comment: fixed after the averages, cut to one line.
+    .o_gradebook_comment {
+        position: sticky;
+        z-index: 1;
+        padding: 0 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.9em;
+        color: $o-gray-700;
+        background-color: $o-gray-100;
+        border-right-width: 2px;
+        cursor: pointer;
+
+        &.o_gradebook_grade_head {
+            z-index: 3;
+            padding: 4px 6px;
+            text-align: center;
+            color: inherit;
+            cursor: default;
+        }
+    }
+
+    // The percent of a letter, or the letter of a percent.
+    .o_gradebook_sup {
+        margin-left: 1px;
+        font-size: 0.7em;
+        color: $text-muted;
+    }
+
+    .o_gradebook_missing {
+        color: $warning;
+    }
+
     .o_gradebook_assignment {
         min-width: var(--gb-col-width);
         max-width: var(--gb-col-width);
