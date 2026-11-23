@@ -2,8 +2,8 @@
 <odoo noupdate="1">
     <!-- Starting values: every school changes them to its own. -->
     <record id="score_category_homework" model="school.score.category">
-        <field name="name">Lesson/Homework</field>
-        <field name="code">HW</field>
+        <field name="name">Lesson</field>
+        <field name="code">L</field>
         <field name="color">#2f9e44</field>
         <field name="sequence">10</field>
     </record>

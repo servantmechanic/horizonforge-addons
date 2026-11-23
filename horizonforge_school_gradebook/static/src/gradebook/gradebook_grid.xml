@@ -23,16 +23,16 @@
                     <t t-if="state.canEdit">
                         <button class="btn btn-primary o_gradebook_new" t-on-click="() => this.openAssignment(false)"
                                 title="Ctrl+Shift+A">New assignment</button>
-                        <button t-if="state.hasSchedule" class="btn btn-secondary o_gradebook_generate"
-                                t-on-click="generateAssignments"
-                                title="Create this grading period's assignments from the course's schedule">
-                            Generate from schedule
+                        <button t-if="state.fillHint" class="btn btn-secondary o_gradebook_generate"
+                                t-on-click="generateAssignments" t-att-title="state.fillHint">
+                            Fill ahead
                         </button>
                     </t>
                     <span t-if="state.locked" class="badge text-bg-warning">
                         <i class="fa fa-lock me-1"/>Locked
                     </span>
                     <span t-elif="!state.canEdit" class="badge text-bg-secondary">Read only</span>
+                    <span t-if="state.statusNote" class="o_gradebook_status_note small text-muted" t-esc="state.statusNote"/>
                     <div t-if="shortcutCategories.length" class="o_gradebook_legend d-flex align-items-center gap-2 small text-muted"
                          title="Press a key on a column to make it that category">
                         <t t-foreach="shortcutCategories" t-as="category" t-key="category.id">
@@ -164,7 +164,7 @@
                                     No assignments in this grading period yet.
                                     <t t-if="state.canEdit">
                                         <br/>Click + or press Tab to start<t t-if="shortcutCategories.length"> (<t t-foreach="shortcutCategories" t-as="c" t-key="c.id"><kbd t-esc="c.shortcut"/> <t t-esc="c.name"/><t t-if="!c_last">, </t></t>)</t>,
-                                        Ctrl+Shift+A for the details<t t-if="state.hasSchedule">, or Generate from schedule</t>.
+                                        Ctrl+Shift+A for the details<t t-if="state.fillHint">, or Fill ahead</t>.
                                     </t>
                                 </t>
                             </th>

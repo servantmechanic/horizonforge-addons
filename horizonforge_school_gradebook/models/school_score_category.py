@@ -9,11 +9,11 @@ class SchoolScoreCategory(models.Model):
 
     name = fields.Char(
         required=True,
-        help="For example Lesson/Homework or Test.",
+        help="For example Lesson or Test.",
     )
     code = fields.Char(
         required=True,
-        help="Short code shown in the gradebook column header, for example HW.",
+        help="Short code shown in the gradebook column header, for example L.",
     )
     color = fields.Char(
         default="#4c6ef5",
@@ -47,6 +47,17 @@ class SchoolScoreCategory(models.Model):
                     "point and ? already do something in the gradebook. Try / - * or +.",
                     key=key,
                 ))
+
+    @api.model
+    def _rename_default_lesson(self):
+        """The shipped Lesson/Homework (HW) is Lesson (L) since 0.8, once:
+        a category the school renamed keeps its name."""
+        lesson = self.env.ref("horizonforge_school_gradebook.score_category_homework", raise_if_not_found=False)
+        if not lesson or (lesson.name, lesson.code) != ("Lesson/Homework", "HW"):
+            return
+        if self.with_context(active_test=False).search_count([("code", "=", "L")], limit=1):
+            return
+        lesson.write({"name": "Lesson", "code": "L"})
 
     @api.model
     def _set_default_shortcuts(self):

@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_school_pacing_item_teacher,school.pacing.item teacher,model_school_pacing_item,horizonforge_school_core.group_school_teacher,1,1,1,1
+access_school_plan_line_teacher,school.plan.line teacher,model_school_plan_line,horizonforge_school_core.group_school_teacher,1,1,1,1
+access_school_pacing_transfer_teacher,school.pacing.transfer teacher,model_school_pacing_transfer,horizonforge_school_core.group_school_teacher,1,1,1,1
+access_school_weekly_plan_teacher,school.weekly.plan teacher,model_school_weekly_plan,horizonforge_school_core.group_school_teacher,1,1,1,1
+access_school_pacing_guide_teacher,school.pacing.guide teacher,model_school_pacing_guide,horizonforge_school_core.group_school_teacher,1,1,1,1

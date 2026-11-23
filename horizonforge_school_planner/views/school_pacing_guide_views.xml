@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Your courses' guides, in the order your classes show each day. -->
+    <record id="school_pacing_guide_view_list" model="ir.ui.view">
+        <field name="name">school.pacing.guide.view.list</field>
+        <field name="model">school.pacing.guide</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="course_id"/>
+                <field name="item_count"/>
+                <field name="target_date" optional="show"/>
+                <field name="summary" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="school_pacing_guide_view_form" model="ir.ui.view">
+        <field name="name">school.pacing.guide.view.form</field>
+        <field name="model">school.pacing.guide</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_build" type="object" string="Build Guide" class="btn-primary"
+                            invisible="not id or not lesson_count"
+                            help="Make the items from these settings. Items already there keep their notes, files and gradebook columns; items added by hand stay."/>
+                    <button name="action_transfer" type="object" string="Export / Import" invisible="not id"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_items" type="object" class="oe_stat_button" icon="fa-list-ol"
+                                invisible="not id">
+                            <field name="item_count" widget="statinfo" string="Items"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="course_id" readonly="id" options="{'no_create': True, 'no_open': True}"
+                                   placeholder="Course"/></h1>
+                    </div>
+                    <div class="alert alert-info py-2" role="status" invisible="not summary">
+                        <field name="summary" nolabel="1"/>
+                    </div>
+                    <group>
+                        <group string="Lessons">
+                            <field name="lesson_count"/>
+                            <field name="lesson_name"/>
+                            <field name="first_number"/>
+                            <field name="lesson_category_id" options="{'no_create': True}" placeholder="No grade"/>
+                        </group>
+                        <group string="Chapters and Tests">
+                            <field name="chapter_size"/>
+                            <field name="chapter_name" invisible="not chapter_size"/>
+                            <field name="test_after_chapter" invisible="not chapter_size"/>
+                            <field name="test_name" invisible="not chapter_size or not test_after_chapter"/>
+                            <field name="test_category_id" options="{'no_create': True}"
+                                   invisible="not chapter_size or not test_after_chapter"/>
+                            <field name="test_days" invisible="not chapter_size or not test_after_chapter"/>
+                            <field name="review_before_test" invisible="not chapter_size or not test_after_chapter"/>
+                        </group>
+                        <group string="When">
+                            <field name="finish" widget="radio"/>
+                            <field name="finish_period_id" options="{'no_create': True, 'no_open': True}"
+                                   invisible="finish != 'period'" required="finish == 'period'"/>
+                            <field name="finish_date" invisible="finish != 'date'" required="finish == 'date'"/>
+                            <field name="pace" widget="radio"/>
+                        </group>
+                        <group string="Meets">
+                            <div class="d-flex flex-wrap gap-3" colspan="2">
+                                <span><field name="meets_monday" nolabel="1"/> Mon</span>
+                                <span><field name="meets_tuesday" nolabel="1"/> Tue</span>
+                                <span><field name="meets_wednesday" nolabel="1"/> Wed</span>
+                                <span><field name="meets_thursday" nolabel="1"/> Thu</span>
+                                <span><field name="meets_friday" nolabel="1"/> Fri</span>
+                            </div>
+                        </group>
+                    </group>
+                    <p class="text-muted">
+                        Build Guide makes Lesson 1 to the last, a test after each chapter, and paces them to the
+                        finish date. Open Items to add notes or files, or to insert an extra test or a review day
+                        by hand: items added by hand stay when the guide is built again.
+                    </p>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="school_pacing_guide_view_search" model="ir.ui.view">
+        <field name="name">school.pacing.guide.view.search</field>
+        <field name="model">school.pacing.guide</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="course_id"/>
+                <filter name="my_courses" string="My Courses"
+                        domain="[('course_id.section_ids', 'any', [('year_id.is_current', '=', True), '|', ('teacher_id', '=', uid), ('co_teacher_ids', 'in', uid)])]"/>
+                <separator/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="school_pacing_guide_action" model="ir.actions.act_window">
+        <field name="name">Pacing Guides</field>
+        <field name="res_model">school.pacing.guide</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Set up a course's pacing guide</p>
+            <p>Say how many lessons the course has, its chapters and tests, and when it should be finished:
+               Build Guide lays out Lesson 1 to the last. Drag the guides into the order your classes
+               come each day: the planner and the weekly plan list them that way.</p>
+        </field>
+    </record>
+
+    <!-- The menu: teachers start on their own courses. -->
+    <record id="school_pacing_guide_server_action" model="ir.actions.server">
+        <field name="name">Pacing Guides</field>
+        <field name="model_id" ref="model_school_pacing_guide"/>
+        <field name="state">code</field>
+        <field name="code">action = env["school.period"]._school_list_action("horizonforge_school_planner.school_pacing_guide_action", "my_courses")</field>
+    </record>
+</odoo>

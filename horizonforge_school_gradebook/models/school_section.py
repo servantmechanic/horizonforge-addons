@@ -209,6 +209,8 @@ class SchoolSection(models.Model):
             "can_edit": bool(period) and section._gradebook_can_edit(period),
             "locked": period.locked,
             "has_schedule": bool(section.course_id.assignment_template_ids.filtered("is_scheduled")),
+            "fill_hint": section._gradebook_fill_hint(),
+            "status_note": section._gradebook_status_note(),
             "categories": [
                 {"id": c.id, "name": c.name, "code": c.code, "color": c.color, "shortcut": c.shortcut or ""}
                 for c in self.env["school.score.category"].with_context(active_test=False).search([])
@@ -351,7 +353,7 @@ class SchoolSection(models.Model):
             start = today if period.date_start <= today <= period.date_end else period.date_start
             days = self.year_id._get_school_days(start, period.date_end)
             date = days[0] if days else start
-        assignment = Assignment.create({
+        vals = {
             "section_id": self.id,
             "name": Assignment._suggest_name(self, category),
             "date": date,
@@ -360,8 +362,14 @@ class SchoolSection(models.Model):
             "max_points": like.max_points if like else 100.0,
             "entry_mode": like.entry_mode if like else self._get_entry_mode(),
             "sequence": after.sequence + 1 if after else 10,
-        })
-        return assignment.id
+        }
+        vals = self._gradebook_next_assignment_vals(vals, forced_category=bool(category_id))
+        return Assignment.create(vals).id
+
+    def _gradebook_next_assignment_vals(self, vals, forced_category=False):
+        """The values of the next assignment the grid adds. The planner
+        fills them from the course's pacing guide."""
+        return vals
 
     def gradebook_set_category(self, assignment_id, category_id):
         """A category's shortcut key on a column: the assignment becomes
@@ -408,8 +416,34 @@ class SchoolSection(models.Model):
         self.env.user.school_enter_direction = direction
         return True
 
+    def _can_fill_ahead(self):
+        """Whether Fill ahead has something to fill this class from."""
+        self.ensure_one()
+        return bool(self.course_id.assignment_template_ids.filtered("is_scheduled"))
+
+    def _fill_ahead(self, period):
+        """Fill ahead: the scheduled assignments of the grading period. The
+        planner fills from the pacing guide instead, when there is one.
+        Returns the assignments created."""
+        self.ensure_one()
+        return self._generate_assignments(period)
+
+    def _gradebook_status_note(self):
+        """A short line for the grid's top bar, or False. The planner
+        shows the class's progress through its pacing guide."""
+        return False
+
+    def _gradebook_fill_hint(self):
+        """What the grid's Fill ahead button does for this class, or False
+        when it has nothing to fill from. The planner adds pacing guides."""
+        self.ensure_one()
+        if self.course_id.assignment_template_ids.filtered("is_scheduled"):
+            return _("Create this grading period's assignments from the course's schedule")
+        return False
+
     def gradebook_generate(self, period_id):
-        """Generate the scheduled assignments from the grid's button."""
+        """Fill ahead, from the grid's button: the scheduled assignments of
+        the grading period. Returns ``{"count", "message"}``."""
         self.ensure_one()
         period = self.env["school.period"].browse(period_id)
         if not self.course_id.assignment_template_ids.filtered("is_scheduled"):
@@ -418,4 +452,9 @@ class SchoolSection(models.Model):
                 "Gradebook, Assignment Schedules.",
                 course=self.course_id.name,
             ))
-        return len(self._generate_assignments(period))
+        count = len(self._generate_assignments(period))
+        return {
+            "count": count,
+            "message": _("%(count)s assignments created from the schedule.", count=count) if count
+            else _("Nothing to add: the schedule's assignments are all there."),
+        }

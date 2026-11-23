@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Built in Python: see models/school_demo.py. -->
+    <function model="school.year" name="_load_school_planner_demo"/>
+</odoo>

@@ -16,6 +16,7 @@ Try the school addons on the public demo: <https://school.horizonforge.tech>
 | [`horizonforge_school_core`](horizonforge_school_core) | School records: years, grading periods, calendar, homerooms, students, patrons, courses, classes, setup guide | In development | LGPL-3 |
 | [`horizonforge_school_gradebook`](horizonforge_school_gradebook) | Gradebook: categories, weights, grading scales, assignment schedules, keyboard grid, report cards | In development | LGPL-3 |
 | [`horizonforge_school_attendance`](horizonforge_school_attendance) | Daily attendance by homeroom: present unless recorded, part days, summary report | In development | LGPL-3 |
+| [`horizonforge_school_planner`](horizonforge_school_planner) | Pacing guides per course laid over the calendar: progress, plans that move with the class, weekly plans | In development | LGPL-3 |
 | [`horizonforge_school_documents`](horizonforge_school_documents) | Shared school files: schoolwide, per year and per homeroom folders, files on the student | In development | LGPL-3 |
 | [`nonprofit_accounting`](nonprofit_accounting) | Standalone cash-basis ledger for a small nonprofit: deposits, bills, transfers, bank reconciliation, period report. Does not use Odoo's Accounting app | In production | AGPL-3 |
 | [`horizonforge_accounting`](horizonforge_accounting) | Small-business books on Community Accounting and OCA: bank feeds, reconciliation, financial statements, check printing, QuickBooks migration | In development | AGPL-3 |

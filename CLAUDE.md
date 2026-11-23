@@ -54,6 +54,7 @@ venv/bin/python odoo/odoo-bin -c odoo.conf -d test_<module> -i <module> \
 | `horizonforge_school_core` | In development | School records (years, periods, calendar, homerooms, students, patrons, courses, classes), setup guide, new-year setup. No dependency on the other modules here |
 | `horizonforge_school_gradebook` | In development | Gradebook on `horizonforge_school_core`: categories, weights, scales, assignment schedules, OWL keyboard grid, grade engine (`school.grade.engine`: all grade math lives there), PDF/CSV reports |
 | `horizonforge_school_attendance` | In development | Daily attendance on `horizonforge_school_core`: present unless recorded, part-day codes, OWL grid by homeroom, summary report; feeds the gradebook's report card through `school.student._school_attendance_totals` |
+| `horizonforge_school_planner` | In development | Pacing guides on `horizonforge_school_gradebook`: guide items per course, plan lines laid over class days (`school.section._replan()`), progress, the grid's next column and Fill ahead from the guide, weekly plan PDF |
 | `horizonforge_school_documents` | In development | Shared files on `horizonforge_school_core`: schoolwide, per-year and per-homeroom folders, two-step delete (trash, then office only), files on the student record |
 
 ## Odoo 19 conventions

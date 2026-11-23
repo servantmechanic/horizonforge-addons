@@ -167,6 +167,8 @@ export class GradebookGrid extends Component {
         state.canEdit = Boolean(data.can_edit);
         state.locked = Boolean(data.locked);
         state.hasSchedule = Boolean(data.has_schedule);
+        state.fillHint = data.fill_hint || "";
+        state.statusNote = data.status_note || "";
         state.entryMode = data.entry_mode || "percent";
         state.today = data.today || "";
         state.grades = data.grades || {};
@@ -1100,16 +1102,11 @@ export class GradebookGrid extends Component {
 
     async generateAssignments() {
         await this.flushAll();
-        const count = await this.orm.call("school.section", "gradebook_generate", [
+        const result = await this.orm.call("school.section", "gradebook_generate", [
             [this.state.sectionId],
             this.state.periodId,
         ]);
-        this.notification.add(
-            count
-                ? _t("%(count)s assignments created from the schedule.", { count })
-                : _t("Nothing to add: the schedule's assignments are all there."),
-            { type: count ? "success" : "info" }
-        );
+        this.notification.add(result.message, { type: result.count ? "success" : "info" });
         await this.reload();
     }
 

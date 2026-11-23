@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_pacing_transfer_view_form" model="ir.ui.view">
+        <field name="name">school.pacing.transfer.view.form</field>
+        <field name="model">school.pacing.transfer</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="mode" widget="radio" options="{'horizontal': true}"/>
+                    <field name="course_id" options="{'no_create': True, 'no_open': True}"/>
+                    <field name="data_file" filename="file_name" invisible="mode != 'import'"
+                           required="mode == 'import'"/>
+                    <field name="file_name" invisible="1"/>
+                    <field name="replace" invisible="mode != 'import'"/>
+                </group>
+                <p class="text-muted" invisible="mode != 'export'">
+                    Downloads the guide as a CSV, or as a zip with the CSV and its items' files,
+                    to import into another course, another year or another school.
+                </p>
+                <p class="text-muted" invisible="mode != 'import'">
+                    A zip exported from a guide, or a CSV with the columns Order, Unit, Name, Topic,
+                    Category (code or name), Days, Max Points, Entry Mode, Notes and Files. Only Name is needed.
+                </p>
+                <footer>
+                    <button name="action_export" type="object" string="Export" class="btn-primary"
+                            invisible="mode != 'export'"/>
+                    <button name="action_import" type="object" string="Import" class="btn-primary"
+                            invisible="mode != 'import'"/>
+                    <button string="Close" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="school_pacing_transfer_action" model="ir.actions.act_window">
+        <field name="name">Export / Import Guide</field>
+        <field name="res_model">school.pacing.transfer</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

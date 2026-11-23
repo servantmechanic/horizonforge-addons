@@ -2,5 +2,6 @@
 <odoo>
     <!-- Runs on install and every upgrade; each call only fills in what a
          school hasn't set yet. -->
+    <function model="school.score.category" name="_rename_default_lesson"/>
     <function model="school.score.category" name="_set_default_shortcuts"/>
 </odoo>

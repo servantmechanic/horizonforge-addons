@@ -163,7 +163,7 @@ class TestGradeReports(GradebookCase):
         self.assertIn("Class average", html)
         self.assertIn("Example, Ben", html)
         csv_rows = self._csv(wizard)
-        self.assertEqual(csv_rows[0][-4:], ["Lesson/Homework", "Test", "Grade", "Letter"])
+        self.assertEqual(csv_rows[0][-4:], ["Lesson", "Test", "Grade", "Letter"])
         self.assertEqual(csv_rows[1][-4:], ["90.0", "80.0", "85", "B"])
 
     def test_progress_report(self):
@@ -172,10 +172,10 @@ class TestGradeReports(GradebookCase):
         self.assertEqual(page["section"], self.section_5)
         self.assertEqual(
             [(r["name"], r["category"], r["score"], r["percent"], r["comment"]) for r in page["rows"]],
-            [("Lesson 1", "HW", "90%", "90.0", "Neat work"), ("Exam", "T", "40/50", "80.0", "")],
+            [("Lesson 1", "L", "90%", "90.0", "Neat work"), ("Exam", "T", "40/50", "80.0", "")],
         )
         self.assertEqual(page["categories"], [
-            {"name": "Lesson/Homework", "average": "90.0"}, {"name": "Test", "average": "80.0"},
+            {"name": "Lesson", "average": "90.0"}, {"name": "Test", "average": "80.0"},
         ])
         self.assertEqual((page["grade"], page["letter"]), ("85", "B"))
         html = self._html(wizard, "report_progress")

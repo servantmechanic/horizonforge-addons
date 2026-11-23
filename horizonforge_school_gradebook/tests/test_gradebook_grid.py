@@ -39,7 +39,7 @@ class TestGradebookGrid(GradebookCase):
             "assignment_id": self.lesson.id, "student_id": self.anna.id,
             "value": 91.0, "status": "scored", "comment": "Late", "percent": 91.0,
         }])
-        self.assertEqual({c["code"] for c in data["categories"]} >= {"HW", "T"}, True)
+        self.assertEqual({c["code"] for c in data["categories"]} >= {"L", "T"}, True)
 
     def test_open_other_period(self):
         data = self.Section.gradebook_open(self.section_5.id, self.semester_2.id)
@@ -150,6 +150,6 @@ class TestGradebookGrid(GradebookCase):
             "friday": True,
         })
         self.semester_1.date_end = "2030-09-13"
-        count = self.section_5.with_user(self.teacher).gradebook_generate(self.semester_1.id)
-        self.assertEqual(count, 3)
+        result = self.section_5.with_user(self.teacher).gradebook_generate(self.semester_1.id)
+        self.assertEqual(result["count"], 3)
         self.assertTrue(self.Section.gradebook_open()["has_schedule"])

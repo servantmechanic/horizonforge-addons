@@ -34,7 +34,7 @@
                 <field name="name"/>
                 <field name="category_id"/>
                 <filter name="my_courses" string="My Courses"
-                        domain="['|', ('course_id.section_ids.teacher_id', '=', uid), ('course_id.section_ids.co_teacher_ids', 'in', uid)]"/>
+                        domain="[('course_id.section_ids', 'any', [('year_id.is_current', '=', True), '|', ('teacher_id', '=', uid), ('co_teacher_ids', 'in', uid)])]"/>
                 <separator/>
                 <filter name="by_hand" string="Placed by Hand" domain="[('is_scheduled', '=', False)]"/>
                 <separator/>
@@ -54,10 +54,18 @@
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">Add an assignment schedule</p>
             <p>Say which assignments a course has each week, for example a Math Lesson every day
-               and a Spelling Test on Friday. Generate Assignments then creates a whole grading
+               and a Spelling Test on Friday. Fill Ahead then creates a whole grading
                period of gradebook columns at once; one that falls on a day off moves to the next school day.
                Leave every weekday off for assignments you place by hand, such as tests:
                pick the schedule when adding the assignment.</p>
         </field>
+    </record>
+
+    <!-- The menu: teachers start on their own courses. -->
+    <record id="school_assignment_template_server_action" model="ir.actions.server">
+        <field name="name">Assignment Schedules</field>
+        <field name="model_id" ref="model_school_assignment_template"/>
+        <field name="state">code</field>
+        <field name="code">action = env["school.period"]._school_list_action("horizonforge_school_gradebook.school_assignment_template_action", "my_courses")</field>
     </record>
 </odoo>

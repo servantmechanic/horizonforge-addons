@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_school_planner_root" name="Planner"
+              parent="horizonforge_school_core.menu_school_root" sequence="7"/>
+    <menuitem id="menu_school_planner" parent="menu_school_planner_root"
+              action="school_plan_line_server_action" sequence="10"/>
+    <menuitem id="menu_school_pacing_guides" parent="menu_school_planner_root"
+              action="school_pacing_guide_server_action" sequence="30"/>
+
+    <!-- Planning lives in the Planner: the gradebook's schedules and Fill
+         Ahead move here (back to Gradebook if the planner is uninstalled:
+         see the uninstall hook). -->
+    <record id="horizonforge_school_gradebook.menu_school_assignment_templates" model="ir.ui.menu">
+        <field name="parent_id" ref="menu_school_planner_root"/>
+        <field name="sequence">40</field>
+    </record>
+    <record id="horizonforge_school_gradebook.menu_school_assignment_generate" model="ir.ui.menu">
+        <field name="parent_id" ref="menu_school_planner_root"/>
+        <field name="sequence">50</field>
+    </record>
+</odoo>

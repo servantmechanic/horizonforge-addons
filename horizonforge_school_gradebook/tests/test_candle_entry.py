@@ -31,6 +31,17 @@ class TestCandleEntry(GradebookCase):
         self.env["school.score.category"]._set_default_shortcuts()
         self.assertEqual(self.homework.shortcut, "+")
 
+    def test_lesson_renamed_once(self):
+        self.assertEqual((self.homework.name, self.homework.code), ("Lesson", "L"))
+        # A database from before 0.8: renamed on upgrade...
+        self.homework.write({"name": "Lesson/Homework", "code": "HW"})
+        self.env["school.score.category"]._rename_default_lesson()
+        self.assertEqual((self.homework.name, self.homework.code), ("Lesson", "L"))
+        # ...but a school's own name stays.
+        self.homework.write({"name": "Daily Work", "code": "DW"})
+        self.env["school.score.category"]._rename_default_lesson()
+        self.assertEqual(self.homework.name, "Daily Work")
+
     def test_suggest_name(self):
         Assignment = self.env["school.assignment"]
         self.assertEqual(Assignment._suggest_name(self.section_5, self.homework), "Lesson 12")

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="horizonforge_school_planner.PlannerCalendarButtons">
+        <button type="button" class="btn btn-secondary o_planner_weekly_plan"
+                title="Print a week of lessons, a page per teacher" t-on-click="onWeeklyPlan">
+            <i class="fa fa-print me-1"/>Weekly Plan
+        </button>
+    </t>
+</templates>

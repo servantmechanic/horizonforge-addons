@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Pacing guides: every teacher reads them; teachers change those of
+         the courses they teach, administrators all. -->
+    <record id="rule_school_pacing_item_read" model="ir.rule">
+        <field name="name">Pacing guide: teachers read all</field>
+        <field name="model_id" ref="model_school_pacing_item"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_teacher'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_school_pacing_item_teacher" model="ir.rule">
+        <field name="name">Pacing guide: teacher's own courses</field>
+        <field name="model_id" ref="model_school_pacing_item"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_teacher'))]"/>
+        <field name="domain_force">['|', ('course_id.section_ids.teacher_id', '=', user.id), ('course_id.section_ids.co_teacher_ids', 'in', user.id)]</field>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    <record id="rule_school_pacing_item_admin" model="ir.rule">
+        <field name="name">Pacing guide: administrator manages all</field>
+        <field name="model_id" ref="model_school_pacing_item"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <!-- Guide settings: as the items. -->
+    <record id="rule_school_pacing_guide_read" model="ir.rule">
+        <field name="name">Pacing guide settings: teachers read all</field>
+        <field name="model_id" ref="model_school_pacing_guide"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_teacher'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_school_pacing_guide_teacher" model="ir.rule">
+        <field name="name">Pacing guide settings: teacher's own courses</field>
+        <field name="model_id" ref="model_school_pacing_guide"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_teacher'))]"/>
+        <field name="domain_force">['|', ('course_id.section_ids.teacher_id', '=', user.id), ('course_id.section_ids.co_teacher_ids', 'in', user.id)]</field>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    <record id="rule_school_pacing_guide_admin" model="ir.rule">
+        <field name="name">Pacing guide settings: administrator manages all</field>
+        <field name="model_id" ref="model_school_pacing_guide"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <!-- Plans: the teacher's own classes; the office reads all. -->
+    <record id="rule_school_plan_line_teacher" model="ir.rule">
+        <field name="name">Plan: teacher's own classes</field>
+        <field name="model_id" ref="model_school_plan_line"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_teacher'))]"/>
+        <field name="domain_force">['|', ('section_id.teacher_id', '=', user.id), ('section_id.co_teacher_ids', 'in', user.id)]</field>
+    </record>
+    <record id="rule_school_plan_line_office" model="ir.rule">
+        <field name="name">Plan: office reads all</field>
+        <field name="model_id" ref="model_school_plan_line"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_office'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_school_plan_line_admin" model="ir.rule">
+        <field name="name">Plan: administrator manages all</field>
+        <field name="model_id" ref="model_school_plan_line"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+</odoo>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_weekly_plan" model="report.paperformat">
+        <field name="name">School Weekly Plan (Letter, landscape)</field>
+        <field name="format">Letter</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">10</field>
+        <field name="margin_bottom">10</field>
+        <field name="margin_left">8</field>
+        <field name="margin_right">8</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+    </record>
+
+    <record id="action_report_weekly_plan" model="ir.actions.report">
+        <field name="name">Weekly Plan</field>
+        <field name="model">school.weekly.plan</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">horizonforge_school_planner.report_weekly_plan</field>
+        <field name="report_file">horizonforge_school_planner.report_weekly_plan</field>
+        <field name="print_report_name">'Weekly Plan %s' % object.week_date</field>
+        <field name="paperformat_id" ref="paperformat_weekly_plan"/>
+    </record>
+
+    <!-- A page per teacher and week. Tables, not flexbox: the PDF builder
+         doesn't lay out flexbox. -->
+    <template id="report_weekly_plan">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="wizard">
+                <t t-foreach="wizard._get_pages()" t-as="page">
+                  <t t-call="web.basic_layout">
+                    <div class="page o_weekly_plan">
+                        <style>
+                            .o_weekly_plan { font-size: 11px; }
+                            .o_weekly_plan h2 { font-size: 18px; margin: 0 0 6px 0; }
+                            .o_weekly_plan table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+                            .o_weekly_plan th, .o_weekly_plan td { border: 1px solid #999; padding: 4px 5px; vertical-align: top; }
+                            .o_weekly_plan th { background-color: #eee; text-align: left; }
+                            .o_weekly_plan th.o_class, .o_weekly_plan td.o_class { width: 13%; }
+                            .o_weekly_plan .o_entry { font-weight: normal; color: #555; font-size: 10px; }
+                            .o_weekly_plan .o_off { color: #c92a2a; font-weight: bold; }
+                            .o_weekly_plan .o_item { margin-bottom: 4px; }
+                            .o_weekly_plan .o_item_name { font-weight: bold; }
+                            .o_weekly_plan .o_muted { color: #666; }
+                            .o_weekly_plan .o_note { margin-top: 2px; padding: 1px 3px; background-color: #fff3bf; }
+                            .o_weekly_plan tr { page-break-inside: avoid; }
+                        </style>
+                        <h2>
+                            Weekly Plan · <t t-out="page['teacher'].name"/> ·
+                            week of <t t-out="page['monday']" t-options="{'widget': 'date'}"/>
+                        </h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="o_class">Class</th>
+                                    <th t-foreach="page['days']" t-as="day">
+                                        <t t-out="day['label']"/>
+                                        <div t-foreach="day['entries']" t-as="entry"
+                                             t-attf-class="o_entry {{ 'o_off' if entry['off'] else '' }}">
+                                            <t t-out="entry['name']"/>
+                                            <t t-if="entry['off']"> (no school)</t>
+                                            <t t-elif="entry['no_lessons']"> (no lessons)</t>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="page['rows']" t-as="row">
+                                    <td class="o_class">
+                                        <strong t-out="row['section'].course_id.name"/>
+                                        <div t-if="row['section'].homeroom_id" class="o_muted" t-out="row['section'].homeroom_id.name"/>
+                                    </td>
+                                    <td t-foreach="row['cells']" t-as="cell">
+                                        <div t-foreach="cell" t-as="item" class="o_item">
+                                            <span class="o_item_name" t-out="item['name']"/>
+                                            <span t-if="item['done']" class="o_muted"> (completed)</span>
+                                            <span t-if="item['files']" class="o_muted"> (files)</span>
+                                            <div t-if="item['topic']" t-out="item['topic']"/>
+                                            <div t-if="item['item_note']" class="o_muted" t-out="item['item_note']"/>
+                                            <div t-if="item['note']" class="o_note" t-out="item['note']"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                  </t>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -7,7 +7,7 @@ top of `horizonforge_school_core`.
 
 | Record | Notes |
 |---|---|
-| Score categories | Name, short code, color and shortcut key. Ships with Lesson/Homework (HW, `/`) and Test (T, `-`) |
+| Score categories | Name, short code, color and shortcut key. Ships with Lesson (L, `/`) and Test (T, `-`) |
 | Weight schemes | Category weights that total 100, and the calculation method |
 | Grading scales | Letter, lowest percent, value when entered and GPA points. Several scales are allowed |
 | Assignment schedules | Per course: which assignments fall on which weekdays |
@@ -111,7 +111,8 @@ every student.
 
 ## Assignment schedules
 
-Under Gradebook, Assignment Schedules, say what each course has every
+Under Gradebook, Assignment Schedules (Planner, Assignment Schedules when
+School Planner is installed: planning lives there), say what each course has every
 week, for example:
 
 | Course | Assignment | Category | Days |
@@ -124,8 +125,8 @@ A schedule doesn't have to run every week: **Every (Weeks)** set to 3 with
 **First Week** 3 gives a test on the chosen weekday in school weeks 3, 6, 9 and
 so on. Weeks without any school day aren't counted.
 
-**Generate from schedule** in the grid (one class), or Gradebook, Generate
-Assignments (many classes), creates the whole grading period at once and
+**Fill ahead** in the grid (one class), or Fill Ahead in the menu (many
+classes; under Planner with School Planner), creates the whole grading period at once and
 numbers the assignments through the year (Lesson 1, Lesson 2, ...). It leaves
 existing assignments alone, so it is safe to run again.
 

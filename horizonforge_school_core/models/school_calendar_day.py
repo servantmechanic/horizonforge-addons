@@ -122,8 +122,10 @@ class SchoolCalendarDay(models.Model):
                 day.audience_label = False
 
     @api.model
-    def _for_me_domain(self):
-        user = self.env.user
+    def _for_me_domain(self, user=None):
+        """Entries for everyone, and those for ``user``'s grade levels,
+        homeroom or themselves (default: the current user)."""
+        user = user or self.env.user
         # sudo: teachers can't read other teachers' classes, but their own
         # grade levels come from them.
         sections = self.env["school.section"].sudo().search([

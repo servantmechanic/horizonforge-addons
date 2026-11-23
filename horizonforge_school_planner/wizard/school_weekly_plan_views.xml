@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_weekly_plan_view_form" model="ir.ui.view">
+        <field name="name">school.weekly.plan.view.form</field>
+        <field name="model">school.weekly.plan</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="week_date"/>
+                    <field name="weeks"/>
+                    <field name="teacher_ids" widget="many2many_tags" options="{'no_create': True}"
+                           groups="horizonforge_school_core.group_school_office"/>
+                </group>
+                <p class="text-muted">
+                    A landscape page per teacher and week: Monday to Friday across, the classes down,
+                    each day's lessons with the guide's notes and your notes for the day.
+                    Days off and calendar events show under each day.
+                </p>
+                <footer>
+                    <button name="action_print" type="object" string="Print" class="btn-primary"/>
+                    <button string="Close" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="school_weekly_plan_action" model="ir.actions.act_window">
+        <field name="name">Weekly Plan</field>
+        <field name="res_model">school.weekly.plan</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

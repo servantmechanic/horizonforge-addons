@@ -4,7 +4,7 @@ from odoo.exceptions import UserError
 
 class SchoolAssignmentGenerate(models.TransientModel):
     _name = "school.assignment.generate"
-    _description = "Generate Assignments"
+    _description = "Fill Ahead"
 
     period_id = fields.Many2one(
         "school.period",
@@ -19,8 +19,9 @@ class SchoolAssignmentGenerate(models.TransientModel):
         compute="_compute_section_ids",
         store=True,
         readonly=False,
-        domain="[('year_id', '=', year_id), ('course_id.assignment_template_ids.is_scheduled', '=', True)]",
-        help="Only classes whose course has an assignment schedule.",
+        domain="[('year_id', '=', year_id)]",
+        help="Classes with something to fill from: an assignment schedule "
+        "(or, with the planner, a pacing guide).",
     )
     year_id = fields.Many2one(related="period_id.year_id")
 
@@ -39,8 +40,7 @@ class SchoolAssignmentGenerate(models.TransientModel):
     def _compute_section_ids(self):
         for wizard in self:
             sections = self.env["school.section"]._gradebook_sections().filtered(
-                lambda s: s.year_id == wizard.period_id.year_id
-                and s.course_id.assignment_template_ids.filtered("is_scheduled")
+                lambda s: s.year_id == wizard.period_id.year_id and s._can_fill_ahead()
             )
             user = self.env.user
             own = sections.filtered(lambda s: s._is_my_class(user))
@@ -48,12 +48,15 @@ class SchoolAssignmentGenerate(models.TransientModel):
 
     def action_generate(self):
         self.ensure_one()
-        if not self.section_ids:
+        sections = self.section_ids.filtered(lambda s: s._can_fill_ahead())
+        if not sections:
             raise UserError(_(
-                "No class to generate for. Add assignment schedules to the "
-                "courses first (Gradebook, Assignment Schedules)."
+                "No class to fill. Give the courses an assignment schedule "
+                "(Assignment Schedules) or a pacing guide first."
             ))
-        assignments = self.section_ids._generate_assignments(self.period_id)
+        assignments = self.env["school.assignment"]
+        for section in sections:
+            assignments |= section._fill_ahead(self.period_id)
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",

@@ -1,8 +1,8 @@
 # School addons changelog
 
 One version covers all the school addons (`horizonforge_school_core`,
-`_gradebook`, `_attendance`, `_documents`): every release sets the same
-version in all four manifests, as `19.0.MAJOR.MINOR.PATCH`, even when a module
+`_gradebook`, `_attendance`, `_documents`, `_planner`): every release sets
+the same version in all their manifests, as `19.0.MAJOR.MINOR.PATCH`, even when a module
 has no changes. The version is shown at the foot of the School sidebar.
 
 - **MINOR**: new screens, settings or records (needs a module upgrade).
@@ -12,6 +12,33 @@ has no changes. The version is shown at the foot of the School sidebar.
 Each release is tagged in git as `school-<version>`, for example `school-0.7.0`.
 
 ## Unreleased
+
+- **Lesson (L).** The shipped score category Lesson/Homework (HW) is now
+  Lesson (L); an upgrade renames it once, unless the school renamed it.
+- **My Courses.** Pacing Guides and Assignment Schedules open on the
+  teacher's own courses.
+
+- **New addon: School Planner** (`horizonforge_school_planner`). A pacing
+  guide per course, set up in a few numbers (how many lessons, chapters with
+  a test and review day after each, finish by a date or the end of a period
+  or the year, one a day or spread out, the days it meets; what won't fit
+  is shown, never doubled up by itself) and built into
+  its items (with notes and files; items added by hand stay when it is built
+  again), imported and exported as CSV or as a zip with the files. The
+  guides' order is each teacher's order of classes in the day. Each class's plan lays it over its days
+  (the course's meeting weekdays, without days off and calendar entries
+  marked No lessons for it): taught items keep their day, the rest follow
+  on, and a date set by hand holds. An item is taught once its gradebook
+  column has scores or its day has passed; nothing to mark done. Progress
+  (Lesson 62 of 170, 3 behind) shows on the classes and in the gradebook.
+  The planner shows whole days (no hours) and has the Weekly Plan button.
+  The gradebook's next column (Tab, +, a key) is the guide's next item, and
+  Fill ahead makes this week's columns from the plan (or, without a guide,
+  the period's from the schedule, as Generate did). A weekly plan prints a
+  page per teacher and week, with the guide's notes and day notes.
+  Planning lives in the Planner menu, grading in the Gradebook: Assignment
+  Schedules and Fill Ahead (formerly Generate Assignments; it now fills
+  from a guide too) move to Planner when the planner is installed.
 
 - **Add assignments as you go.** In the gradebook, Tab past the last column
   (once it has a score) adds the next assignment on the next school day,

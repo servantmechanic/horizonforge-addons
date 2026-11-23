@@ -17,6 +17,7 @@ const ICONS = {
     "horizonforge_school_core.menu_school_calendar": "fa-calendar",
     "horizonforge_school_documents.menu_school_documents_root": "fa-folder-open-o",
     "horizonforge_school_gradebook.menu_school_grade_reports": "fa-bar-chart",
+    "horizonforge_school_planner.menu_school_planner_root": "fa-book",
     "horizonforge_school_core.menu_school_my_preferences": "fa-sliders",
     "horizonforge_school_core.menu_school_config": "fa-cog",
 };

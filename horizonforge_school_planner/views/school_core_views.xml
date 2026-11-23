@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Courses: the days they meet, and their pacing guide. -->
+    <record id="school_course_view_list" model="ir.ui.view">
+        <field name="name">school.course.view.list.inherit.planner</field>
+        <field name="model">school.course</field>
+        <field name="inherit_id" ref="horizonforge_school_core.school_course_view_list"/>
+        <field name="arch" type="xml">
+            <field name="teacher_id" position="after">
+                <field name="pacing_item_count" optional="show"/>
+                <button name="action_open_pacing_guide" type="object" string="Pacing Guide" class="btn-link"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Calendar: No lessons, for an entry shown only (a field trip). -->
+    <record id="school_calendar_day_view_form" model="ir.ui.view">
+        <field name="name">school.calendar.day.view.form.inherit.planner</field>
+        <field name="model">school.calendar.day</field>
+        <field name="inherit_id" ref="horizonforge_school_core.school_calendar_day_view_form"/>
+        <field name="arch" type="xml">
+            <field name="audience" position="before">
+                <field name="no_lessons"/>
+            </field>
+        </field>
+    </record>
+    <record id="school_calendar_day_view_list" model="ir.ui.view">
+        <field name="name">school.calendar.day.view.list.inherit.planner</field>
+        <field name="model">school.calendar.day</field>
+        <field name="inherit_id" ref="horizonforge_school_core.school_calendar_day_view_list"/>
+        <field name="arch" type="xml">
+            <field name="day_type" position="after">
+                <field name="no_lessons" optional="show" readonly="day_type == 'off'" widget="boolean_toggle"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Classes: progress through the guide. -->
+    <record id="school_section_view_list" model="ir.ui.view">
+        <field name="name">school.section.view.list.inherit.planner</field>
+        <field name="model">school.section</field>
+        <field name="inherit_id" ref="horizonforge_school_core.school_section_view_list"/>
+        <field name="arch" type="xml">
+            <field name="student_count" position="after">
+                <field name="planner_progress" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Assignments: the guide item a column is for. -->
+    <record id="school_assignment_view_form" model="ir.ui.view">
+        <field name="name">school.assignment.view.form.inherit.planner</field>
+        <field name="model">school.assignment</field>
+        <field name="inherit_id" ref="horizonforge_school_gradebook.school_assignment_view_form"/>
+        <field name="arch" type="xml">
+            <field name="entry_mode" position="after">
+                <field name="pacing_item_id" readonly="1" invisible="not pacing_item_id" options="{'no_open': True}"/>
+            </field>
+        </field>
+    </record>
+</odoo>

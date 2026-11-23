@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="school_pacing_item_view_list" model="ir.ui.view">
+        <field name="name">school.pacing.item.view.list</field>
+        <field name="model">school.pacing.item</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" open_form_view="1">
+                <field name="sequence" widget="handle"/>
+                <field name="course_id" options="{'no_create': True}" optional="show"/>
+                <field name="unit" optional="show" placeholder="e.g. Chapter 3"/>
+                <field name="name" placeholder="e.g. Lesson 23"/>
+                <field name="topic" optional="show" placeholder="e.g. Adding fractions"/>
+                <field name="category_id" options="{'no_create': True}" placeholder="No grade"/>
+                <field name="days" optional="show"/>
+                <field name="max_points" optional="hide"/>
+                <field name="entry_mode" optional="hide" placeholder="Class default"/>
+                <field name="note" optional="hide"/>
+                <field name="attachment_count" string="Files" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="school_pacing_item_view_form" model="ir.ui.view">
+        <field name="name">school.pacing.item.view.form</field>
+        <field name="model">school.pacing.item</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="course_id" options="{'no_create': True}"/>
+                            <field name="unit"/>
+                            <field name="name"/>
+                            <field name="topic"/>
+                        </group>
+                        <group>
+                            <field name="category_id" options="{'no_create': True}" placeholder="No grade"/>
+                            <field name="days"/>
+                            <field name="max_points" invisible="not category_id"/>
+                            <field name="entry_mode" invisible="not category_id" placeholder="Class default"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                    <field name="note" placeholder="Notes for every year: pages, materials, what to prepare..."/>
+                    <div class="mt-2">
+                        <field name="attachment_ids" widget="many2many_binary" string="Add a file" nolabel="1"
+                               readonly="not id"/>
+                        <p class="text-muted" invisible="id">Save the item first, then add files.</p>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="school_pacing_item_view_search" model="ir.ui.view">
+        <field name="name">school.pacing.item.view.search</field>
+        <field name="model">school.pacing.item</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="topic"/>
+                <field name="unit"/>
+                <field name="course_id"/>
+                <filter name="my_courses" string="My Courses"
+                        domain="[('course_id.section_ids', 'any', [('year_id.is_current', '=', True), '|', ('teacher_id', '=', uid), ('co_teacher_ids', 'in', uid)])]"/>
+                <separator/>
+                <filter name="graded" string="Graded" domain="[('category_id', '!=', False)]"/>
+                <filter name="not_graded" string="No Grade" domain="[('category_id', '=', False)]"/>
+                <filter name="with_files" string="With Files" domain="[('attachment_ids', '!=', False)]"/>
+                <separator/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_unit" string="Unit" context="{'group_by': 'unit'}"/>
+                    <filter name="group_category" string="Category" context="{'group_by': 'category_id'}"/>
+                </group>
+                <searchpanel>
+                    <field name="course_id" string="Course" icon="fa-book"/>
+                </searchpanel>
+            </search>
+        </field>
+    </record>
+
+    <record id="school_pacing_item_action" model="ir.actions.act_window">
+        <field name="name">Pacing Guides</field>
+        <field name="res_model">school.pacing.item</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No items yet</p>
+            <p>Set the guide up (Planner, Pacing Guides) and press Build Guide, or list the items here
+               in teaching order: Lesson 1, Lesson 2, ... Test 1. Drag them to reorder; items added
+               here stay when the guide is built again.</p>
+        </field>
+    </record>
+
+</odoo>
