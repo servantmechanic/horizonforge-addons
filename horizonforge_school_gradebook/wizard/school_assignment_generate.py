@@ -43,7 +43,7 @@ class SchoolAssignmentGenerate(models.TransientModel):
                 and s.course_id.assignment_template_ids.filtered("is_scheduled")
             )
             user = self.env.user
-            own = sections.filtered(lambda s: user in (s.teacher_id | s.co_teacher_ids))
+            own = sections.filtered(lambda s: s._is_my_class(user))
             wizard.section_ids = own or sections
 
     def action_generate(self):

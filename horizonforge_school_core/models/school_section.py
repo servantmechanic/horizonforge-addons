@@ -114,3 +114,28 @@ class SchoolSection(models.Model):
                 "next": {"type": "ir.actions.client", "tag": "soft_reload"},
             },
         }
+
+    # A teacher's classes: those they teach, and those their homeroom's
+    # students take (the homeroom teacher keeps their grades too).
+
+    @api.model
+    def _my_classes_domain(self, user=None, path=""):
+        """Domain on classes (or, with ``path`` such as "section_id.", on
+        records of a class) for the classes of ``user``."""
+        uid = (user or self.env.user).id
+        return [
+            "|", "|",
+            (path + "teacher_id", "=", uid),
+            (path + "co_teacher_ids", "in", uid),
+            (path + "enrollment_ids.student_id.homeroom_id.teacher_id", "=", uid),
+        ]
+
+    def _is_my_class(self, user=None):
+        self.ensure_one()
+        user = user or self.env.user
+        if user in (self.teacher_id | self.co_teacher_ids):
+            return True
+        # sudo: the homeroom of every student in the class, not only those
+        # the user can see.
+        return user in self.sudo().enrollment_ids.student_id.homeroom_id.teacher_id
+

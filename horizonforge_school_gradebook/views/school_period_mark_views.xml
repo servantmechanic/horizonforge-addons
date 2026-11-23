@@ -26,7 +26,7 @@
                 <field name="grade_level_ids"/>
                 <field name="period_id"/>
                 <filter name="my_classes" string="My Classes"
-                        domain="['|', ('section_id.teacher_id', '=', uid), ('section_id.co_teacher_ids', 'in', uid)]"/>
+                        domain="['|', '|', ('section_id.teacher_id', '=', uid), ('section_id.co_teacher_ids', 'in', uid), ('section_id.enrollment_ids.student_id.homeroom_id.teacher_id', '=', uid)]"/>
                 <separator/>
                 <filter name="current_year" string="Current Year" domain="[('section_id.year_id.is_current', '=', True)]"/>
                 <filter name="current_period" string="Current Grading Period" domain="[('period_id.is_current', '=', True)]"/>

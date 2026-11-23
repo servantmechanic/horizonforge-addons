@@ -40,6 +40,7 @@ class SchoolCourse(models.Model):
         "school.assignment.template",
         "course_id",
         string="Assignment Schedule",
+        copy=True,
     )
 
 

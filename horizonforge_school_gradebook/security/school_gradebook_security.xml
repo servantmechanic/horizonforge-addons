@@ -69,6 +69,41 @@
         <field name="domain_force">[(1, '=', 1)]</field>
     </record>
 
+    <!-- Homeroom teachers keep the grades of their homeroom's students in
+         every class, beside the class's own teacher (science, music):
+         assignments of those classes, and those students' scores, letter
+         grades and comments. -->
+    <record id="rule_school_assignment_homeroom" model="ir.rule">
+        <field name="name">Assignment: homeroom teacher, their students' classes</field>
+        <field name="model_id" ref="model_school_assignment"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_teacher'))]"/>
+        <field name="domain_force">[('section_id.enrollment_ids.student_id.homeroom_id.teacher_id', '=', user.id)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    <record id="rule_school_score_homeroom" model="ir.rule">
+        <field name="name">Score: homeroom teacher, their students'</field>
+        <field name="model_id" ref="model_school_score"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_teacher'))]"/>
+        <field name="domain_force">[('student_id.homeroom_id.teacher_id', '=', user.id)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    <record id="rule_school_period_mark_homeroom" model="ir.rule">
+        <field name="name">Period mark: homeroom teacher, their students'</field>
+        <field name="model_id" ref="model_school_period_mark"/>
+        <field name="groups" eval="[(4, ref('horizonforge_school_core.group_school_teacher'))]"/>
+        <field name="domain_force">[('student_id.homeroom_id.teacher_id', '=', user.id)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
     <!-- Schedules: everyone reads them; teachers change those of the courses
          they teach, administrators all. -->
     <record id="rule_school_assignment_template_read" model="ir.rule">

@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import _, fields, models
 
 
 class SchoolCourse(models.Model):
@@ -12,6 +12,7 @@ class SchoolCourse(models.Model):
         help="The subject as taught to one group, for example Math 5.",
     )
     code = fields.Char(
+        copy=False,
         help="Short code, for example MA5.",
     )
     sequence = fields.Integer(
@@ -42,3 +43,12 @@ class SchoolCourse(models.Model):
         "UNIQUE(code)",
         "Course codes must be unique.",
     )
+
+    def copy_data(self, default=None):
+        """Duplicate Math 2 into Math 2 (copy), to rename Math 3: the grade
+        levels and teacher come along, the classes and the code don't."""
+        vals_list = super().copy_data(default=default)
+        if "name" not in (default or {}):
+            for course, vals in zip(self, vals_list):
+                vals["name"] = _("%s (copy)", course.name)
+        return vals_list

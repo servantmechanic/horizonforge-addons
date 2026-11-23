@@ -46,6 +46,9 @@ leave it. Press `?` in the grid for the full shortcut list.
 | Ctrl+Shift+F | Fill the column's empty cells |
 | Ctrl+V | Paste a column or block from a spreadsheet |
 
+When the grading period on screen isn't the current one, a banner says so,
+with a button back to the current period. It shows once, never per entry.
+
 Entry modes: percent (type 88), points (type 22 of 25) or number wrong (type 3
 of 25). The typed value is kept, so changing an assignment's max points
 recalculates the percent without retyping.
@@ -82,12 +85,15 @@ nothing; choose it under **From Schedule** when adding an assignment in the
 grid, and the name (Test 4), category, points and entry mode are filled in.
 
 Schedules belong to the course, so next year's classes use
-them without any copying.
+them without any copying. Duplicating a course copies its schedules.
 
 ## Access
 
 - **Teacher**: assignments and scores of their own classes, and the assignment
-  schedules of the courses they teach.
+  schedules of the courses they teach. A homeroom teacher also keeps their
+  homeroom's students' grades in every class they take, beside the class's
+  own teacher: those classes are in their gradebook, showing only their own
+  students.
 - **Office**: reads every class's gradebook.
 - **Administrator**: everything, including scores in locked grading periods.
 

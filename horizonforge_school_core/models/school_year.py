@@ -49,6 +49,28 @@ class SchoolYear(models.Model):
         help="Days off (holidays and breaks) and days shown for information. "
         "Weekends are always off.",
     )
+    school_days_target = fields.Integer(
+        string="School Days",
+        help="How many days of school the year must have, for example 180. "
+        "When set, the end date follows from it: the start date, plus that "
+        "many school days and the planned snow days, skipping weekends and "
+        "days off. Leave at 0 to set the end date by hand.",
+    )
+    snow_day_allowance = fields.Integer(
+        string="Planned Snow Days",
+        help="Extra school days added at the end of the year for closings "
+        "nobody can plan, for example 5. A snow day on the calendar uses one "
+        "up; the end date only moves once they run out.",
+    )
+    school_day_count = fields.Integer(
+        string="School Days in the Year",
+        compute="_compute_school_day_count",
+        help="Monday to Friday between the start and end dates, minus the days off.",
+    )
+    snow_days_used = fields.Integer(
+        string="Snow Days Used",
+        compute="_compute_school_day_count",
+    )
 
     _name_unique = models.Constraint(
         "UNIQUE(name)",
@@ -68,6 +90,16 @@ class SchoolYear(models.Model):
         for year in self:
             year.section_count = counts.get(year, 0)
 
+    @api.depends("date_start", "date_end", "day_off_ids.date_start", "day_off_ids.date_end",
+                 "day_off_ids.day_type", "day_off_ids.is_snow_day")
+    def _compute_school_day_count(self):
+        for year in self:
+            if not (year.date_start and year.date_end):
+                year.school_day_count = year.snow_days_used = 0
+                continue
+            year.school_day_count = len(year._get_school_days())
+            year.snow_days_used = len(year._snow_dates())
+
     @api.model
     def _get_current(self):
         """Return the current school year (empty if none is marked)."""
@@ -78,7 +110,68 @@ class SchoolYear(models.Model):
         years = super().create(vals_list)
         years._keep_one_current()
         years._add_holidays()
+        years._apply_school_days_target()
         return years
+
+    # ------------------------------------------------------------------
+    # School days target: the end date follows from it
+    # ------------------------------------------------------------------
+
+    def _off_dates(self, snow=None):
+        """Weekdays covered by the year's days off (only the snow days with
+        ``snow=True``), whatever the year's end date."""
+        self.ensure_one()
+        dates = set()
+        for entry in self.day_off_ids:
+            if entry.day_type != "off" or (snow and not entry.is_snow_day):
+                continue
+            day = entry.date_start
+            while day <= entry.date_end:
+                if day.weekday() < 5:
+                    dates.add(day)
+                day += timedelta(days=1)
+        return dates
+
+    def _snow_dates(self):
+        return self._off_dates(snow=True)
+
+    def _target_end_date(self):
+        """The last day of school by the target: the start date plus the
+        target school days and the planned snow days not used yet. False
+        without a target."""
+        self.ensure_one()
+        if self.school_days_target <= 0 or not self.date_start:
+            return False
+        unused = max(self.snow_day_allowance - len(self._snow_dates()), 0)
+        needed = self.school_days_target + unused
+        off = self._off_dates()
+        day, count = self.date_start, 0
+        limit = self.date_start + timedelta(days=730)
+        while day <= limit:
+            if day.weekday() < 5 and day not in off:
+                count += 1
+                if count == needed:
+                    return day
+            day += timedelta(days=1)
+        return False
+
+    def _apply_school_days_target(self):
+        """Move the end date of the years with a target to where the target
+        puts it. The last grading period ends with the year: when it ended
+        on the old end date, it moves too."""
+        for year in self.filtered(lambda y: y.school_days_target > 0):
+            end = year._target_end_date()
+            if not end or end == year.date_end:
+                continue
+            # sudo: any teacher may add a snow day; that moves the end date.
+            year = year.sudo()
+            last = year.period_ids.filtered(lambda p: p.date_end == year.date_end)
+            if end < year.date_end:
+                last.date_end = end
+                super(SchoolYear, year).write({"date_end": end})
+            else:
+                super(SchoolYear, year).write({"date_end": end})
+                last.date_end = end
 
     @api.model
     def _easter(self, year):
@@ -139,6 +232,8 @@ class SchoolYear(models.Model):
         res = super().write(vals)
         if vals.get("is_current"):
             self._keep_one_current()
+        if {"school_days_target", "snow_day_allowance", "date_start", "date_end"} & set(vals):
+            self._apply_school_days_target()
         return res
 
     def _keep_one_current(self):
@@ -240,7 +335,10 @@ class SchoolYear(models.Model):
             dates = format_date(self.env, entry.date_start, date_format="EEE MMM d")
             if entry.date_end != entry.date_start:
                 dates += " – " + format_date(self.env, entry.date_end, date_format="EEE MMM d")
-            rows.append({"dates": dates, "name": entry.name, "off": entry.day_type == "off"})
+            name = entry.name
+            if entry.audience_label:
+                name = f"{name} ({entry.audience_label})"
+            rows.append({"dates": dates, "name": name, "off": entry.day_type == "off"})
         return rows
 
     def action_print_calendar(self):

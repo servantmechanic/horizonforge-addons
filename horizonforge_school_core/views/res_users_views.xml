@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- A School section in the user's own Preferences dialog. -->
+    <record id="res_users_view_form_preferences" model="ir.ui.view">
+        <field name="name">res.users.preferences.form.inherit.school</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+        <field name="arch" type="xml">
+            <page name="preferences_page" position="inside">
+                <group string="School" name="school_preferences"
+                       groups="horizonforge_school_core.group_school_teacher">
+                    <group name="school_preferences_left">
+                        <field name="school_name_order" widget="radio" readonly="0"/>
+                    </group>
+                    <group name="school_preferences_right"/>
+                </group>
+            </page>
+        </field>
+    </record>
+
+    <!-- School, My Preferences: the same dialog, one click from the sidebar. -->
+    <record id="action_school_my_preferences" model="ir.actions.server">
+        <field name="name">My Preferences</field>
+        <field name="model_id" ref="base.model_res_users"/>
+        <field name="group_ids" eval="[(4, ref('group_school_teacher'))]"/>
+        <field name="state">code</field>
+        <field name="code">action = dict(env["res.users"].action_get(), res_id=env.uid)</field>
+    </record>
+</odoo>

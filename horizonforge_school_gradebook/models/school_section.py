@@ -154,17 +154,17 @@ class SchoolSection(models.Model):
         user = self.env.user
         if user.has_group("horizonforge_school_core.group_school_admin"):
             return True
-        return not period.locked and user in (self.teacher_id | self.co_teacher_ids)
+        return not period.locked and self._is_my_class(user)
 
     @api.model
     def _gradebook_sections(self):
-        """Classes the user picks from: their own, or all for the office,
-        in the current school year."""
+        """Classes the user picks from: their own (with their homeroom's
+        classes), or all for the office, in the current school year."""
         user = self.env.user
         domain = [("year_id.is_current", "=", True), ("course_id.grading_type", "=", "percent")]
         if not user.has_group("horizonforge_school_core.group_school_office"):
-            domain += ["|", ("teacher_id", "=", user.id), ("co_teacher_ids", "in", user.id)]
-        own = lambda s: user not in (s.teacher_id | s.co_teacher_ids)  # noqa: E731
+            domain += self._my_classes_domain(user)
+        own = lambda s: not s._is_my_class(user)  # noqa: E731
         return self.search(domain).sorted(
             lambda s: (own(s), s.course_id.sequence, s.course_id.name or "", s.name or "", s.id)
         )
@@ -185,18 +185,20 @@ class SchoolSection(models.Model):
             return result
         section.check_access("read")
         periods = section.year_id.period_ids
+        today = fields.Date.context_today(self)
+        current = periods.filtered(lambda p: p.date_start <= today <= p.date_end)[:1]
         period = periods.filtered(lambda p: p.id == period_id)
         if not period:
-            today = fields.Date.context_today(self)
             period = (
-                periods.filtered(lambda p: p.date_start <= today <= p.date_end)
+                current
                 or periods.filtered(lambda p: p.date_start > today)[:1]
                 or periods[-1:]
             )
         result.update({
             "periods": [{"id": p.id, "name": p.name, "locked": p.locked} for p in periods],
             "period_id": period.id,
-            "today": fields.Date.to_string(fields.Date.context_today(self)),
+            "current_period_id": current.id,
+            "today": fields.Date.to_string(today),
             "entry_mode": section._get_entry_mode(),
             "can_edit": bool(period) and section._gradebook_can_edit(period),
             "locked": period.locked,
@@ -231,7 +233,9 @@ class SchoolSection(models.Model):
             lambda e: e.date_start <= period.date_end
             and (not e.date_end or e.date_end >= period.date_start)
         )
-        students = enrollments.student_id.with_context(active_test=False)
+        students = section._gradebook_visible_students(
+            enrollments.student_id.with_context(active_test=False)
+        )
         result["students"] = students._grid_rows()
         result["scores"] = [
             score._cell()
@@ -239,6 +243,17 @@ class SchoolSection(models.Model):
         ]
         result.update(section._gradebook_grades(period, students))
         return result
+
+    def _gradebook_visible_students(self, students):
+        """A homeroom teacher who doesn't teach the class sees only their
+        own homeroom's students in it (the others' scores are closed)."""
+        self.ensure_one()
+        user = self.env.user
+        if user in (self.teacher_id | self.co_teacher_ids) or user.has_group(
+            "horizonforge_school_core.group_school_office"
+        ):
+            return students
+        return students.filtered(lambda s: s.homeroom_id.teacher_id == user)
 
     def _gradebook_grades(self, period, students=None):
         """The grid's grade column: each student's period grade and

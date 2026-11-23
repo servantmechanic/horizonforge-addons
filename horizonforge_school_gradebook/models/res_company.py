@@ -1,5 +1,6 @@
 from odoo import api, fields, models
 
+from .res_users import ENTER_DIRECTIONS
 from .school_assignment import ENTRY_MODES
 
 CARD_LETTER = (
@@ -45,6 +46,14 @@ Work Habits
 class ResCompany(models.Model):
     _inherit = "res.company"
 
+    school_enter_direction = fields.Selection(
+        ENTER_DIRECTIONS,
+        string="Gradebook: Enter Moves",
+        default="down",
+        required=True,
+        help="The default for new users. Each teacher can change their own "
+        "in My Preferences, or in the gradebook's top bar.",
+    )
     school_entry_mode = fields.Selection(
         ENTRY_MODES,
         string="Entry Mode",

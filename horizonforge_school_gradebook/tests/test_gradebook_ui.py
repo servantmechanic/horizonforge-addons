@@ -294,3 +294,25 @@ class TestGradebookUi(HttpCase, SchoolCoreCase):
             "/odoo/action-horizonforge_school_core.school_student_action",
             code, login="grid_teacher", timeout=120,
         )
+
+    def test_other_period_banner(self):
+        today = fields.Date.context_today(self.env.user)
+        if today.month == 12 and today.day == 31:
+            self.skipTest("needs a day after today in the year")
+        self.period.date_end = today
+        self.env["school.period"].create({
+            "year_id": self.year.id, "name": "Next",
+            "date_start": fields.Date.add(today, days=1), "date_end": self.year.date_end,
+        })
+        self._run("""
+            await waitFor("td.o_selected");
+            if (document.querySelector(".o_gradebook_period_warning")) { throw new Error("banner on the current period"); }
+            const select = document.querySelector(".o_gradebook_period");
+            select.value = [...select.options].find((o) => o.text.trim() === "Next").value;
+            select.dispatchEvent(new Event("change"));
+            const banner = await waitFor(".o_gradebook_period_warning");
+            expect(banner.textContent.includes("The current grading period is All Year"), true, "banner text");
+            banner.querySelector("button").click();
+            await waitFor(() => !document.querySelector(".o_gradebook_period_warning"), "banner gone");
+            expect(document.querySelector(".o_gradebook_period").selectedOptions[0].text.trim(), "All Year", "period");
+        """)

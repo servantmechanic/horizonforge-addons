@@ -15,6 +15,12 @@
                             <field name="school_current_year_id" options="{'no_create': True}"/>
                         </setting>
                     </block>
+                    <block title="Teacher Preferences" name="school_preferences_setting_container">
+                        <setting string="Student Names" company_dependent="1"
+                                 help="How students are shown and sorted in the grids, for new users. Each teacher can change it in My Preferences.">
+                            <field name="school_name_order" widget="radio"/>
+                        </setting>
+                    </block>
                     <block title="Reports" name="school_report_setting_container">
                         <setting string="Principal" company_dependent="1"
                                  help="Printed in the report header. The school name, address and logo come from the company.">

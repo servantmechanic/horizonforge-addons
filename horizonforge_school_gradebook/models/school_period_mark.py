@@ -144,7 +144,7 @@ class SchoolPeriodMark(models.Model):
             user = self.env.user
             domain = [("year_id.is_current", "=", True)]
             if not user.has_group("horizonforge_school_core.group_school_admin"):
-                domain += ["|", ("teacher_id", "=", user.id), ("co_teacher_ids", "in", user.id)]
+                domain += self.env["school.section"]._my_classes_domain(user)
             sections = self.env["school.section"].search(domain)
             from_menu = True
         else:

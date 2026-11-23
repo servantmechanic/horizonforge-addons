@@ -48,11 +48,15 @@
                     <group>
                         <group>
                             <field name="date_start"/>
-                            <field name="date_end"/>
-                        </group>
-                        <group>
+                            <field name="date_end" readonly="school_days_target > 0"/>
                             <field name="is_current" invisible="1"/>
                             <field name="active" invisible="1"/>
+                        </group>
+                        <group string="School Days" name="school_days">
+                            <field name="school_days_target"/>
+                            <field name="snow_day_allowance" invisible="not school_days_target"/>
+                            <field name="snow_days_used" invisible="not snow_day_allowance and not snow_days_used"/>
+                            <field name="school_day_count"/>
                         </group>
                     </group>
                     <notebook>
@@ -74,6 +78,8 @@
                                     <field name="date_start"/>
                                     <field name="date_end"/>
                                     <field name="day_type"/>
+                                    <field name="is_snow_day" widget="boolean_toggle" readonly="day_type != 'off'"/>
+                                    <field name="audience_label" optional="show"/>
                                 </list>
                             </field>
                         </page>
@@ -115,6 +121,8 @@
                 <field name="date_start"/>
                 <field name="date_end"/>
                 <field name="day_type"/>
+                <field name="is_snow_day" widget="boolean_toggle" readonly="day_type != 'off'" optional="show"/>
+                <field name="audience_label" optional="show"/>
             </list>
         </field>
     </record>
@@ -127,6 +135,8 @@
                       mode="month" color="color" quick_create="0" event_open_popup="1">
                 <field name="name"/>
                 <field name="day_type"/>
+                <field name="is_snow_day" invisible="not is_snow_day"/>
+                <field name="audience_label" invisible="not audience_label"/>
             </calendar>
         </field>
     </record>
@@ -147,6 +157,16 @@
                             <field name="date_start"/>
                             <field name="date_end"/>
                             <field name="day_type" widget="radio"/>
+                            <field name="is_snow_day" invisible="day_type != 'off'"/>
+                        </group>
+                        <group invisible="day_type == 'off'">
+                            <field name="audience" widget="radio"/>
+                            <field name="grade_level_ids" widget="many2many_tags" options="{'no_create': True}"
+                                   invisible="audience != 'grade_level'" required="audience == 'grade_level'"/>
+                            <field name="homeroom_ids" widget="many2many_tags" options="{'no_create': True}"
+                                   invisible="audience != 'homeroom'" required="audience == 'homeroom'"/>
+                            <field name="teacher_ids" widget="many2many_tags" options="{'no_create': True}"
+                                   invisible="audience != 'teacher'" required="audience == 'teacher'"/>
                         </group>
                     </group>
                 </sheet>
@@ -163,8 +183,12 @@
                 <field name="year_id"/>
                 <filter name="current_year" string="Current Year" domain="[('year_id.is_current', '=', True)]"/>
                 <separator/>
+                <filter name="for_me" string="For Me" domain="[('is_for_me', '=', True)]"
+                        help="Entries for everyone, and those for your grade levels, homeroom or you"/>
+                <separator/>
                 <filter name="no_school" string="No School" domain="[('day_type', '=', 'off')]"/>
                 <filter name="shown_only" string="Shown Only" domain="[('day_type', '=', 'info')]"/>
+                <filter name="snow_days" string="Snow Days" domain="[('is_snow_day', '=', True)]"/>
             </search>
         </field>
     </record>
@@ -173,12 +197,13 @@
         <field name="name">School Calendar</field>
         <field name="res_model">school.calendar.day</field>
         <field name="view_mode">calendar,list</field>
-        <field name="context">{'search_default_current_year': 1}</field>
+        <field name="context">{'search_default_current_year': 1, 'search_default_for_me': 1}</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">Add a day off</p>
-            <p>List the holidays and breaks of the school year. Weekends are always off.
-               Red days have no school; the others are shown for information.
-               No assignments are generated on these days. Switch between the calendar and the list at the top right.</p>
+            <p class="o_view_nocontent_smiling_face">Add a day off or an event</p>
+            <p>List the holidays, breaks and snow days of the school year, and events such as field trips.
+               Weekends are always off. Red days have no school, and no assignments are generated on them;
+               the others are shown for information, for everyone or only for some grade levels,
+               homerooms or teachers. Switch between the calendar and the list at the top right.</p>
         </field>
     </record>
 </odoo>

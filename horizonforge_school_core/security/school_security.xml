@@ -64,6 +64,28 @@
         <field name="domain_force">[(1, '=', 1)]</field>
     </record>
 
+    <!-- Homeroom teachers keep their homeroom's grades in every class their
+         students take, whoever teaches it: they read those classes and
+         enrollments (the gradebook gives them the grades). -->
+    <record id="rule_school_section_homeroom" model="ir.rule">
+        <field name="name">Class: homeroom teacher reads their students' classes</field>
+        <field name="model_id" ref="model_school_section"/>
+        <field name="groups" eval="[(4, ref('group_school_teacher'))]"/>
+        <field name="domain_force">[('enrollment_ids.student_id.homeroom_id.teacher_id', '=', user.id)]</field>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_school_enrollment_homeroom" model="ir.rule">
+        <field name="name">Enrollment: homeroom teacher reads their students'</field>
+        <field name="model_id" ref="model_school_enrollment"/>
+        <field name="groups" eval="[(4, ref('group_school_teacher'))]"/>
+        <field name="domain_force">[('student_id.homeroom_id.teacher_id', '=', user.id)]</field>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
     <!-- A small school: every teacher reads every student (and, through
          the student, their patrons, notes and files). Classes, enrollments,
          grades and attendance stay limited to the teacher's own. -->

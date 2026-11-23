@@ -8,6 +8,10 @@ class ResConfigSettings(models.TransientModel):
         related="company_id.school_principal_name",
         readonly=False,
     )
+    school_name_order = fields.Selection(
+        related="company_id.school_name_order",
+        readonly=False,
+    )
     school_current_year_id = fields.Many2one(
         "school.year",
         string="Current School Year",

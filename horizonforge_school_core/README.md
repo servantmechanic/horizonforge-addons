@@ -11,7 +11,7 @@ addons: the gradebook and attendance addons install on top of it.
 | Grading periods | Any number per year (quarters, trimesters, six weeks); can be locked |
 | Grade levels | Ordered, lowest first |
 | Homerooms | A room with its teacher and grade levels (for example Lower Room and Upper Room); the year's classes are generated from them |
-| School calendar | Days off (holidays and breaks) and holidays shown for information; the office can change it any time, in a calendar or a list |
+| School calendar | Days off (holidays, breaks, snow days) and entries shown for information (holidays, field trips), for everyone or some grade levels, homerooms or teachers; any teacher can change it, in a calendar or a list |
 | Students | Each student has a contact record for address, phone and email |
 | Patrons | Contacts flagged as a family contact, linked to their students |
 | Courses | A subject for one group, such as Math 5 |
@@ -22,7 +22,10 @@ addons: the gradebook and attendance addons install on top of it.
 
 - **Teacher**: reads every student and patron (a small school, where
   everyone knows everyone), and their own classes (as teacher or co-teacher)
-  with their enrollments, grades and attendance.
+  with their enrollments, grades and attendance. A homeroom teacher also has
+  the classes their homeroom's students take (science, music, taught by
+  someone else): they keep those students' grades there, beside the class's
+  teacher, and print their report cards. Every teacher keeps the school calendar.
 - **Office**: reads every class, and manages students, patrons and enrollments.
 - **Administrator**: manages years, grading periods, grade levels, homerooms,
   courses, classes and settings.
@@ -38,7 +41,9 @@ step opens the normal screen:
 3. Grade levels, lowest first.
 4. Homerooms: each room with its teacher and grade levels.
 5. Courses, each with its grade levels. A course taught by someone other than
-   the homeroom teacher (music, say) names its own teacher.
+   the homeroom teacher (music, say) names its own teacher. To build Math 3
+   from Math 2, select Math 2 and use Actions, Duplicate: the copy keeps its
+   grade levels, teacher and assignment schedules; rename it and set its code.
 6. Students: by hand, or import the CSV template (Actions, Import records).
    Patrons named in the import must exist first. A student's homeroom follows
    their grade level.
@@ -54,6 +59,19 @@ session). Good Friday, Easter, Thanksgiving and Christmas are added to every
 new year as shown only; switch one to No school to make it a day off. **Add
 Holidays** on the school year adds them to a year that doesn't have them.
 
+An entry shown only can be **for** everyone, or only for some grade levels,
+homerooms or teachers (a grade 5 field trip). The calendar opens on the
+**For Me** filter: entries for everyone, and those for the grade levels you
+teach, your homeroom or you. Days without school are always for everyone.
+
+**School days.** Give the school year a number of **School Days** (180) and
+**Planned Snow Days** (5), and its end date follows: the start date plus 185
+school days, skipping weekends and days off. Mark an unplanned closing as a
+**Snow Day** (a No school entry): it uses up a planned snow day, so the end
+date stays put until all of them are used, and then moves later a day at a
+time. The last grading period ends with the year. Leave School Days at 0 to
+set the end date by hand.
+
 ## Names and contacts
 
 Students and patrons are contacts underneath, but the school screens show only
@@ -62,10 +80,17 @@ only Odoo's base, so it runs on its own or beside other apps. In the gradebook
 and attendance grids, each user chooses whether students are listed last name
 first or first name first.
 
+## My Preferences
+
+School, **My Preferences** opens Odoo's preferences dialog, which has a School
+part: student name order, and (with the gradebook) where Enter moves. School
+settings, Teacher Preferences, set what new users start with.
+
 ## A new school year
 
 Configuration, New Year Setup creates next year in one step: the year and its
-grading periods and days off on the same weekdays as last year, last year's classes (or
+grading periods and days off on the same weekdays as last year (not last
+year's snow days), its school days and planned snow days, last year's classes (or
 classes generated from the homerooms), students moved up one grade level with
 the top grade archived, and everyone enrolled in their new classes.
 

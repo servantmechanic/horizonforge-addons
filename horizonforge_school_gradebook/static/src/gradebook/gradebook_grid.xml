@@ -64,6 +64,17 @@
                 </t>
             </div>
 
+            <div t-if="otherPeriodWarning" class="o_gradebook_period_warning alert alert-warning rounded-0 border-0 border-bottom mb-0 px-3 py-1 d-flex align-items-center gap-2"
+                 role="status">
+                <i class="fa fa-exclamation-triangle"/>
+                <span>
+                    This is <strong t-esc="otherPeriodWarning.shown"/>.
+                    The current grading period is <t t-esc="otherPeriodWarning.current.name"/>.
+                </span>
+                <button class="btn btn-link btn-sm p-0" t-on-click="() => this.goToPeriod(otherPeriodWarning.current.id)">
+                    Go to <t t-esc="otherPeriodWarning.current.name"/>
+                </button>
+            </div>
             <div t-if="!state.sections.length" class="o_gradebook_empty m-auto text-center text-muted p-4">
                 <h3>No classes yet</h3>
                 <p>The gradebook shows the classes you teach in the current school year.<br/>

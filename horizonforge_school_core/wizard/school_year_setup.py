@@ -38,6 +38,22 @@ class SchoolYearSetup(models.TransientModel):
         required=True,
         precompute=True,
     )
+    school_days_target = fields.Integer(
+        string="School Days",
+        compute="_compute_from_source",
+        store=True,
+        readonly=False,
+        precompute=True,
+        help="For example 180. When set, the end date follows from it once "
+        "the year's days off are in. Leave at 0 to keep the end date above.",
+    )
+    snow_day_allowance = fields.Integer(
+        string="Planned Snow Days",
+        compute="_compute_from_source",
+        store=True,
+        readonly=False,
+        precompute=True,
+    )
     period_mode = fields.Selection(
         [
             ("copy", "Copy last year's periods"),
@@ -116,6 +132,8 @@ class SchoolYearSetup(models.TransientModel):
         for wizard in self:
             source = wizard.source_year_id
             if not source:
+                wizard.school_days_target = wizard.school_days_target or 0
+                wizard.snow_day_allowance = wizard.snow_day_allowance or 0
                 # First year: August to May around the coming school year.
                 today = fields.Date.context_today(wizard)
                 first = today.year if today.month <= 7 else today.year + 1
@@ -124,6 +142,8 @@ class SchoolYearSetup(models.TransientModel):
                     wizard.date_end = today.replace(year=first + 1, month=5, day=31)
                     wizard.name = f"{first}-{(first + 1) % 100:02d}"
                 continue
+            wizard.school_days_target = source.school_days_target
+            wizard.snow_day_allowance = source.snow_day_allowance
             # 52 weeks later: the same weekdays as last year.
             wizard.date_start = source.date_start + timedelta(weeks=52)
             wizard.date_end = source.date_end + timedelta(weeks=52)
@@ -175,8 +195,11 @@ class SchoolYearSetup(models.TransientModel):
     def _day_off_vals(self):
         shift = self.date_start - self.source_year_id.date_start
         vals_list = []
-        # Only the days off: the holidays are worked out again for the new year.
-        for day in self.source_year_id.day_off_ids.filtered(lambda d: d.day_type == "off"):
+        # Only the planned days off: the holidays are worked out again for
+        # the new year, and last year's snow days don't come back.
+        for day in self.source_year_id.day_off_ids.filtered(
+            lambda d: d.day_type == "off" and not d.is_snow_day
+        ):
             start = max(day.date_start + shift, self.date_start)
             end = min(day.date_end + shift, self.date_end)
             if start <= end:
@@ -215,6 +238,8 @@ class SchoolYearSetup(models.TransientModel):
             "name": self.name,
             "date_start": self.date_start,
             "date_end": self.date_end,
+            "school_days_target": self.school_days_target,
+            "snow_day_allowance": self.snow_day_allowance,
             "period_ids": periods,
             "day_off_ids": self._day_off_vals() if source and self.copy_days_off else [],
         })

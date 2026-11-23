@@ -68,7 +68,7 @@
                 <field name="year_id"/>
                 <filter name="current_year" string="Current Year" domain="[('year_id.is_current', '=', True)]"/>
                 <filter name="my_classes" string="My Classes"
-                        domain="['|', ('teacher_id', '=', uid), ('co_teacher_ids', 'in', uid)]"/>
+                        domain="['|', '|', ('teacher_id', '=', uid), ('co_teacher_ids', 'in', uid), ('enrollment_ids.student_id.homeroom_id.teacher_id', '=', uid)]"/>
                 <separator/>
                 <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
                 <group>

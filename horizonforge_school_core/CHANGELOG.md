@@ -13,6 +13,32 @@ Each release is tagged in git as `school-<version>`, for example `school-0.7.0`.
 
 ## Unreleased
 
+- **Teachers keep the calendar.** Every teacher sees School, Calendar and can
+  add, change or remove entries (a snow day, a field trip). An entry shown
+  only can be for everyone or only for some grade levels, homerooms or
+  teachers; the calendar opens on the entries for you (For Me filter), and
+  the printed calendar names who an entry is for. Days without school stay
+  for everyone.
+- **School days sets the last day.** A school year can have a number of
+  school days (180) and planned snow days (5): the end date then follows from
+  the start date, the weekends and the days off. Marking a day off as a snow
+  day uses up a planned one; only once they run out does the last day move
+  later. The last grading period moves with it. New Year Setup copies both
+  numbers but not last year's snow days.
+- **Homeroom teachers keep their students' grades.** A homeroom teacher
+  enters and changes the grades of their homeroom's students in every class
+  they take, beside the class's own teacher (science, music): those classes
+  are in their gradebook and under My Classes, showing only their own
+  students, and the report card they print has every subject.
+- **My Preferences.** School, My Preferences (and the School part of Odoo's
+  own Preferences dialog): student name order and where Enter moves in the
+  gradebook. School settings, Teacher Preferences, set the defaults for new
+  users.
+- **Other grading period warning.** The gradebook shows a banner when the
+  grading period on screen isn't the current one, with a button back to it.
+- **Duplicate a course.** Duplicating a course (Math 2 into Math 3) copies its
+  grade levels, teacher and assignment schedules; the code is left empty.
+
 - **Attendance notes by double-click.** Double-clicking a recorded absence or
   tardy in the attendance grid opens its note, like the N key.
 - **Print the school calendar.** The School Calendar has a Print button, and

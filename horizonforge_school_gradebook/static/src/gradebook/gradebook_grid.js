@@ -48,6 +48,7 @@ export class GradebookGrid extends Component {
             periods: [],
             sectionId: false,
             periodId: false,
+            currentPeriodId: false,
             assignments: [],
             students: [],
             categories: {},
@@ -131,6 +132,7 @@ export class GradebookGrid extends Component {
         state.nameOrder = data.name_order || "last_first";
         state.periods = data.periods || [];
         state.periodId = data.period_id || false;
+        state.currentPeriodId = data.current_period_id || false;
         state.assignments = data.assignments || [];
         state.students = data.students || [];
         state.categories = Object.fromEntries((data.categories || []).map((c) => [c.id, c]));
@@ -217,9 +219,24 @@ export class GradebookGrid extends Component {
     }
 
     async onPeriodChange(ev) {
+        await this.goToPeriod(Number(ev.target.value));
+    }
+
+    async goToPeriod(periodId) {
         await this.flushAll();
-        await this.load(this.state.sectionId, Number(ev.target.value));
+        await this.load(this.state.sectionId, periodId);
         this.focusGrid();
+    }
+
+    /** The current grading period, when the grid shows another one. */
+    get otherPeriodWarning() {
+        const { periods, periodId, currentPeriodId } = this.state;
+        if (!currentPeriodId || periodId === currentPeriodId) {
+            return false;
+        }
+        const shown = periods.find((p) => p.id === periodId);
+        const current = periods.find((p) => p.id === currentPeriodId);
+        return shown && current ? { shown: shown.name, current } : false;
     }
 
     // ------------------------------------------------------------------

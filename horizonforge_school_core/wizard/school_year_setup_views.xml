@@ -11,6 +11,8 @@
                         <field name="name" placeholder="e.g. 2027-28"/>
                         <field name="date_start"/>
                         <field name="date_end"/>
+                        <field name="school_days_target"/>
+                        <field name="snow_day_allowance" invisible="not school_days_target"/>
                         <field name="make_current"/>
                     </group>
                     <group string="Set Up">

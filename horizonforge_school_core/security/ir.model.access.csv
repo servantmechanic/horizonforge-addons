@@ -17,7 +17,6 @@ access_school_enrollment_office,school.enrollment office,model_school_enrollment
 access_school_enrollment_admin,school.enrollment admin,model_school_enrollment,group_school_admin,1,1,1,1
 access_school_homeroom_teacher,school.homeroom teacher,model_school_homeroom,group_school_teacher,1,0,0,0
 access_school_homeroom_admin,school.homeroom admin,model_school_homeroom,group_school_admin,1,1,1,1
-access_school_calendar_day_teacher,school.calendar.day teacher,model_school_calendar_day,group_school_teacher,1,0,0,0
-access_school_calendar_day_office,school.calendar.day office,model_school_calendar_day,group_school_office,1,1,1,1
+access_school_calendar_day_teacher,school.calendar.day teacher,model_school_calendar_day,group_school_teacher,1,1,1,1
 access_school_year_setup_admin,school.year.setup admin,model_school_year_setup,group_school_admin,1,1,1,1
 access_school_setup_guide_admin,school.setup.guide admin,model_school_setup_guide,group_school_admin,1,1,1,1

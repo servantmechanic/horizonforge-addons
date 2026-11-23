@@ -12,6 +12,9 @@
     <menuitem id="menu_school_enrollments" parent="menu_school_root" action="school_enrollment_action" sequence="40"
               groups="group_school_office"/>
 
+    <menuitem id="menu_school_my_preferences" parent="menu_school_root" action="action_school_my_preferences"
+              sequence="85"/>
+
     <menuitem id="menu_school_config" name="Configuration" parent="menu_school_root" sequence="90"
               groups="group_school_admin"/>
     <menuitem id="menu_school_settings" parent="menu_school_config" action="school_settings_action" sequence="5"
@@ -20,8 +23,10 @@
     <menuitem id="menu_school_grade_levels" parent="menu_school_config" action="school_grade_level_action" sequence="20"/>
     <menuitem id="menu_school_homerooms" parent="menu_school_config" action="school_homeroom_action" sequence="35"/>
     <menuitem id="menu_school_setup_guide" parent="menu_school_config" action="school_setup_guide_action" sequence="1"/>
+    <!-- Every teacher keeps the calendar. "-": removes the Office group
+         earlier versions set, on upgraded databases. -->
     <menuitem id="menu_school_calendar" parent="menu_school_root" action="school_calendar_day_action" sequence="45"
-              groups="group_school_office"/>
+              groups="-group_school_office"/>
     <menuitem id="menu_school_year_setup" parent="menu_school_config" action="school_year_setup_action" sequence="15"/>
     <menuitem id="menu_school_courses" parent="menu_school_config" action="school_course_action" sequence="40"/>
 </odoo>
